@@ -16,8 +16,12 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role): Response
     {
         $user = $request->user();
-        if (!$user || $user->role !== $role) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+        if (! $user || $user->role !== $role) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+
+            return redirect()->route('home')->with('error', 'Akses ditolak.');
         }
 
         return $next($request);

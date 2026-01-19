@@ -112,10 +112,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('produk.detail', request()->route('id')) }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Kembali ke Detail
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
@@ -342,24 +359,16 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        const initialCartCount = {{ $cartCount ?? 0 }};
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
-        updateCartBadge();
-        window.addEventListener('storage', updateCartBadge);
+        updateCartBadge(initialCartCount);
 
         const qtyInput = document.querySelector('input[name="qty"]');
         const summaryQty = document.getElementById('summaryQty');
@@ -403,6 +412,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

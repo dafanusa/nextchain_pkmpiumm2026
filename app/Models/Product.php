@@ -28,11 +28,6 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImage::class);
-    }
-
     public function negotiationOffers(): HasMany
     {
         return $this->hasMany(NegotiationOffer::class);

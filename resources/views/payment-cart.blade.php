@@ -124,10 +124,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('checkout.cart') }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Kembali ke Checkout
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
@@ -306,9 +323,8 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
-        const selectedKey = 'nextchain_cart_selected';
-        const buyerKey = 'nextchain_cart_buyer';
+        const orderItemsState = @json($orderItems ?? []);
+        const buyer = @json($buyer ?? []);
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const cartSummaryItems = document.getElementById('cartSummaryItems');
         const buyerSummary = document.getElementById('buyerSummary');
@@ -324,62 +340,34 @@
         const simClose = document.getElementById('simClose');
         const simConfirm = document.getElementById('simConfirm');
         const simPending = document.getElementById('simPending');
-        const orderId = "{{ $orderId }}";
+        const orderId = "{{ $order->order_number }}";
         const midtransKey = "{{ $midtransClientKey }}";
-        const shippingFee = 25000;
+        const shippingFee = {{ (int) $order->shipping_fee }};
+        const initialCartCount = {{ $cartCount ?? 0 }};
 
         function formatPrice(value) {
             return 'Rp ' + Number(value).toLocaleString('id-ID');
         }
 
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function getSelectedItems() {
-            try {
-                return JSON.parse(localStorage.getItem(selectedKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function getBuyerInfo() {
-            try {
-                return JSON.parse(localStorage.getItem(buyerKey)) || {};
-            } catch {
-                return {};
-            }
-        }
-
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
 
         function renderSummary() {
-            const items = getCartItems();
-            const selectedIds = new Set(getSelectedItems());
-            const selectedItems = items.filter((item) => selectedIds.has(item.id));
-            const buyer = getBuyerInfo();
-
             cartSummaryItems.innerHTML = '';
             let subtotal = 0;
-            selectedItems.forEach((item) => {
+            orderItemsState.forEach((item) => {
                 const qty = Number(item.qty || 0);
                 const price = Number(item.price || 0);
                 subtotal += qty * price;
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-3';
                 row.innerHTML = `
-                    <img src="{{ asset('assets') }}/${item.image}" alt="${item.name}" class="h-12 w-16 rounded-xl object-cover">
+                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-12 w-16 rounded-xl object-cover">
                     <div class="flex-1">
                         <p class="text-sm font-semibold">${item.name}</p>
                         <p class="text-xs text-[var(--muted)]">${qty} ${item.unit}</p>
@@ -389,7 +377,7 @@
                 cartSummaryItems.appendChild(row);
             });
 
-            const hasItems = selectedItems.length > 0;
+            const hasItems = orderItemsState.length > 0;
             const shipping = hasItems ? shippingFee : 0;
             summarySubtotal.textContent = formatPrice(subtotal);
             summaryShipping.textContent = formatPrice(shipping);
@@ -410,24 +398,10 @@
 
         async function requestSnapToken() {
             const method = paymentMethod.value;
-            const selectedItems = getCartItems().filter((item) => getSelectedItems().includes(item.id));
-            const itemsPayload = selectedItems.map((item) => ({
-                id: item.id,
-                qty: Number(item.qty || 0),
-            }));
-            const buyer = getBuyerInfo();
 
             const url = new URL("{{ route('checkout.cart.midtrans') }}", window.location.origin);
-            url.searchParams.set('order_id', orderId);
+            url.searchParams.set('order', orderId);
             url.searchParams.set('method', method);
-            url.searchParams.set('items', JSON.stringify(itemsPayload));
-            url.searchParams.set('name', buyer.name || '');
-            url.searchParams.set('phone', buyer.phone || '');
-            url.searchParams.set('address', buyer.address || '');
-            url.searchParams.set('shipping_method', buyer.shipping_method || '');
-            url.searchParams.set('shipping_date', buyer.shipping_date || '');
-            url.searchParams.set('shipping_time', buyer.shipping_time || '');
-            url.searchParams.set('note', buyer.note || '');
 
             payStatus.textContent = 'Menyiapkan pembayaran...';
             payNowBtn.disabled = true;
@@ -518,11 +492,9 @@
         });
 
         renderSummary();
-        updateCartBadge();
-        window.addEventListener('storage', () => {
-            renderSummary();
-            updateCartBadge();
-        });
+        updateCartBadge(initialCartCount);
     </script>
 </body>
 </html>
+
+

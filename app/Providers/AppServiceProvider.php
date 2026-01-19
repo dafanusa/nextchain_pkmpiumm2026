@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Cart;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,12 +24,32 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('login', function ($request) {
-            $key = strtolower((string) $request->input('email')) . '|' . $request->ip();
+            $key = strtolower((string) $request->input('email')).'|'.$request->ip();
+
             return Limit::perMinute(5)->by($key);
         });
 
         RateLimiter::for('register', function ($request) {
             return Limit::perMinute(3)->by($request->ip());
+        });
+
+        View::composer('*', function ($view): void {
+            $data = $view->getData();
+            if (array_key_exists('cartCount', $data)) {
+                return;
+            }
+
+            $count = 0;
+            if (auth()->check()) {
+                $cart = Cart::query()
+                    ->where('user_id', auth()->id())
+                    ->where('status', 'active')
+                    ->withSum('items', 'qty')
+                    ->first();
+                $count = (int) ($cart?->items_sum_qty ?? 0);
+            }
+
+            $view->with('cartCount', $count);
         });
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NEXTCHAIN - Home</title>
+    <title>NEXTCHAIN | UD. Ade Saputra Farm</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -191,10 +191,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('produk') }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Lihat Produk
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
@@ -215,6 +232,20 @@
             <a href="#galeri" class="block">Galeri</a>
             <a href="#testimoni" class="block">Testimoni</a>
             <a href="#contact" class="block">Contact</a>
+            <div class="pt-2 border-t border-white/10 space-y-2">
+                @auth
+                    <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full text-left text-sm font-semibold text-white">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="block text-sm font-semibold text-white">Login</a>
+                    <a href="{{ route('register') }}" class="block text-sm font-semibold text-white">Register</a>
+                @endauth
+            </div>
         </div>
     </header>
 
@@ -472,23 +503,23 @@
                                 </div>
                             </div>
                             <div class="grid md:grid-cols-2 gap-6">
-                                @foreach ([
-                                    ['name' => 'Hadi', 'role' => 'Warung Makan', 'text' => 'Harga jelas, nego cepat, pengiriman tepat waktu.'],
-                                    ['name' => 'Alya', 'role' => 'Reseller Telur', 'text' => 'Stok konsisten dan kualitasnya rapi.'],
-                                    ['name' => 'Rizki', 'role' => 'Katering', 'text' => 'Negosiasi mudah, jadwal distribusi fleksibel.'],
-                                    ['name' => 'Salsa', 'role' => 'Toko Sembako', 'text' => 'Transparan, harga update real-time, respon cepat.'],
-                                ] as $t)
+                                @forelse ($testimonials ?? [] as $t)
                                 <div class="quote-card rounded-3xl p-6 transition">
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
-                                            <p class="text-xs uppercase tracking-widest text-[var(--muted)]">{{ $t['role'] }}</p>
-                                            <p class="text-lg font-semibold mt-2 text-[var(--ink)]">{{ $t['name'] }}</p>
+                                            <p class="text-xs uppercase tracking-widest text-[var(--muted)]">{{ $t->role ?? 'Pembeli' }}</p>
+                                            <p class="text-lg font-semibold mt-2 text-[var(--ink)]">{{ $t->name }}</p>
+                                            <p class="text-xs text-[var(--muted)] mt-1">{{ $t->rating }}/5</p>
                                         </div>
                                         <div class="quote-mark text-[var(--brand)]">“</div>
                                     </div>
-                                    <p class="text-sm text-[var(--muted)] mt-3 leading-relaxed">{{ $t['text'] }}</p>
+                                    <p class="text-sm text-[var(--muted)] mt-3 leading-relaxed">{{ $t->message }}</p>
                                 </div>
-                                @endforeach
+                                @empty
+                                <div class="quote-card rounded-3xl p-6 transition">
+                                    <p class="text-sm text-[var(--muted)]">Belum ada testimoni yang ditampilkan.</p>
+                                </div>
+                                @endforelse
                             </div>
                         </div>
                         <div class="form-shell rounded-3xl p-6 shadow-xl">
@@ -497,40 +528,48 @@
                             <p class="text-sm text-white/70 mt-2">
                                 Isi form berikut agar testimoni kamu bisa tampil di halaman ini.
                             </p>
-                            <form class="mt-6 grid gap-4" onsubmit="return false;">
-                                <div>
-                                    <label class="text-xs font-semibold text-white/80">Nama</label>
-                                    <input type="text" placeholder="Nama lengkap"
-                                           class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            @if (session('success'))
+                                <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-700">
+                                    {{ session('success') }}
                                 </div>
-                                <div>
-                                    <label class="text-xs font-semibold text-white/80">Peran/Usaha</label>
-                                    <input type="text" placeholder="Contoh: Warung Makan"
-                                           class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            @endif
+                            @auth
+                                <form class="mt-6 grid gap-4" method="post" action="{{ route('testimonials.store') }}">
+                                    @csrf
+                                    <div>
+                                        <label class="text-xs font-semibold text-white/80">Peran/Usaha</label>
+                                        <input type="text" name="role" value="{{ old('role') }}" placeholder="Contoh: Warung Makan"
+                                               class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-white/80">Rating</label>
+                                        <select name="rating" class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                            <option value="5" @selected(old('rating') == 5)>5 - Sangat puas</option>
+                                            <option value="4" @selected(old('rating') == 4)>4 - Puas</option>
+                                            <option value="3" @selected(old('rating') == 3)>3 - Cukup</option>
+                                            <option value="2" @selected(old('rating') == 2)>2 - Kurang</option>
+                                            <option value="1" @selected(old('rating') == 1)>1 - Kecewa</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-white/80">Testimoni</label>
+                                        <textarea rows="4" name="message" placeholder="Tulis pengalamanmu di sini..."
+                                                  class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30">{{ old('message') }}</textarea>
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full rounded-full bg-white text-[var(--brand)] px-5 py-3 text-sm font-semibold hover:bg-white/90 transition">
+                                        Kirim Testimoni
+                                    </button>
+                                    <p class="text-xs text-white/60">
+                                        Testimoni akan tampil setelah disetujui admin.
+                                    </p>
+                                </form>
+                            @else
+                                <div class="mt-6 rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-sm text-white/80">
+                                    Login dulu untuk mengisi testimoni.
+                                    <a href="{{ route('login') }}" class="text-white underline font-semibold">Login di sini</a>.
                                 </div>
-                                <div>
-                                    <label class="text-xs font-semibold text-white/80">Rating</label>
-                                    <select class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30">
-                                        <option value="5">5 - Sangat puas</option>
-                                        <option value="4">4 - Puas</option>
-                                        <option value="3">3 - Cukup</option>
-                                        <option value="2">2 - Kurang</option>
-                                        <option value="1">1 - Kecewa</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-semibold text-white/80">Testimoni</label>
-                                    <textarea rows="4" placeholder="Tulis pengalamanmu di sini..."
-                                              class="mt-2 w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"></textarea>
-                                </div>
-                                <button type="submit"
-                                        class="w-full rounded-full bg-white text-[var(--brand)] px-5 py-3 text-sm font-semibold hover:bg-white/90 transition">
-                                    Kirim Testimoni
-                                </button>
-                                <p class="text-xs text-white/60">
-                                    Form ini simulasi. Data belum tersimpan ke database.
-                                </p>
-                            </form>
+                            @endauth
                         </div>
                     </div>
                 </div>
@@ -666,24 +705,16 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        const initialCartCount = {{ $cartCount ?? 0 }};
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
-        updateCartBadge();
-        window.addEventListener('storage', updateCartBadge);
+        updateCartBadge(initialCartCount);
 
         const navLinks = Array.from(document.querySelectorAll('nav .nav-link'));
         const sectionTargets = navLinks
@@ -810,6 +841,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

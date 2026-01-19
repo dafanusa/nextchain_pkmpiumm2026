@@ -338,10 +338,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('produk') }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Lihat Produk
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
@@ -363,6 +380,20 @@
         <a href="{{ route('home') }}#galeri" class="block">Galeri</a>
         <a href="{{ route('home') }}#testimoni" class="block">Testimoni</a>
         <a href="{{ route('home') }}#contact" class="block">Contact</a>
+        <div class="pt-2 border-t border-white/10 space-y-2">
+            @auth
+                <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full text-left text-sm font-semibold text-white">
+                        Logout
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="block text-sm font-semibold text-white">Login</a>
+                <a href="{{ route('register') }}" class="block text-sm font-semibold text-white">Register</a>
+            @endauth
+        </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
@@ -470,7 +501,7 @@
             @foreach ($products as $id => $product)
             <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-lg card-glow">
                 <div class="space-y-4">
-                    <img src="{{ asset('assets/' . $product['image']) }}"
+                    <img src="{{ $product['image_url'] ?? asset('assets/' . $product['image']) }}"
                          alt="{{ $product['name'] }}"
                          class="h-44 w-full rounded-2xl object-cover">
                     <div class="flex items-center justify-between">
@@ -498,7 +529,13 @@
                             <span class="absolute left-0 top-4 h-8 w-1 rounded-full bg-[var(--brand)]"></span>
                             <div class="flex items-center justify-between">
                                 <p class="text-sm font-semibold">{{ $offer['user'] }}</p>
-                                <span class="text-xs text-[var(--muted)]">{{ $offer['time'] }}</span>
+                                <span class="text-xs font-semibold
+                                    @if (($offer['status'] ?? '') === 'accepted') text-emerald-600
+                                    @elseif (($offer['status'] ?? '') === 'rejected') text-red-500
+                                    @else text-[var(--muted)]
+                                    @endif">
+                                    {{ ucfirst($offer['status'] ?? 'pending') }}
+                                </span>
                             </div>
                             <p class="text-base font-semibold text-[var(--ink)] mt-2">
                                 Rp {{ number_format($offer['price']) }} / {{ $product['unit'] }}
@@ -506,6 +543,7 @@
                             <p class="text-xs text-[var(--muted)] mt-1">
                                 Volume {{ $offer['qty'] }} {{ $product['unit'] }}
                             </p>
+                            <p class="text-xs text-[var(--muted)] mt-1">{{ $offer['time'] }}</p>
                         </div>
                     @empty
                         <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 text-sm text-[var(--muted)]">
@@ -572,29 +610,23 @@
                 mobileMenu.classList.toggle('pointer-events-auto');
             });
         }
-        const cartKey = 'nextchain_cart';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        const initialCartCount = {{ $cartCount ?? 0 }};
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
-        updateCartBadge();
-        window.addEventListener('storage', updateCartBadge);
+        updateCartBadge(initialCartCount);
         updateLivePrices();
         setInterval(updateLivePrices, 4000);
     </script>
 </body>
 </html>
+
+
 
 
 

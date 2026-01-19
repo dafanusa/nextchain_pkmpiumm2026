@@ -59,6 +59,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
                     <span class="sr-only">Menu</span>
@@ -82,6 +103,20 @@
         <a href="{{ route('home') }}#galeri" class="block">Galeri</a>
         <a href="{{ route('home') }}#testimoni" class="block">Testimoni</a>
         <a href="{{ route('home') }}#contact" class="block">Contact</a>
+        <div class="pt-2 border-t border-white/10 space-y-2">
+            @auth
+                <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full text-left text-sm font-semibold text-white">
+                        Logout
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="block text-sm font-semibold text-white">Login</a>
+                <a href="{{ route('register') }}" class="block text-sm font-semibold text-white">Register</a>
+            @endauth
+        </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
@@ -100,6 +135,15 @@
                 <div id="cartItems" class="space-y-4"></div>
                 <div id="cartEmpty" class="text-center text-[var(--muted)] py-10 hidden">
                     Keranjang masih kosong.
+                </div>
+                <div id="loginRequired" class="text-center text-[var(--muted)] py-10 hidden">
+                    Login dulu untuk mengelola keranjang.
+                    <div class="mt-4">
+                        <a href="{{ route('login') }}"
+                           class="inline-flex items-center px-4 py-2 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-dark)] transition">
+                            Ke Login
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="bg-white/90 border border-slate-200 rounded-3xl p-6 shadow-lg space-y-4 lg:sticky lg:top-28">
@@ -169,46 +213,24 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const cartItemsEl = document.getElementById('cartItems');
         const cartEmptyEl = document.getElementById('cartEmpty');
+        const loginRequiredEl = document.getElementById('loginRequired');
         const cartSummaryCount = document.getElementById('cartSummaryCount');
         const cartSummarySubtotal = document.getElementById('cartSummarySubtotal');
         const cartSummaryTotal = document.getElementById('cartSummaryTotal');
         const checkoutSelectedBtn = document.getElementById('checkoutSelectedBtn');
-        const selectedKey = 'nextchain_cart_selected';
+        const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+        const initialCartItems = @json($cartItems ?? []);
+        let cartItemsState = initialCartItems;
 
         function formatPrice(value) {
             return 'Rp ' + Number(value).toLocaleString('id-ID');
         }
 
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function getSelectedItems() {
-            try {
-                return JSON.parse(localStorage.getItem(selectedKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function setSelectedItems(ids) {
-            localStorage.setItem(selectedKey, JSON.stringify(ids));
-        }
-
-        function setCartItems(items) {
-            localStorage.setItem(cartKey, JSON.stringify(items));
-        }
-
         function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+            const count = (isAuthenticated ? cartItemsState : []).reduce((sum, item) => sum + Number(item.qty || 0), 0);
             cartCounts.forEach((badge) => {
                 badge.textContent = count;
                 badge.classList.toggle('hidden', count === 0);
@@ -216,10 +238,10 @@
         }
 
         function renderCart() {
-            const items = getCartItems();
-            const selectedIds = new Set(getSelectedItems());
+            const items = isAuthenticated ? cartItemsState : [];
             cartItemsEl.innerHTML = '';
-            cartEmptyEl.classList.toggle('hidden', items.length !== 0);
+            cartEmptyEl.classList.toggle('hidden', items.length !== 0 || !isAuthenticated);
+            loginRequiredEl.classList.toggle('hidden', isAuthenticated);
 
             let totalQty = 0;
             let subtotal = 0;
@@ -227,7 +249,7 @@
             items.forEach((item) => {
                 const qty = Number(item.qty || 0);
                 const price = Number(item.price || 0);
-                if (selectedIds.has(item.id)) {
+                if (item.selected) {
                     totalQty += qty;
                     subtotal += qty * price;
                 }
@@ -235,10 +257,10 @@
                 const card = document.createElement('div');
                 card.className = 'flex flex-col sm:flex-row sm:items-center gap-4 border border-slate-200 rounded-2xl p-4';
                 card.innerHTML = `
-                    <img src="{{ asset('assets') }}/${item.image}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
+                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
                     <div class="flex-1 space-y-1">
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" class="item-check h-4 w-4 accent-[var(--brand)]" ${selectedIds.has(item.id) ? 'checked' : ''}>
+                            <input type="checkbox" class="item-check h-4 w-4 accent-[var(--brand)]" ${item.selected ? 'checked' : ''}>
                             <p class="text-base font-semibold">${item.name}</p>
                         </div>
                         <p class="text-xs text-[var(--muted)]">Rp ${price.toLocaleString('id-ID')} / ${item.unit}</p>
@@ -253,7 +275,7 @@
                     </div>
                     <div class="text-right space-y-2">
                         <p class="text-sm font-semibold text-[var(--brand)]">${formatPrice(qty * price)}</p>
-                        <a href="/checkout/${item.id}?qty=${qty}"
+                        <a href="/checkout/${item.product_id}?qty=${qty}"
                            class="inline-flex items-center justify-center px-3 py-2 rounded-full bg-[var(--brand)] text-white text-xs font-semibold hover:bg-[var(--brand-dark)] transition">
                             Checkout
                         </a>
@@ -263,13 +285,17 @@
 
                 const checkbox = card.querySelector('.item-check');
                 checkbox.addEventListener('change', () => {
-                    if (checkbox.checked) {
-                        selectedIds.add(item.id);
-                    } else {
-                        selectedIds.delete(item.id);
-                    }
-                    setSelectedItems(Array.from(selectedIds));
-                    renderCart();
+                    fetch(`{{ url('/keranjang/items') }}/${item.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        },
+                        body: JSON.stringify({ selected: checkbox.checked }),
+                    }).then(() => {
+                        item.selected = checkbox.checked;
+                        renderCart();
+                    });
                 });
 
                 const qtyValue = card.querySelector('.qty-value');
@@ -277,23 +303,43 @@
                 const plusBtn = card.querySelector('.qty-plus');
                 minusBtn.addEventListener('click', () => {
                     const nextQty = Math.max(1, Number(item.qty || 1) - 1);
-                    item.qty = nextQty;
-                    setCartItems(items);
-                    renderCart();
+                    fetch(`{{ url('/keranjang/items') }}/${item.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        },
+                        body: JSON.stringify({ qty: nextQty }),
+                    }).then(() => {
+                        item.qty = nextQty;
+                        renderCart();
+                    });
                 });
                 plusBtn.addEventListener('click', () => {
                     const nextQty = Number(item.qty || 1) + 1;
-                    item.qty = nextQty;
-                    setCartItems(items);
-                    renderCart();
+                    fetch(`{{ url('/keranjang/items') }}/${item.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        },
+                        body: JSON.stringify({ qty: nextQty }),
+                    }).then(() => {
+                        item.qty = nextQty;
+                        renderCart();
+                    });
                 });
 
                 card.querySelector('.remove-btn').addEventListener('click', () => {
-                    const next = items.filter((row) => row.id !== item.id);
-                    setCartItems(next);
-                    selectedIds.delete(item.id);
-                    setSelectedItems(Array.from(selectedIds));
-                    renderCart();
+                    fetch(`{{ url('/keranjang/items') }}/${item.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        },
+                    }).then(() => {
+                        cartItemsState = cartItemsState.filter((row) => row.id !== item.id);
+                        renderCart();
+                    });
                 });
 
                 cartItemsEl.appendChild(card);
@@ -312,8 +358,10 @@
 
         if (checkoutSelectedBtn) {
             checkoutSelectedBtn.addEventListener('click', () => {
-                const selectedIds = getSelectedItems();
-                if (!selectedIds.length) {
+                if (!isAuthenticated) {
+                    return;
+                }
+                if (!cartItemsState.some((row) => row.selected)) {
                     return;
                 }
                 window.location.href = "{{ route('checkout.cart') }}";
@@ -321,7 +369,8 @@
         }
 
         renderCart();
-        window.addEventListener('storage', renderCart);
     </script>
 </body>
 </html>
+
+

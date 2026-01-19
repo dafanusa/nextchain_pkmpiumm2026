@@ -114,10 +114,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('produk') }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Kembali ke Produk
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
@@ -139,6 +156,20 @@
         <a href="{{ route('home') }}#galeri" class="block">Galeri</a>
         <a href="{{ route('home') }}#testimoni" class="block">Testimoni</a>
         <a href="{{ route('home') }}#contact" class="block">Contact</a>
+        <div class="pt-2 border-t border-white/10 space-y-2">
+            @auth
+                <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full text-left text-sm font-semibold text-white">
+                        Logout
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="block text-sm font-semibold text-white">Login</a>
+                <a href="{{ route('register') }}" class="block text-sm font-semibold text-white">Register</a>
+            @endauth
+        </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-6 py-10">
@@ -222,7 +253,8 @@
                         Mulai Negosiasi
                     </a>
                     <a href="{{ route('checkout', request()->route('id')) }}"
-                       class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-checkout">
+                       class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-checkout"
+                       data-requires-auth="true">
                         Checkout
                     </a>
                     <button type="button"
@@ -288,52 +320,131 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
+        const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+        const loginUrl = "{{ route('login') }}";
+        const initialCartCount = {{ $cartCount ?? 0 }};
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        let toastTimer = null;
+        function getCurrentCartCount() {
+            const firstBadge = cartCounts[0];
+            if (!firstBadge) {
+                return 0;
             }
+            return Number(firstBadge.textContent || 0);
         }
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
-        function addToCart(item) {
-            const items = getCartItems();
-            const existing = items.find((row) => row.id === item.id);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                items.push({ ...item, qty: 1 });
+
+        function showToast(message) {
+            if (!toast || !toastText) {
+                return;
             }
-            localStorage.setItem(cartKey, JSON.stringify(items));
-            updateCartBadge();
+            toastText.textContent = message;
+            toast.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+            }
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2600);
         }
 
         const addBtn = document.getElementById('addToCartBtn');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
-                addToCart({
-                    id: addBtn.dataset.id,
-                    name: addBtn.dataset.name,
-                    price: Number(addBtn.dataset.price),
-                    unit: addBtn.dataset.unit,
-                    image: addBtn.dataset.image,
-                });
+                if (!isAuthenticated) {
+                    showLoginPrompt();
+                    return;
+                }
+                fetch("{{ route('cart.items.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                    },
+                    body: JSON.stringify({ product_id: addBtn.dataset.id, qty: 1 }),
+                }).then(async (response) => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Gagal menambahkan ke keranjang.');
+                    }
+                    return data;
+                }).then((data) => {
+                        if (typeof data.count === 'number') {
+                            updateCartBadge(data.count);
+                        } else {
+                            updateCartBadge(getCurrentCartCount() + 1);
+                        }
+                        showToast('Produk ditambahkan ke keranjang.');
+                    }).catch((error) => {
+                        showToast(error.message);
+                    });
             });
         }
 
-        updateCartBadge();
-        window.addEventListener('storage', updateCartBadge);
+        function showLoginPrompt() {
+            const promptEl = document.getElementById('authPrompt');
+            if (!promptEl) {
+                window.location.href = loginUrl;
+                return;
+            }
+            promptEl.classList.remove('hidden');
+        }
+
+        document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
+            el.addEventListener('click', (event) => {
+                if (!isAuthenticated) {
+                    event.preventDefault();
+                    showLoginPrompt();
+                }
+            });
+        });
+
+        updateCartBadge(initialCartCount);
+    </script>
+
+    <div id="authPrompt" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-6">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center space-y-4">
+            <h3 class="text-lg font-semibold">Login dulu ya</h3>
+            <p class="text-sm text-[var(--muted)]">Untuk checkout atau menambah keranjang, kamu harus login.</p>
+            <div class="flex justify-center gap-3">
+                <a href="{{ route('login') }}"
+                   class="px-4 py-2 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-dark)] transition">
+                    Ke Login
+                </a>
+                <button type="button" id="authCloseBtn"
+                        class="px-4 py-2 rounded-full border border-slate-200 text-sm font-semibold hover:border-[var(--brand)] transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-6 right-6 z-50 max-w-xs rounded-2xl bg-white px-4 py-3 text-sm text-[var(--ink)] shadow-xl border border-slate-200 opacity-0 -translate-y-3 pointer-events-none transition-all duration-300">
+        <div id="toastText"></div>
+    </div>
+
+    <script>
+        const authCloseBtn = document.getElementById('authCloseBtn');
+        const authPrompt = document.getElementById('authPrompt');
+        if (authCloseBtn && authPrompt) {
+            authCloseBtn.addEventListener('click', () => authPrompt.classList.add('hidden'));
+        }
     </script>
 </body>
 </html>
+
+
 
 
 

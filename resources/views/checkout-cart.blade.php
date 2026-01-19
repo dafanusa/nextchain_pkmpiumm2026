@@ -63,10 +63,27 @@
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
                 </a>
-                <a href="{{ route('cart') }}"
-                   class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
-                    Kembali ke Keranjang
-                </a>
+                @auth
+                    <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        Hai, {{ strtok(auth()->user()->name, ' ') }}
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white hover:bg-white/10 transition">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}"
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-full bg-white text-[var(--brand)] text-sm font-semibold hover:bg-slate-100 transition">
+                        Register
+                    </a>
+                @endauth
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
                     <span class="sr-only">Menu</span>
@@ -114,7 +131,8 @@
                     Belum ada produk yang dipilih.
                 </div>
 
-                <form id="buyerForm" class="grid gap-4">
+                <form id="buyerForm" class="grid gap-4" method="post" action="{{ route('checkout.cart.payment.store') }}">
+                    @csrf
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Nama Pemesan</label>
@@ -167,7 +185,7 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-3 pt-2">
-                        <button type="button" id="submitCartCheckout"
+                        <button type="submit" id="submitCartCheckout"
                                 class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition disabled:opacity-60 disabled:cursor-not-allowed">
                             Lanjut ke Pembayaran
                         </button>
@@ -248,9 +266,6 @@
             });
         }
 
-        const cartKey = 'nextchain_cart';
-        const selectedKey = 'nextchain_cart_selected';
-        const buyerKey = 'nextchain_cart_buyer';
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const checkoutItemsEl = document.getElementById('checkoutItems');
         const checkoutEmptyEl = document.getElementById('checkoutEmpty');
@@ -259,53 +274,24 @@
         const summaryShipping = document.getElementById('summaryShipping');
         const summaryTotal = document.getElementById('summaryTotal');
         const submitBtn = document.getElementById('submitCartCheckout');
-        const buyerForm = document.getElementById('buyerForm');
         const shippingFee = 25000;
+        const initialCartItems = @json($cartItems ?? []);
+        const initialCartCount = {{ $cartCount ?? 0 }};
 
         function formatPrice(value) {
             return 'Rp ' + Number(value).toLocaleString('id-ID');
         }
 
-        function getCartItems() {
-            try {
-                return JSON.parse(localStorage.getItem(cartKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function getSelectedItems() {
-            try {
-                return JSON.parse(localStorage.getItem(selectedKey)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        function updateCartBadge() {
-            const count = getCartItems().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+        function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
-                badge.textContent = count;
-                badge.classList.toggle('hidden', count === 0);
+                const nextCount = Number(count || 0);
+                badge.textContent = nextCount;
+                badge.classList.toggle('hidden', nextCount === 0);
             });
         }
 
-        function getBuyerInfo() {
-            if (!buyerForm) {
-                return null;
-            }
-            const formData = new FormData(buyerForm);
-            return Object.fromEntries(formData.entries());
-        }
-
-        function setBuyerInfo(info) {
-            localStorage.setItem(buyerKey, JSON.stringify(info));
-        }
-
         function renderCheckout() {
-            const items = getCartItems();
-            const selectedIds = new Set(getSelectedItems());
-            const selectedItems = items.filter((item) => selectedIds.has(item.id));
+            const selectedItems = initialCartItems.filter((item) => item.selected);
 
             checkoutItemsEl.innerHTML = '';
             checkoutEmptyEl.classList.toggle('hidden', selectedItems.length !== 0);
@@ -322,7 +308,7 @@
                 const row = document.createElement('div');
                 row.className = 'flex flex-col sm:flex-row sm:items-center gap-4 border border-slate-200 rounded-2xl p-4';
                 row.innerHTML = `
-                    <img src="{{ asset('assets') }}/${item.image}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
+                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
                     <div class="flex-1 space-y-1">
                         <p class="text-base font-semibold">${item.name}</p>
                         <p class="text-xs text-[var(--muted)]">Rp ${price.toLocaleString('id-ID')} / ${item.unit}</p>
@@ -341,26 +327,12 @@
             summaryShipping.textContent = formatPrice(hasSelected ? shippingFee : 0);
             summaryTotal.textContent = formatPrice(subtotal + (hasSelected ? shippingFee : 0));
             submitBtn.disabled = !hasSelected;
-            updateCartBadge();
+            updateCartBadge(initialCartCount);
         }
 
-        submitBtn.addEventListener('click', () => {
-            if (submitBtn.disabled) {
-                return;
-            }
-            if (buyerForm && !buyerForm.checkValidity()) {
-                buyerForm.reportValidity();
-                return;
-            }
-            const buyerInfo = getBuyerInfo();
-            if (buyerInfo) {
-                setBuyerInfo(buyerInfo);
-            }
-            window.location.href = "{{ route('checkout.cart.payment') }}";
-        });
-
         renderCheckout();
-        window.addEventListener('storage', renderCheckout);
     </script>
 </body>
 </html>
+
+

@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CartCheckoutRequest;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class CartCheckoutController extends Controller
+{
+    public function checkout(): View
+    {
+        $cart = Cart::firstOrCreate(
+            ['user_id' => auth()->id(), 'status' => 'active'],
+            ['status' => 'active']
+        );
+
+        $items = $cart->items()->with('product')->get();
+        $cartItems = $items->map(fn ($item) => $this->mapCartItem($item))->values();
+
+        return view('checkout-cart', compact('cartItems'));
+    }
+
+    public function storePayment(CartCheckoutRequest $request): RedirectResponse
+    {
+        $cart = Cart::firstOrCreate(
+            ['user_id' => $request->user()->id, 'status' => 'active'],
+            ['status' => 'active']
+        );
+
+        $items = $cart->items()->with('product')->get();
+        $selectedItems = $items->where('selected', true);
+
+        if ($selectedItems->isEmpty()) {
+            return redirect()->route('checkout.cart');
+        }
+
+        $subtotal = $selectedItems->sum(fn ($item) => $item->qty * $item->price);
+        $shipping = 25000;
+        $total = $subtotal + $shipping;
+        $orderNumber = 'NC-CART-'.date('ymd').'-'.Str::upper(Str::random(5));
+
+        $order = Order::create([
+            'user_id' => $request->user()->id,
+            'order_number' => $orderNumber,
+            'status' => 'pending',
+            'payment_status' => 'unpaid',
+            'subtotal' => $subtotal,
+            'shipping_fee' => $shipping,
+            'total' => $total,
+            'buyer_name' => $request->input('name'),
+            'buyer_phone' => $request->input('phone'),
+            'buyer_address' => $request->input('address'),
+            'shipping_method' => $request->input('shipping_method'),
+            'shipping_date' => $request->input('shipping_date'),
+            'shipping_time' => $request->input('shipping_time'),
+            'note' => $request->input('note'),
+        ]);
+
+        foreach ($selectedItems as $item) {
+            $order->items()->create([
+                'product_id' => $item->product_id,
+                'unit' => $item->product?->unit ?? '',
+                'price' => $item->price,
+                'qty' => $item->qty,
+                'line_total' => $item->qty * $item->price,
+            ]);
+        }
+
+        return redirect()->route('checkout.cart.payment', ['order' => $order->order_number]);
+    }
+
+    public function payment(Request $request): View|RedirectResponse
+    {
+        $orderNumber = (string) $request->query('order', '');
+        if ($orderNumber === '') {
+            return redirect()->route('checkout.cart');
+        }
+
+        $order = Order::query()
+            ->where('order_number', $orderNumber)
+            ->where('user_id', $request->user()->id)
+            ->with('items.product')
+            ->firstOrFail();
+
+        $orderItems = $order->items->map(fn (OrderItem $item) => $this->mapOrderItem($item))->values();
+        $midtransClientKey = env('MIDTRANS_CLIENT_KEY');
+
+        return view('payment-cart', [
+            'order' => $order,
+            'orderItems' => $orderItems,
+            'buyer' => [
+                'name' => $order->buyer_name,
+                'phone' => $order->buyer_phone,
+                'address' => $order->buyer_address,
+                'shipping_method' => $order->shipping_method,
+                'shipping_date' => optional($order->shipping_date)->format('Y-m-d'),
+                'shipping_time' => $order->shipping_time,
+                'note' => $order->note,
+            ],
+            'midtransClientKey' => $midtransClientKey,
+        ]);
+    }
+
+    public function midtransToken(Request $request): JsonResponse
+    {
+        $orderNumber = (string) $request->query('order', '');
+        if ($orderNumber === '') {
+            return response()->json(['error' => 'Order tidak ditemukan.'], 404);
+        }
+
+        $order = Order::query()
+            ->where('order_number', $orderNumber)
+            ->where('user_id', $request->user()->id)
+            ->with('items.product')
+            ->first();
+
+        if (! $order) {
+            return response()->json(['error' => 'Order tidak ditemukan.'], 404);
+        }
+
+        $itemDetails = $order->items->map(function (OrderItem $item) {
+            return [
+                'id' => (string) $item->product_id,
+                'price' => (int) $item->price,
+                'quantity' => (int) $item->qty,
+                'name' => $item->product?->name ?? 'Produk',
+            ];
+        })->values()->all();
+
+        if (empty($itemDetails)) {
+            return response()->json(['error' => 'Tidak ada item valid.'], 400);
+        }
+
+        $itemDetails[] = [
+            'id' => 'shipping',
+            'price' => (int) $order->shipping_fee,
+            'quantity' => 1,
+            'name' => 'Ongkir',
+        ];
+
+        $payload = [
+            'transaction_details' => [
+                'order_id' => $order->order_number,
+                'gross_amount' => (int) $order->total,
+            ],
+            'item_details' => $itemDetails,
+            'customer_details' => [
+                'first_name' => $order->buyer_name ?: 'Pembeli',
+                'phone' => $order->buyer_phone ?: '',
+                'shipping_address' => [
+                    'address' => $order->buyer_address ?: '',
+                ],
+            ],
+        ];
+
+        $method = $request->query('method');
+        if (! empty($method) && $method !== 'all') {
+            $payload['enabled_payments'] = [$method];
+        }
+
+        $serverKey = env('MIDTRANS_SERVER_KEY');
+        if (empty($serverKey)) {
+            return response()->json(['error' => 'MIDTRANS_SERVER_KEY belum diatur.'], 500);
+        }
+
+        $ch = curl_init('https://app.sandbox.midtrans.com/snap/v1/transactions');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Authorization: Basic '.base64_encode($serverKey.':'),
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 201 && $httpCode !== 200) {
+            return response()->json(['error' => 'Gagal membuat token Midtrans.', 'detail' => $response], 500);
+        }
+
+        $data = json_decode($response, true);
+        if (! isset($data['token'])) {
+            return response()->json(['error' => 'Token Midtrans tidak ditemukan.', 'detail' => $data], 500);
+        }
+
+        return response()->json(['token' => $data['token']]);
+    }
+
+    private function mapCartItem(CartItem $item): array
+    {
+        $product = $item->product;
+        $image = $product?->image;
+        $imageUrl = $this->resolveImageUrl($image);
+
+        return [
+            'id' => $item->id,
+            'product_id' => $product?->id,
+            'name' => $product?->name ?? 'Produk',
+            'price' => $item->price,
+            'unit' => $product?->unit ?? '',
+            'image' => $image,
+            'image_url' => $imageUrl,
+            'qty' => $item->qty,
+            'selected' => $item->selected,
+        ];
+    }
+
+    private function mapOrderItem(OrderItem $item): array
+    {
+        $product = $item->product;
+        $image = $product?->image;
+        $imageUrl = $this->resolveImageUrl($image);
+
+        return [
+            'id' => $item->id,
+            'product_id' => $item->product_id,
+            'name' => $product?->name ?? 'Produk',
+            'price' => $item->price,
+            'unit' => $item->unit,
+            'image' => $image,
+            'image_url' => $imageUrl,
+            'qty' => $item->qty,
+            'line_total' => $item->line_total,
+        ];
+    }
+
+    private function resolveImageUrl(?string $image): ?string
+    {
+        if (! $image) {
+            return asset('assets/ternakayam.jpg');
+        }
+
+        return str_starts_with($image, 'products/')
+            ? asset('storage/'.$image)
+            : asset('assets/'.$image);
+    }
+}
