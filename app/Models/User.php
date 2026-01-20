@@ -14,6 +14,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
 
     public const ROLE_USER = 'user';
+
     public const ROLE_ADMIN = 'admin';
 
     /**
@@ -26,6 +27,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
+        'loyalty_points',
     ];
 
     /**
@@ -48,6 +50,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'loyalty_points' => 'integer',
         ];
     }
 

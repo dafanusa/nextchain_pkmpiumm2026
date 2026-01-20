@@ -39,6 +39,11 @@
                     <option value="admin" @selected(old('role', $user->role) === 'admin')>Admin</option>
                 </select>
             </div>
+            <div>
+                <label class="text-sm font-semibold">Loyalty Points</label>
+                <input type="number" name="loyalty_points" min="0" value="{{ old('loyalty_points', $user->loyalty_points ?? 0) }}"
+                       class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+            </div>
             @if (!$user->exists)
                 <div>
                     <label class="text-sm font-semibold">Password</label>

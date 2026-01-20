@@ -26,7 +26,13 @@
         </div>
 
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-            <h2 class="text-lg font-semibold">Status Order</h2>
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-lg font-semibold">Status Order</h2>
+                <a href="{{ route('invoice.download', $order) }}"
+                   class="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                    Cetak Nota
+                </a>
+            </div>
             <form method="post" action="{{ route('admin.orders.update', $order) }}" class="mt-4 space-y-4">
                 @csrf
                 @method('put')

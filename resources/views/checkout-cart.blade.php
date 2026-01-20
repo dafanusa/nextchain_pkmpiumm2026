@@ -67,6 +67,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -153,7 +158,7 @@
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Metode Pengiriman</label>
-                            <select name="shipping_method" required
+                            <select name="shipping_method" id="shippingMethod" required
                                     class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <option value="" disabled selected>Pilih metode</option>
                                 <option>Pickup di farm</option>
@@ -161,16 +166,36 @@
                                 <option>Kurir UMKM</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="text-sm font-semibold">Tanggal Pengiriman</label>
-                            <input type="date" name="shipping_date" required
-                                   class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+                    </div>
+                    <div id="scheduleFields" class="grid sm:grid-cols-2 gap-4 hidden">
+                        <div class="sm:col-span-2">
+                            <label class="text-sm font-semibold">Jadwal Pengiriman</label>
+                            <select name="delivery_schedule_id" id="deliverySchedule"
+                                    class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+                                <option value="" disabled selected>Pilih jadwal tersedia</option>
+                                @forelse ($schedules ?? [] as $schedule)
+                                    <option value="{{ $schedule->id }}"
+                                            data-destination="{{ $schedule->destination }}"
+                                            data-date="{{ $schedule->delivery_date->format('Y-m-d') }}"
+                                            data-time="{{ $schedule->delivery_time }}">
+                                        {{ $schedule->destination }} - {{ $schedule->delivery_date->format('d M Y') }} ({{ $schedule->delivery_time }})
+                                    </option>
+                                @empty
+                                    <option value="" disabled>Belum ada jadwal tersedia</option>
+                                @endforelse
+                            </select>
+                            <div id="scheduleInfo" class="mt-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-[var(--muted)] hidden"></div>
                         </div>
                     </div>
-                    <div class="grid sm:grid-cols-2 gap-4">
+                    <div id="manualScheduleFields" class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-semibold">Tanggal Pengiriman</label>
+                            <input type="date" name="shipping_date" id="shippingDate" required
+                                   class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+                        </div>
                         <div>
                             <label class="text-sm font-semibold">Jam Pengiriman</label>
-                            <select name="shipping_time" required
+                            <select name="shipping_time" id="shippingTime" required
                                     class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <option value="" disabled selected>Pilih jam</option>
                                 <option>Pagi (08.00 - 11.00)</option>
@@ -178,6 +203,8 @@
                                 <option>Sore (14.00 - 17.00)</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Catatan</label>
                             <input type="text" name="note" placeholder="Contoh: kirim pagi hari"
@@ -274,6 +301,13 @@
         const summaryShipping = document.getElementById('summaryShipping');
         const summaryTotal = document.getElementById('summaryTotal');
         const submitBtn = document.getElementById('submitCartCheckout');
+        const shippingMethod = document.getElementById('shippingMethod');
+        const scheduleFields = document.getElementById('scheduleFields');
+        const manualScheduleFields = document.getElementById('manualScheduleFields');
+        const deliverySchedule = document.getElementById('deliverySchedule');
+        const scheduleInfo = document.getElementById('scheduleInfo');
+        const shippingDate = document.getElementById('shippingDate');
+        const shippingTime = document.getElementById('shippingTime');
         const shippingFee = 25000;
         const initialCartItems = @json($cartItems ?? []);
         const initialCartCount = {{ $cartCount ?? 0 }};
@@ -288,6 +322,38 @@
                 badge.textContent = nextCount;
                 badge.classList.toggle('hidden', nextCount === 0);
             });
+        }
+
+        function updateScheduleInfo() {
+            if (!deliverySchedule || !scheduleInfo) return;
+            const selected = deliverySchedule.options[deliverySchedule.selectedIndex];
+            const destination = selected?.dataset?.destination;
+            const date = selected?.dataset?.date;
+            const time = selected?.dataset?.time;
+            if (!destination || !date || !time) {
+                scheduleInfo.classList.add('hidden');
+                scheduleInfo.textContent = '';
+                return;
+            }
+            scheduleInfo.classList.remove('hidden');
+            scheduleInfo.textContent = `Tujuan: ${destination} - ${date} - ${time}`;
+        }
+
+        function updateScheduleVisibility() {
+            const isScheduled = shippingMethod?.value === 'Pengiriman terjadwal';
+            scheduleFields?.classList.toggle('hidden', !isScheduled);
+            manualScheduleFields?.classList.toggle('hidden', isScheduled);
+
+            if (deliverySchedule) deliverySchedule.required = isScheduled;
+            if (shippingDate) shippingDate.required = !isScheduled;
+            if (shippingTime) shippingTime.required = !isScheduled;
+
+            if (isScheduled) {
+                updateScheduleInfo();
+            } else if (scheduleInfo) {
+                scheduleInfo.classList.add('hidden');
+                scheduleInfo.textContent = '';
+            }
         }
 
         function renderCheckout() {
@@ -307,8 +373,9 @@
 
                 const row = document.createElement('div');
                 row.className = 'flex flex-col sm:flex-row sm:items-center gap-4 border border-slate-200 rounded-2xl p-4';
+                const imageSrc = item.image_url || "{{ asset('assets/ternakayam.jpg') }}";
                 row.innerHTML = `
-                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
+                    <img src="${imageSrc}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
                     <div class="flex-1 space-y-1">
                         <p class="text-base font-semibold">${item.name}</p>
                         <p class="text-xs text-[var(--muted)]">Rp ${price.toLocaleString('id-ID')} / ${item.unit}</p>
@@ -330,9 +397,17 @@
             updateCartBadge(initialCartCount);
         }
 
+        if (shippingMethod) {
+            shippingMethod.addEventListener('change', updateScheduleVisibility);
+        }
+        if (deliverySchedule) {
+            deliverySchedule.addEventListener('change', updateScheduleInfo);
+        }
         renderCheckout();
+        updateScheduleVisibility();
     </script>
 </body>
 </html>
+
 
 

@@ -195,6 +195,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -235,6 +240,11 @@
             <div class="pt-2 border-t border-white/10 space-y-2">
                 @auth
                     <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -298,8 +308,10 @@
                     <div class="soft-panel rounded-[2rem] p-5 shadow-lg flex items-center justify-between">
                         <div>
                             <p class="text-xs text-[var(--muted)]">Harga hari ini</p>
-                            <p class="text-2xl font-bold text-[var(--brand)]">Rp 26.000 - Rp 28.000/kg</p>
-                            <p class="text-xs text-[var(--muted)] mt-1">Grade A - update real-time</p>
+                            <p class="text-2xl font-bold text-[var(--brand)]">
+                                Rp {{ number_format($heroPriceMin) }} - Rp {{ number_format($heroPriceMax) }}/{{ $heroUnit }}
+                            </p>
+                            <p class="text-xs text-[var(--muted)] mt-1">Grade {{ $heroGrade }} - update real-time</p>
                         </div>
                         <img src="{{ asset('assets/ternakayam.jpg') }}" alt="Telur segar"
                              class="w-20 h-20 rounded-2xl object-cover border border-white">
@@ -311,33 +323,34 @@
         <section class="py-16 border-t border-slate-200/80 bg-white/60 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="tentang">
             <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
                 <div class="space-y-6">
-                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 text-xs font-semibold text-[var(--brand)]">
+                    <span class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 text-sm font-semibold text-[var(--brand)] shadow-sm border border-slate-200/60">
+                        <span class="h-2.5 w-2.5 rounded-full bg-[var(--brand)]"></span>
                         Profil UMKM
                     </span>
-                    <h2 class="text-4xl font-bold">UD. AdeSaputra Farm</h2>
-                    <p class="text-[var(--muted)] text-lg">
+                    <h2 class="text-4xl sm:text-5xl font-bold">UD. AdeSaputra Farm</h2>
+                    <p class="text-[var(--muted)] text-lg sm:text-xl">
                         UMKM peternakan telur yang fokus pada kualitas produksi dan keterbukaan harga.
                         NEXTCHAIN membantu pembeli berinteraksi langsung dengan peternak tanpa perantara.
                     </p>
                     <div class="grid sm:grid-cols-2 gap-5 pt-2 text-sm text-[var(--muted)]">
-                        <div>
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm">
                             <p class="uppercase text-xs tracking-wider text-[var(--brand)]">Fokus</p>
-                            <p class="mt-2 text-base font-semibold text-[var(--ink)]">Telur segar berkualitas</p>
+                            <p class="mt-2 text-lg font-semibold text-[var(--ink)]">Telur segar berkualitas</p>
                             <p class="mt-1">Produksi diawasi setiap hari.</p>
                         </div>
-                        <div>
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm">
                             <p class="uppercase text-xs tracking-wider text-[var(--brand)]">Transparansi</p>
-                            <p class="mt-2 text-base font-semibold text-[var(--ink)]">Harga terbuka</p>
+                            <p class="mt-2 text-lg font-semibold text-[var(--ink)]">Harga terbuka</p>
                             <p class="mt-1">Penawaran bisa dilihat bersama.</p>
                         </div>
-                        <div>
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm">
                             <p class="uppercase text-xs tracking-wider text-[var(--brand)]">Distribusi</p>
-                            <p class="mt-2 text-base font-semibold text-[var(--ink)]">Terjadwal dan fleksibel</p>
+                            <p class="mt-2 text-lg font-semibold text-[var(--ink)]">Terjadwal dan fleksibel</p>
                             <p class="mt-1">Pickup farm atau pengiriman.</p>
                         </div>
-                        <div>
+                        <div class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm">
                             <p class="uppercase text-xs tracking-wider text-[var(--brand)]">Kapasitas</p>
-                            <p class="mt-2 text-base font-semibold text-[var(--ink)]">Skala UMKM</p>
+                            <p class="mt-2 text-lg font-semibold text-[var(--ink)]">Skala UMKM</p>
                             <p class="mt-1">Siap untuk kebutuhan grosir.</p>
                         </div>
                     </div>
@@ -352,8 +365,10 @@
                              class="rounded-3xl h-56 w-full object-cover mt-8">
                         <div class="col-span-2 bg-gradient-to-r from-[#0f3d91] to-[#1d5bbf] rounded-3xl p-6 text-white">
                             <p class="text-xs text-white/70">Harga hari ini</p>
-                            <p class="text-2xl font-semibold mt-2">Rp 26.000 - Rp 28.000/kg</p>
-                            <p class="text-xs text-white/70 mt-1">Grade A, update real-time</p>
+                            <p class="text-2xl font-semibold mt-2">
+                                Rp {{ number_format($heroPriceMin) }} - Rp {{ number_format($heroPriceMax) }}/{{ $heroUnit }}
+                            </p>
+                            <p class="text-xs text-white/70 mt-1">Grade {{ $heroGrade }}, update real-time</p>
                         </div>
                     </div>
                 </div>
@@ -367,36 +382,29 @@
                 <a href="{{ route('produk') }}" class="text-sm font-semibold text-[var(--brand)]">Lihat semua produk</a>
             </div>
             <div class="mt-6 divide-y divide-slate-200">
-                <div class="py-6 grid md:grid-cols-5 gap-6 items-center">
-                    <img src="{{ asset('assets/ternakayam.jpg') }}" alt="Telur Grade A" class="rounded-3xl h-36 w-full object-cover md:col-span-2">
-                    <div class="md:col-span-3 space-y-2">
-                        <h3 class="text-2xl font-semibold">Telur Ayam Ras Grade A</h3>
-                        <p class="text-[var(--muted)]">Rp 26.000 - Rp 28.000/kg - kualitas premium.</p>
-                        <a href="{{ route('produk.detail', 1) }}" class="text-sm font-semibold text-[var(--brand)]">
-                            Lihat Detail
-                        </a>
+                @forelse ($featuredProducts ?? [] as $product)
+                    <div class="py-6 grid md:grid-cols-5 gap-6 items-center">
+                        <img src="{{ $product->image_url }}"
+                             alt="{{ $product->name }}"
+                             class="rounded-3xl h-36 w-full object-cover md:col-span-2">
+                        <div class="md:col-span-3 space-y-2">
+                            <h3 class="text-2xl font-semibold">{{ $product->name }}</h3>
+                            <p class="text-[var(--muted)]">
+                                Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}/{{ $product->unit }}
+                                @if (!empty($product->grade))
+                                    - Grade {{ $product->grade }}
+                                @endif
+                            </p>
+                            <a href="{{ route('produk.detail', $product) }}" class="text-sm font-semibold text-[var(--brand)]">
+                                Lihat Detail
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <div class="py-6 grid md:grid-cols-5 gap-6 items-center">
-                    <img src="{{ asset('assets/ternakayam1.jpg') }}" alt="Telur Grade B" class="rounded-3xl h-36 w-full object-cover md:col-span-2">
-                    <div class="md:col-span-3 space-y-2">
-                        <h3 class="text-2xl font-semibold">Telur Ayam Ras Grade B</h3>
-                        <p class="text-[var(--muted)]">Rp 23.000 - Rp 25.000/kg - ideal untuk volume besar.</p>
-                        <a href="{{ route('produk.detail', 2) }}" class="text-sm font-semibold text-[var(--brand)]">
-                            Lihat Detail
-                        </a>
+                @empty
+                    <div class="py-8 text-sm text-[var(--muted)]">
+                        Belum ada produk ditampilkan.
                     </div>
-                </div>
-                <div class="py-6 grid md:grid-cols-5 gap-6 items-center">
-                    <img src="{{ asset('assets/ternakayam2.jpg') }}" alt="Telur Omega" class="rounded-3xl h-36 w-full object-cover md:col-span-2">
-                    <div class="md:col-span-3 space-y-2">
-                        <h3 class="text-2xl font-semibold">Telur Omega</h3>
-                        <p class="text-[var(--muted)]">Rp 30.000 - Rp 33.000/kg - nutrisi lebih tinggi.</p>
-                        <a href="{{ route('produk.detail', 3) }}" class="text-sm font-semibold text-[var(--brand)]">
-                            Lihat Detail
-                        </a>
-                    </div>
-                </div>
+                @endforelse
             </div>
             </div>
         </section>
@@ -651,7 +659,7 @@
                         Buka Google Maps
                     </a>
                     <a href="https://wa.me/6281247889969"
-                       class="px-6 py-3 rounded-full border border-gray-200 text-sm font-semibold hover:border-[var(--brand)] transition">
+                       class="px-6 py-3 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition">
                         Chat WhatsApp
                     </a>
                 </div>
@@ -841,7 +849,6 @@
     </script>
 </body>
 </html>
-
 
 
 

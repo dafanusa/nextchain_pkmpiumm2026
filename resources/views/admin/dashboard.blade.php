@@ -236,11 +236,11 @@
                             <span class="text-[var(--ink)] font-semibold">{{ $product->name }}</span>
                             <span class="text-[var(--muted)]">{{ number_format($product->stock) }} {{ $product->unit }}</span>
                         </div>
-                        <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div class="h-3 rounded-full bg-slate-100 overflow-hidden">
                             @php
                                 $ratio = $maxTopStock > 0 ? ($product->stock / $maxTopStock) * 100 : 0;
                             @endphp
-                            <div class="h-2 bg-[var(--brand)]/80" style="width: {{ $ratio }}%"></div>
+                            <div class="h-3 bg-[var(--brand)]/80" style="width: {{ max(8, $ratio) }}%"></div>
                         </div>
                     @endforeach
                     @if ($stats['top_products']->isEmpty())

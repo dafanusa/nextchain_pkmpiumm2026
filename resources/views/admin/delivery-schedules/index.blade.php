@@ -1,13 +1,13 @@
 @extends('admin.layout')
 
-@section('title', 'Users')
+@section('title', 'Delivery Schedules')
 
 @section('content')
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold">Daftar Users</h2>
-        <a href="{{ route('admin.users.create') }}"
+        <h2 class="text-lg font-semibold">Daftar Jadwal Pengiriman</h2>
+        <a href="{{ route('admin.delivery-schedules.create') }}"
            class="px-4 py-2 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-dark)] transition">
-            Tambah User
+            Tambah Jadwal
         </a>
     </div>
 
@@ -16,42 +16,39 @@
             {{ session('success') }}
         </div>
     @endif
-    @if (session('error'))
-        <div class="mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
 
     <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
         <table class="w-full text-sm">
             <thead class="bg-slate-50 text-[var(--muted)]">
                 <tr>
-                    <th class="text-left px-4 py-3">Nama</th>
-                    <th class="text-left px-4 py-3">Email</th>
-                    <th class="text-left px-4 py-3">Poin</th>
-                    <th class="text-left px-4 py-3">Role</th>
+                    <th class="text-left px-4 py-3">Tujuan</th>
+                    <th class="text-left px-4 py-3">Tanggal</th>
+                    <th class="text-left px-4 py-3">Jam</th>
+                    <th class="text-left px-4 py-3">Status</th>
                     <th class="text-right px-4 py-3">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($users as $user)
+                @forelse ($schedules as $schedule)
                     <tr class="border-t border-slate-100">
-                        <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $user->name }}</td>
-                        <td class="px-4 py-3 text-[var(--muted)]">{{ $user->email }}</td>
-                        <td class="px-4 py-3 text-[var(--muted)]">{{ $user->loyalty_points ?? 0 }}</td>
+                        <td class="px-4 py-3 text-[var(--ink)] font-semibold">{{ $schedule->destination }}</td>
+                        <td class="px-4 py-3 text-[var(--muted)]">{{ $schedule->delivery_date->format('d M Y') }}</td>
+                        <td class="px-4 py-3 text-[var(--muted)]">{{ $schedule->delivery_time }}</td>
                         <td class="px-4 py-3">
-                            <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $user->role }}</span>
+                            <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $schedule->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                {{ $schedule->is_active ? 'Aktif' : 'Nonaktif' }}
+                            </span>
                         </td>
                         <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('admin.users.edit', $user) }}"
+                            <a href="{{ route('admin.delivery-schedules.edit', $schedule) }}"
                                class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
                                 Edit
                             </a>
-                            <form action="{{ route('admin.users.destroy', $user) }}" method="post" class="inline">
+                            <form action="{{ route('admin.delivery-schedules.destroy', $schedule) }}" method="post" class="inline">
                                 @csrf
                                 @method('delete')
                                 <button type="submit"
-                                        onclick="return confirm('Hapus user ini?')"
+                                        onclick="return confirm('Hapus jadwal ini?')"
                                         class="inline-flex px-3 py-1.5 rounded-full border border-red-200 text-xs font-semibold text-red-600 hover:border-red-300 transition">
                                     Hapus
                                 </button>
@@ -60,7 +57,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada user.</td>
+                        <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada jadwal.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -68,6 +65,6 @@
     </div>
 
     <div class="mt-4">
-        {{ $users->links() }}
+        {{ $schedules->links() }}
     </div>
 @endsection

@@ -25,10 +25,14 @@
                         <td class="px-4 py-3">
                             <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $order->status }}</span>
                         </td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="px-4 py-3 text-right space-x-2">
                             <a href="{{ route('admin.orders.show', $order) }}"
                                class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
                                 Detail
+                            </a>
+                            <a href="{{ route('invoice.download', $order) }}"
+                               class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                Cetak Nota
                             </a>
                         </td>
                     </tr>

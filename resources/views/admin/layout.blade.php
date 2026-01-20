@@ -37,6 +37,7 @@
                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Dashboard</a>
                 <a href="{{ route('admin.users.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Users</a>
                 <a href="{{ route('admin.products.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Products</a>
+                <a href="{{ route('admin.delivery-schedules.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Delivery Schedules</a>
                 <a href="{{ route('admin.offers.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Negotiations</a>
                 <a href="{{ route('admin.orders.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Orders</a>
                 <a href="{{ route('admin.payments.index') }}" class="block px-4 py-2 rounded-full hover:bg-white/10">Payments</a>

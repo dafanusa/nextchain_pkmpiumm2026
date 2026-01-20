@@ -63,6 +63,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -106,6 +111,11 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -167,6 +177,100 @@
                 </button>
             </div>
         </div>
+
+        <section class="mt-10">
+            <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-lg">
+                <div class="absolute -top-24 -right-16 h-48 w-48 rounded-full bg-blue-100/70 blur-3xl"></div>
+                <div class="absolute -bottom-24 -left-16 h-52 w-52 rounded-full bg-emerald-100/60 blur-3xl"></div>
+                <div class="relative flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Riwayat Pesanan</p>
+                        <h2 class="text-2xl font-semibold mt-2">Transaksi terakhir kamu</h2>
+                        <p class="text-sm text-[var(--muted)] mt-1">Ringkasan pesanan terbaru lengkap dengan status pembayaran.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs text-[var(--muted)] shadow-sm">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Update otomatis
+                    </span>
+                </div>
+
+                @if (session('success'))
+                    <div class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @auth
+                    <div class="mt-6 grid gap-4">
+                        @forelse ($orderHistory ?? [] as $order)
+                            <div class="rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-sm">
+                                <div class="flex flex-wrap items-start justify-between gap-6">
+                                    <div class="space-y-1">
+                                        <p class="text-base font-semibold text-[var(--ink)]">{{ $order->order_number }}</p>
+                                        <p class="text-xs text-[var(--muted)]">
+                                            {{ optional($order->created_at)->format('d M Y, H:i') }}
+                                        </p>
+                                        <div class="mt-4 grid gap-2 text-sm text-[var(--muted)]">
+                                            @foreach ($order->items->take(3) as $item)
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span class="truncate">{{ $item->product?->name ?? 'Produk' }}</span>
+                                                    <span class="font-semibold text-[var(--ink)]">{{ $item->qty }} {{ $item->unit }}</span>
+                                                </div>
+                                            @endforeach
+                                            @if ($order->items->count() > 3)
+                                                <span class="text-xs text-[var(--muted)]">
+                                                    +{{ $order->items->count() - 3 }} item lainnya
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="text-right space-y-2">
+                                        <p class="text-lg font-semibold text-[var(--brand)]">Rp {{ number_format($order->total) }}</p>
+                                        <div class="flex flex-wrap justify-end gap-2 text-xs font-semibold">
+                                            <span class="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{{ $order->status }}</span>
+                                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">{{ $order->payment_status }}</span>
+                                        </div>
+                                        @if ($order->payment_status === 'paid')
+                                            <div class="flex flex-wrap justify-end gap-2 pt-3 text-sm font-semibold">
+                                                <a href="{{ route('invoice.download', $order) }}"
+                                                   class="inline-flex items-center px-4 py-2 rounded-full bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition">
+                                                    Cetak Nota
+                                                </a>
+                                                <a href="{{ route('invoice.whatsapp', $order) }}"
+                                                   class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+                                                    Kirim WA
+                                                </a>
+                                                <form method="post" action="{{ route('invoice.email', $order) }}">
+                                                    @csrf
+                                                    <button type="submit"
+                                                            class="inline-flex items-center px-4 py-2 rounded-full bg-blue-700 text-white text-xs font-semibold hover:bg-blue-800 transition">
+                                                        Kirim Email
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-[var(--muted)]">
+                                Belum ada riwayat pesanan.
+                            </div>
+                        @endforelse
+                    </div>
+                @else
+                    <div class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-[var(--muted)]">
+                        Login dulu untuk melihat riwayat pesanan.
+                        <div class="mt-4">
+                            <a href="{{ route('login') }}"
+                               class="inline-flex items-center px-4 py-2 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-dark)] transition">
+                                Ke Login
+                            </a>
+                        </div>
+                    </div>
+                @endauth
+            </div>
+        </section>
     </main>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
@@ -223,6 +327,7 @@
         const checkoutSelectedBtn = document.getElementById('checkoutSelectedBtn');
         const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
         const initialCartItems = @json($cartItems ?? []);
+        const defaultImageUrl = "{{ asset('assets/ternakayam.jpg') }}";
         let cartItemsState = initialCartItems;
 
         function formatPrice(value) {
@@ -249,6 +354,7 @@
             items.forEach((item) => {
                 const qty = Number(item.qty || 0);
                 const price = Number(item.price || 0);
+                const imageUrl = item.image_url || defaultImageUrl;
                 if (item.selected) {
                     totalQty += qty;
                     subtotal += qty * price;
@@ -257,7 +363,7 @@
                 const card = document.createElement('div');
                 card.className = 'flex flex-col sm:flex-row sm:items-center gap-4 border border-slate-200 rounded-2xl p-4';
                 card.innerHTML = `
-                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
+                    <img src="${imageUrl}" alt="${item.name}" class="h-20 w-28 rounded-xl object-cover">
                     <div class="flex-1 space-y-1">
                         <div class="flex items-center gap-2">
                             <input type="checkbox" class="item-check h-4 w-4 accent-[var(--brand)]" ${item.selected ? 'checked' : ''}>
@@ -279,7 +385,9 @@
                            class="inline-flex items-center justify-center px-3 py-2 rounded-full bg-[var(--brand)] text-white text-xs font-semibold hover:bg-[var(--brand-dark)] transition">
                             Checkout
                         </a>
-                        <button class="block text-xs text-red-500 remove-btn">Hapus</button>
+                        <button class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition remove-btn">
+                            Hapus
+                        </button>
                     </div>
                 `;
 
@@ -301,6 +409,12 @@
                 const qtyValue = card.querySelector('.qty-value');
                 const minusBtn = card.querySelector('.qty-minus');
                 const plusBtn = card.querySelector('.qty-plus');
+                const imageEl = card.querySelector('img');
+                if (imageEl) {
+                    imageEl.addEventListener('error', () => {
+                        imageEl.src = defaultImageUrl;
+                    });
+                }
                 minusBtn.addEventListener('click', () => {
                     const nextQty = Math.max(1, Number(item.qty || 1) - 1);
                     fetch(`{{ url('/keranjang/items') }}/${item.id}`, {
@@ -372,5 +486,7 @@
     </script>
 </body>
 </html>
+
+
 
 

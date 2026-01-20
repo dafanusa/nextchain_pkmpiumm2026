@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Negosiasi - {{ $product['name'] }}</title>
+    <title>Negosiasi - {{ $product->name }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -84,6 +84,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -125,6 +130,11 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -140,7 +150,7 @@
 
     <main class="max-w-7xl mx-auto px-6 py-10">
         <div class="md:hidden mb-4">
-            <a href="{{ route('produk.detail', request()->route('id')) }}"
+            <a href="{{ route('produk.detail', $product) }}"
                class="inline-flex items-center text-sm font-semibold text-[var(--brand)]">
                 Kembali ke Detail Produk
             </a>
@@ -149,25 +159,25 @@
             <section class="order-1 lg:order-none lg:col-span-4 glass-card rounded-3xl p-6">
                 <h1 class="text-2xl font-bold">Negosiasi Harga</h1>
                 <p class="text-[var(--muted)] mt-2">
-                    {{ $product['name'] }} - {{ $product['supplier'] }}
+                    {{ $product->name }} - {{ $product->supplier }}
                 </p>
                 @if ($acceptedOffer)
                     <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
                         Tawaran diterima:
                         <span class="font-semibold">
                             {{ $acceptedOffer->user?->name ?? 'User' }}
-                            - Rp {{ number_format($acceptedOffer->price) }} / {{ $product['unit'] }}
+                            - Rp {{ number_format($acceptedOffer->price) }} / {{ $product->unit }}
                         </span>
                     </div>
                 @endif
                 <div class="mt-4 bg-white/70 rounded-2xl p-4 accent-ring">
                     <p class="text-xs text-[var(--muted)]">Harga real-time</p>
                     <p id="livePrice" class="text-2xl font-bold text-[var(--brand)] mt-1">
-                        Rp {{ number_format($product['price_min']) }}
+                        Rp {{ number_format($product->price_min) }}
                     </p>
                     <p class="text-xs text-[var(--muted)] mt-2">
-                        Rentang: Rp {{ number_format($product['price_min']) }} - Rp {{ number_format($product['price_max']) }}
-                        / {{ $product['unit'] }}
+                        Rentang: Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}
+                        / {{ $product->unit }}
                     </p>
                 </div>
             </section>
@@ -188,7 +198,7 @@
                                 </p>
                             </div>
                             <div class="text-sm text-[var(--muted)]">
-                                Rp {{ number_format($offer->price) }} / {{ $product['unit'] }} - {{ $offer->qty }} {{ $product['unit'] }}
+                                Rp {{ number_format($offer->price) }} / {{ $product->unit }} - {{ $offer->qty }} {{ $product->unit }}
                             </div>
                             <div class="text-xs font-semibold
                                 @if ($offer->status === 'accepted') text-emerald-600
@@ -209,15 +219,15 @@
                     <div>
                         <h3 class="text-sm font-semibold text-[var(--brand)]">Negosiasi Instan (Lelang)</h3>
                         <p class="text-xs text-[var(--muted)]">
-                            Pilih harga di rentang Rp {{ number_format($product['price_min']) }} - Rp {{ number_format($product['price_max']) }}.
+                            Pilih harga di rentang Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}.
                         </p>
                     </div>
                     <div>
-                        <input id="bidRange" type="range" min="{{ $product['price_min'] }}" max="{{ $product['price_max'] }}"
-                               value="{{ $product['price_min'] }}" class="w-full">
+                        <input id="bidRange" type="range" min="{{ $product->price_min }}" max="{{ $product->price_max }}"
+                               value="{{ $product->price_min }}" class="w-full">
                         <div class="flex items-center justify-between text-xs text-[var(--muted)] mt-1">
-                            <span>Rp {{ number_format($product['price_min']) }}</span>
-                            <span>Rp {{ number_format($product['price_max']) }}</span>
+                            <span>Rp {{ number_format($product->price_min) }}</span>
+                            <span>Rp {{ number_format($product->price_max) }}</span>
                         </div>
                     </div>
                     <div class="bg-white/70 rounded-2xl p-4">
@@ -242,17 +252,17 @@
                     <h2 class="text-lg font-semibold text-[var(--brand)]">Ajukan Tawaran</h2>
 
                     <div>
-                        <label class="text-sm font-medium">Jumlah ({{ $product['unit'] }})</label>
-                        <input id="qty" type="number" min="{{ $product['moq'] }}" value="{{ $product['moq'] }}"
+                        <label class="text-sm font-medium">Jumlah ({{ $product->unit }})</label>
+                        <input id="qty" type="number" min="{{ $product->moq }}" value="{{ $product->moq }}"
                                class="mt-1 w-full border rounded-xl px-3 py-2">
                         <p class="text-xs text-[var(--muted)] mt-1">
-                            MOQ: {{ $product['moq'] }} {{ $product['unit'] }}
+                            MOQ: {{ $product->moq }} {{ $product->unit }}
                         </p>
                     </div>
 
                     <div>
-                        <label class="text-sm font-medium">Harga tawaran per {{ $product['unit'] }}</label>
-                        <input id="offerPrice" type="number" value="{{ $product['price_min'] }}"
+                        <label class="text-sm font-medium">Harga tawaran per {{ $product->unit }}</label>
+                        <input id="offerPrice" type="number" value="{{ $product->price_min }}"
                                class="mt-1 w-full border rounded-xl px-3 py-2">
                     </div>
 
@@ -367,9 +377,9 @@
             });
         }
         updateCartBadge(initialCartCount);
-        const maxPrice = {{ $product['price_max'] }};
-        const minPrice = {{ $product['price_min'] }};
-        const unit = "{{ $product['unit'] }}";
+        const maxPrice = {{ $product->price_max }};
+        const minPrice = {{ $product->price_min }};
+        const unit = "{{ $product->unit }}";
         const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
         const loginUrl = "{{ route('login') }}";
         let currentOfferStatus = "{{ $userOffer?->status ?? '' }}";
@@ -475,7 +485,7 @@
                 Distribusi: ${dist}. Jadwal: ${sched}. Lokasi: ${loc}.`
             );
 
-            fetch("{{ route('produk.negosiasi.store', request()->route('id')) }}", {
+            fetch("{{ route('produk.negosiasi.store', $product->id) }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -524,7 +534,7 @@
             if (bidStatus) {
                 bidStatus.textContent = 'Mengirim tawaran...';
             }
-            fetch("{{ route('produk.negosiasi.store', request()->route('id')) }}", {
+            fetch("{{ route('produk.negosiasi.store', $product->id) }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -575,7 +585,7 @@
             const messageText = input.value;
             addMessage('buyer', messageText);
             input.value = '';
-            fetch("{{ route('produk.negosiasi.message', request()->route('id')) }}", {
+            fetch("{{ route('produk.negosiasi.message', $product->id) }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -652,6 +662,8 @@
     </footer>
 </body>
 </html>
+
+
 
 
 

@@ -128,6 +128,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -225,12 +230,12 @@
             <div class="glass-card rounded-3xl p-6 space-y-4 lg:sticky lg:top-28">
                 <h2 class="text-lg font-semibold">Ringkasan Pembayaran</h2>
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('assets/' . $product['image']) }}"
-                         alt="{{ $product['name'] }}"
+                    <img src="{{ $product->image_url }}"
+                         alt="{{ $product->name }}"
                          class="h-16 w-20 rounded-2xl object-cover">
                     <div>
-                        <p class="text-sm font-semibold">{{ $product['name'] }}</p>
-                        <p class="text-xs text-[var(--muted)]">{{ $qty }} {{ $product['unit'] }}</p>
+                        <p class="text-sm font-semibold">{{ $product->name }}</p>
+                        <p class="text-xs text-[var(--muted)]">{{ $qty }} {{ $product->unit }}</p>
                         <p class="text-xs text-[var(--muted)]">Order ID: {{ $orderId }}</p>
                     </div>
                 </div>
@@ -239,6 +244,9 @@
                     <p><span class="font-semibold text-[var(--ink)]">WA:</span> {{ $buyer['phone'] ?: '-' }}</p>
                     <p><span class="font-semibold text-[var(--ink)]">Alamat:</span> {{ $buyer['address'] ?: '-' }}</p>
                     <p><span class="font-semibold text-[var(--ink)]">Pengiriman:</span> {{ $buyer['shipping_method'] ?: '-' }}</p>
+                    @if (!empty($buyer['delivery_destination']))
+                        <p><span class="font-semibold text-[var(--ink)]">Tujuan terjadwal:</span> {{ $buyer['delivery_destination'] }}</p>
+                    @endif
                     <p><span class="font-semibold text-[var(--ink)]">Jadwal:</span> {{ $buyer['shipping_date'] ?: '-' }} {{ $buyer['shipping_time'] ?: '' }}</p>
                     @if (!empty($buyer['note']))
                         <p><span class="font-semibold text-[var(--ink)]">Catatan:</span> {{ $buyer['note'] }}</p>
@@ -261,7 +269,7 @@
                             class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition">
                         Bayar Sekarang
                     </button>
-                    <a href="{{ route('checkout', request()->route('id')) }}?qty={{ $qty }}"
+                    <a href="{{ route('checkout', $product) }}?qty={{ $qty }}"
                        class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
                         Kembali
                     </a>
@@ -365,7 +373,7 @@
 
         async function requestSnapToken() {
             const method = paymentMethod.value;
-            const url = new URL("{{ route('checkout.midtrans', request()->route('id')) }}", window.location.origin);
+            const url = new URL("{{ route('checkout.midtrans', $product) }}", window.location.origin);
             url.searchParams.set('qty', "{{ $qty }}");
             url.searchParams.set('method', method);
             url.searchParams.set('name', "{{ $buyer['name'] }}");
@@ -421,7 +429,7 @@
         simClose.addEventListener('click', closeSimModal);
 
         simConfirm.addEventListener('click', () => {
-            window.location.href = "{{ route('checkout.success', request()->route('id')) }}";
+            window.location.href = "{{ route('checkout.success', $product) }}?orderId={{ $orderId }}";
         });
 
         simPending.addEventListener('click', () => {
@@ -439,7 +447,7 @@
                 payStatus.textContent = '';
                 window.snap.pay(token, {
                     onSuccess: () => {
-                        window.location.href = "{{ route('checkout.success', request()->route('id')) }}";
+                        window.location.href = "{{ route('checkout.success', $product) }}?orderId={{ $orderId }}";
                     },
                     onPending: () => {
                         payStatus.textContent = 'Pembayaran pending. Silakan selesaikan pembayaran.';
@@ -462,6 +470,7 @@
     </script>
 </body>
 </html>
+
 
 
 

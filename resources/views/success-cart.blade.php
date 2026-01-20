@@ -91,6 +91,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -170,6 +175,26 @@
                 </div>
             </div>
 
+            @if ($order)
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="{{ route('invoice.download', $order) }}"
+                       class="px-5 py-2.5 rounded-full border border-slate-200 text-sm font-semibold hover:border-[var(--brand)] transition">
+                        Cetak Nota
+                    </a>
+                    <a href="{{ route('invoice.whatsapp', $order) }}"
+                       class="px-5 py-2.5 rounded-full border border-emerald-200 text-sm font-semibold text-emerald-700 hover:border-emerald-300 transition">
+                        Kirim WA
+                    </a>
+                    <form method="post" action="{{ route('invoice.email', $order) }}">
+                        @csrf
+                        <button type="submit"
+                                class="px-5 py-2.5 rounded-full border border-blue-200 text-sm font-semibold text-blue-700 hover:border-blue-300 transition">
+                            Kirim Email
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             <div class="mt-6 grid md:grid-cols-3 gap-4 text-sm text-[var(--muted)]">
                 <div class="bg-gray-50 rounded-2xl p-4">
                     <p class="text-xs uppercase tracking-wide">Status</p>
@@ -215,6 +240,22 @@
         </div>
     </footer>
 
+    @if ($order)
+        @php
+            $publicUrl = route('invoice.short', $order->invoice_short_code);
+            $waMessage = "Ini nota pembelian {$order->invoice_uid} dari UD. AdeSaputra Farm. Silakan unduh di {$publicUrl}";
+            $waUrl = 'https://wa.me/?text=' . rawurlencode($waMessage);
+        @endphp
+        <script>
+            const autoKey = 'invoice-auto-{{ $orderId }}';
+            if (!sessionStorage.getItem(autoKey)) {
+                sessionStorage.setItem(autoKey, '1');
+                window.open("{{ $publicUrl }}", '_blank');
+                setTimeout(() => window.open("{{ $waUrl }}", '_blank'), 600);
+            }
+        </script>
+    @endif
+
     <script>
         const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -244,5 +285,6 @@
     </script>
 </body>
 </html>
+
 
 

@@ -342,6 +342,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -383,6 +388,11 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -497,9 +507,9 @@
             </div>
         </div>
 
-        <section class="mt-10 grid md:grid-cols-2 gap-6">
+        <section class="mt-10 grid md:grid-cols-2 gap-6 items-stretch">
             @foreach ($products as $id => $product)
-            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-lg card-glow">
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-lg card-glow flex flex-col h-full">
                 <div class="space-y-4">
                     <img src="{{ $product['image_url'] ?? asset('assets/' . $product['image']) }}"
                          alt="{{ $product['name'] }}"
@@ -552,7 +562,7 @@
                     @endforelse
                 </div>
 
-                <div class="mt-6 flex flex-wrap gap-3">
+                <div class="mt-auto pt-6 flex flex-wrap gap-3">
                     <a href="{{ route('produk.detail', $id) }}"
                        class="inline-flex items-center justify-center px-4 py-2 text-sm action-btn btn-detail">
                         Detail Produk
@@ -625,6 +635,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

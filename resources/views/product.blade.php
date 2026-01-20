@@ -146,6 +146,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -187,6 +192,11 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -216,54 +226,54 @@
         </div>
 
         <section class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach ($products as $id => $product)
+            @foreach ($products as $product)
             <div class="bg-white rounded-3xl overflow-hidden shadow-lg card-glow transition">
                 <div class="relative">
-                    <img src="{{ asset('assets/' . $product['image']) }}"
-                         alt="{{ $product['name'] }}"
+                    <img src="{{ $product->image_url }}"
+                         alt="{{ $product->name }}"
                          class="h-48 w-full object-cover">
                     <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-[var(--brand)]">
-                        Grade {{ $product['grade'] }}
+                        Grade {{ $product->grade ?? '-' }}
                     </span>
                 </div>
                 <div class="p-6 space-y-3">
                     <div>
-                        <h3 class="text-lg font-semibold">{{ $product['name'] }}</h3>
+                        <h3 class="text-lg font-semibold">{{ $product->name }}</h3>
                         <p class="text-sm text-[var(--muted)]">
-                            Mitra: {{ $product['supplier'] }}
+                            Mitra: {{ $product->supplier }}
                         </p>
                     </div>
                     <div class="bg-gray-50 rounded-2xl p-4">
                         <p class="text-xs text-[var(--muted)]">Rentang harga</p>
                         <p class="text-xl font-bold text-[var(--brand)]">
-                            Rp {{ number_format($product['price_min']) }} - Rp {{ number_format($product['price_max']) }}
-                            / {{ $product['unit'] }}
+                            Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}
+                            / {{ $product->unit }}
                         </p>
                         <p class="text-xs text-[var(--muted)] mt-2">
-                            MOQ: {{ $product['moq'] }} {{ $product['unit'] }} - Stok: {{ $product['stock'] }} {{ $product['unit'] }}
+                            MOQ: {{ $product->moq }} {{ $product->unit }} - Stok: {{ $product->stock }} {{ $product->unit }}
                         </p>
                     </div>
                     <div class="grid grid-cols-2 gap-3 pt-2">
-                        <a href="{{ route('produk.detail', $id) }}"
+                        <a href="{{ route('produk.detail', $product) }}"
                            class="inline-flex items-center justify-center px-3 py-2 text-sm action-btn btn-detail">
                             Detail
                         </a>
-                        <a href="{{ route('produk.negosiasi', $id) }}"
+                        <a href="{{ route('produk.negosiasi', $product) }}"
                            class="inline-flex items-center justify-center px-3 py-2 text-sm action-btn btn-nego">
                             Negosiasi
                         </a>
-                        <a href="{{ route('checkout', $id) }}"
+                        <a href="{{ route('checkout', $product) }}"
                            class="inline-flex items-center justify-center px-3 py-2 text-sm action-btn btn-checkout"
                            data-requires-auth="true">
                             Checkout
                         </a>
                         <button type="button"
                                 class="inline-flex items-center justify-center px-3 py-2 text-sm action-btn btn-cart add-to-cart"
-                                data-id="{{ $id }}"
-                                data-name="{{ $product['name'] }}"
-                                data-price="{{ $product['price_min'] }}"
-                                data-unit="{{ $product['unit'] }}"
-                                data-image="{{ $product['image'] }}">
+                                data-id="{{ $product->id }}"
+                                data-name="{{ $product->name }}"
+                                data-price="{{ $product->price_min }}"
+                                data-unit="{{ $product->unit }}"
+                                data-image="{{ $product->image }}">
                             Keranjang
                         </button>
                     </div>
@@ -300,6 +310,10 @@
             (c) 2026 NEXTCHAIN - PKM-PI UMM 2026
         </div>
     </footer>
+
+    <div id="toast" class="fixed top-6 right-6 z-50 max-w-xs rounded-2xl bg-white px-4 py-3 text-sm text-[var(--ink)] shadow-xl border border-slate-200 opacity-0 -translate-y-3 pointer-events-none transition-all duration-300">
+        <div id="toastText"></div>
+    </div>
 
     <script>
         const menuBtn = document.getElementById('menuBtn');
@@ -435,6 +449,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

@@ -7,6 +7,7 @@ use App\Http\Requests\CartItemStoreRequest;
 use App\Http\Requests\CartItemUpdateRequest;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,7 @@ class CartController extends Controller
     {
         $cartItems = [];
         $cartCount = 0;
+        $orderHistory = collect();
 
         if (Auth::check()) {
             $cart = $this->getOrCreateCart(Auth::user()->id);
@@ -44,9 +46,15 @@ class CartController extends Controller
                 ];
             })->values();
             $cartCount = $items->sum('qty');
+            $orderHistory = Order::query()
+                ->with('items.product')
+                ->where('user_id', Auth::id())
+                ->latest('id')
+                ->take(5)
+                ->get();
         }
 
-        return view('cart', compact('cartItems', 'cartCount'));
+        return view('cart', compact('cartItems', 'cartCount', 'orderHistory'));
     }
 
     public function store(CartItemStoreRequest $request): JsonResponse

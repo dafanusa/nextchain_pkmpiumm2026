@@ -42,10 +42,6 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-right flex flex-wrap justify-end gap-2">
-                            <a href="{{ route('admin.offers.edit', $offer) }}"
-                               class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
-                                Edit
-                            </a>
                             @if ($offer->status === 'pending')
                                 <form action="{{ route('admin.offers.approve', $offer) }}" method="post" class="inline">
                                     @csrf
@@ -64,6 +60,10 @@
                                     </button>
                                 </form>
                             @endif
+                            <a href="{{ route('admin.offers.edit', $offer) }}"
+                               class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                Edit
+                            </a>
                             <form action="{{ route('admin.offers.destroy', $offer) }}" method="post" class="inline">
                                 @csrf
                                 @method('delete')

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ $product['name'] }} - Detail NEXTCHAIN</title>
+    <title>{{ $product->name }} - Detail NEXTCHAIN</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -118,6 +118,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -159,6 +164,11 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
+                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Poin
+                    <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                </span>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -179,17 +189,17 @@
 
         <div class="mt-6 grid lg:grid-cols-2 gap-10 items-start">
             <div class="bg-white rounded-3xl p-4 shadow-lg">
-                <img src="{{ asset('assets/' . $product['images'][0]) }}"
+                <img src="{{ $images[0] ?? $product->image_url }}"
                      id="mainImage"
-                     alt="{{ $product['name'] }}"
+                     alt="{{ $product->name }}"
                      class="w-full h-80 object-cover rounded-2xl">
 
-                @if(!empty($product['images']))
+                @if (!empty($images))
                 <div class="grid grid-cols-4 gap-3 mt-4">
-                    @foreach ($product['images'] as $img)
-                        <img src="{{ asset('assets/' . $img) }}"
-                             alt="Thumbnail {{ $product['name'] }}"
-                             onclick="document.getElementById('mainImage').src='{{ asset('assets/' . $img) }}'"
+                    @foreach ($images as $img)
+                        <img src="{{ $img }}"
+                             alt="Thumbnail {{ $product->name }}"
+                             onclick="document.getElementById('mainImage').src='{{ $img }}'"
                              class="h-20 w-full object-cover rounded-xl cursor-pointer border border-transparent hover:border-[var(--brand)] transition">
                     @endforeach
                 </div>
@@ -198,29 +208,29 @@
 
             <div class="space-y-6">
                 <div>
-                    <h1 class="text-3xl font-bold">{{ $product['name'] }}</h1>
+                    <h1 class="text-3xl font-bold">{{ $product->name }}</h1>
                     <p class="text-[var(--muted)] mt-2">
-                        Mitra: {{ $product['supplier'] }} - Grade {{ $product['grade'] }}
+                        Mitra: {{ $product->supplier }} - Grade {{ $product->grade ?? '-' }}
                     </p>
                 </div>
 
                 <div class="bg-white rounded-3xl p-6 shadow-lg">
                     <p class="text-xs text-[var(--muted)]">Harga real-time</p>
                     <p class="text-3xl font-bold text-[var(--brand)] mt-2">
-                        Rp {{ number_format($product['price_min']) }} - Rp {{ number_format($product['price_max']) }}
-                        / {{ $product['unit'] }}
+                        Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}
+                        / {{ $product->unit }}
                     </p>
                     <div class="grid grid-cols-2 gap-4 mt-4 text-sm text-[var(--muted)]">
                         <div>
                             <p class="text-xs uppercase tracking-wide">MOQ</p>
                             <p class="text-base font-semibold text-[var(--ink)]">
-                                {{ $product['moq'] }} {{ $product['unit'] }}
+                                {{ $product->moq }} {{ $product->unit }}
                             </p>
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-wide">Stok siap</p>
                             <p class="text-base font-semibold text-[var(--ink)]">
-                                {{ $product['stock'] }} {{ $product['unit'] }}
+                                {{ $product->stock }} {{ $product->unit }}
                             </p>
                         </div>
                     </div>
@@ -229,7 +239,7 @@
                 <div class="bg-white rounded-3xl p-6 shadow-lg">
                     <h2 class="text-lg font-semibold">Deskripsi Produk</h2>
                     <p class="text-[var(--muted)] mt-2 leading-relaxed">
-                        {{ $product['description'] ?? 'Deskripsi produk belum tersedia.' }}
+                        {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
                     </p>
                     <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm text-[var(--muted)]">
                         <div class="bg-gray-50 rounded-2xl p-4">
@@ -248,11 +258,11 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                    <a href="{{ route('produk.negosiasi', request()->route('id')) }}"
+                    <a href="{{ route('produk.negosiasi', $product) }}"
                        class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-nego">
                         Mulai Negosiasi
                     </a>
-                    <a href="{{ route('checkout', request()->route('id')) }}"
+                    <a href="{{ route('checkout', $product) }}"
                        class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-checkout"
                        data-requires-auth="true">
                         Checkout
@@ -260,11 +270,11 @@
                     <button type="button"
                             class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-cart"
                             id="addToCartBtn"
-                            data-id="{{ request()->route('id') }}"
-                            data-name="{{ $product['name'] }}"
-                            data-price="{{ $product['price_min'] }}"
-                            data-unit="{{ $product['unit'] }}"
-                            data-image="{{ $product['image'] }}">
+                            data-id="{{ $product->id }}"
+                            data-name="{{ $product->name }}"
+                            data-price="{{ $product->price_min }}"
+                            data-unit="{{ $product->unit }}"
+                            data-image="{{ $product->image }}">
                         Keranjang
                     </button>
                     <a href="{{ route('produk') }}"
@@ -443,6 +453,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

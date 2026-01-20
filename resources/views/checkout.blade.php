@@ -116,6 +116,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -175,12 +180,12 @@
         <div class="mt-8 grid lg:grid-cols-[1.2fr_0.8fr] gap-6 items-start">
             <div class="glass-card rounded-3xl p-6 space-y-6">
                 <div class="flex items-center gap-4">
-                    <img src="{{ asset('assets/' . $product['image']) }}"
-                         alt="{{ $product['name'] }}"
+                    <img src="{{ $product->image_url }}"
+                         alt="{{ $product->name }}"
                          class="h-20 w-28 rounded-2xl object-cover">
                     <div>
-                        <h2 class="text-xl font-semibold">{{ $product['name'] }}</h2>
-                        <p class="text-sm text-[var(--muted)]">Mitra: {{ $product['supplier'] }}</p>
+                        <h2 class="text-xl font-semibold">{{ $product->name }}</h2>
+                        <p class="text-sm text-[var(--muted)]">Mitra: {{ $product->supplier }}</p>
                         <p class="text-xs text-[var(--muted)] mt-1">Order ID: {{ $orderId }}</p>
                     </div>
                 </div>
@@ -195,20 +200,20 @@
                     <div class="bg-gray-50 rounded-2xl p-4">
                         <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Harga perkiraan</p>
                         <p class="text-lg font-semibold text-[var(--brand)] mt-1">
-                            Rp {{ number_format($unitPrice) }} / {{ $product['unit'] }}
+                            Rp {{ number_format($unitPrice) }} / {{ $product->unit }}
                         </p>
-                        <p class="text-xs text-[var(--muted)] mt-2">Rentang asli: Rp {{ number_format($product['price_min']) }} - Rp {{ number_format($product['price_max']) }}</p>
+                        <p class="text-xs text-[var(--muted)] mt-2">Rentang asli: Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}</p>
                     </div>
                     <div class="bg-gray-50 rounded-2xl p-4">
                         <p class="text-xs uppercase tracking-wide text-[var(--muted)]">MOQ & stok</p>
                         <p class="text-lg font-semibold text-[var(--ink)] mt-1">
-                            MOQ {{ $product['moq'] }} {{ $product['unit'] }}
+                            MOQ {{ $product->moq }} {{ $product->unit }}
                         </p>
-                        <p class="text-xs text-[var(--muted)] mt-2">Stok {{ $product['stock'] }} {{ $product['unit'] }}</p>
+                        <p class="text-xs text-[var(--muted)] mt-2">Stok {{ $product->stock }} {{ $product->unit }}</p>
                     </div>
                 </div>
 
-                <form action="{{ route('checkout.payment', request()->route('id')) }}" method="get" class="grid gap-4" id="checkoutForm">
+                <form action="{{ route('checkout.payment', $product) }}" method="get" class="grid gap-4" id="checkoutForm">
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Nama Pemesan</label>
@@ -229,13 +234,13 @@
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Jumlah Pesanan</label>
-                            <input type="number" name="qty" min="{{ $product['moq'] }}" value="{{ $qty }}"
+                            <input type="number" name="qty" min="{{ $product->moq }}" value="{{ $qty }}"
                                    class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
-                            <p class="text-xs text-[var(--muted)] mt-1">Min: {{ $product['moq'] }} {{ $product['unit'] }}</p>
+                            <p class="text-xs text-[var(--muted)] mt-1">Min: {{ $product->moq }} {{ $product->unit }}</p>
                         </div>
                         <div>
                             <label class="text-sm font-semibold">Metode Pengiriman</label>
-                            <select name="shipping_method" required
+                            <select name="shipping_method" id="shippingMethod" required
                                     class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <option value="" disabled selected>Pilih metode</option>
                                 <option>Pickup di farm</option>
@@ -244,15 +249,35 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid sm:grid-cols-2 gap-4">
+                    <div id="scheduleFields" class="grid sm:grid-cols-2 gap-4 hidden">
+                        <div class="sm:col-span-2">
+                            <label class="text-sm font-semibold">Jadwal Pengiriman</label>
+                            <select name="delivery_schedule_id" id="deliverySchedule"
+                                    class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+                                <option value="" disabled selected>Pilih jadwal tersedia</option>
+                                @forelse ($schedules ?? [] as $schedule)
+                                    <option value="{{ $schedule->id }}"
+                                            data-destination="{{ $schedule->destination }}"
+                                            data-date="{{ $schedule->delivery_date->format('Y-m-d') }}"
+                                            data-time="{{ $schedule->delivery_time }}">
+                                        {{ $schedule->destination }} - {{ $schedule->delivery_date->format('d M Y') }} ({{ $schedule->delivery_time }})
+                                    </option>
+                                @empty
+                                    <option value="" disabled>Belum ada jadwal tersedia</option>
+                                @endforelse
+                            </select>
+                            <div id="scheduleInfo" class="mt-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-[var(--muted)] hidden"></div>
+                        </div>
+                    </div>
+                    <div id="manualScheduleFields" class="grid sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold">Tanggal Pengiriman</label>
-                            <input type="date" name="shipping_date" required
+                            <input type="date" name="shipping_date" id="shippingDate" required
                                    class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                         </div>
                         <div>
                             <label class="text-sm font-semibold">Jam Pengiriman</label>
-                            <select name="shipping_time" required
+                            <select name="shipping_time" id="shippingTime" required
                                     class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <option value="" disabled selected>Pilih jam</option>
                                 <option>Pagi (08.00 - 11.00)</option>
@@ -271,7 +296,7 @@
                                 class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition">
                             Lanjut ke Pembayaran
                         </button>
-                        <a href="{{ route('produk.detail', request()->route('id')) }}"
+                        <a href="{{ route('produk.detail', $product) }}"
                            class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
                             Kembali
                         </a>
@@ -282,12 +307,12 @@
             <div class="glass-card rounded-3xl p-6 space-y-4 lg:sticky lg:top-28" id="orderSummary">
                 <h2 class="text-lg font-semibold">Ringkasan Pesanan</h2>
                 <div class="flex justify-between text-sm text-[var(--muted)]">
-                    <span>Harga per {{ $product['unit'] }}</span>
+                    <span>Harga per {{ $product->unit }}</span>
                     <span id="summaryUnitPrice">Rp {{ number_format($unitPrice) }}</span>
                 </div>
                 <div class="flex justify-between text-sm text-[var(--muted)]">
                     <span>Jumlah</span>
-                    <span id="summaryQty">{{ $qty }} {{ $product['unit'] }}</span>
+                    <span id="summaryQty">{{ $qty }} {{ $product->unit }}</span>
                 </div>
                 <div class="flex justify-between text-sm text-[var(--muted)]">
                     <span>Subtotal</span>
@@ -376,10 +401,17 @@
         const summaryTotal = document.getElementById('summaryTotal');
         const checkoutForm = document.getElementById('checkoutForm');
         const checkoutSubmit = document.getElementById('checkoutSubmit');
+        const shippingMethod = document.getElementById('shippingMethod');
+        const scheduleFields = document.getElementById('scheduleFields');
+        const manualScheduleFields = document.getElementById('manualScheduleFields');
+        const deliverySchedule = document.getElementById('deliverySchedule');
+        const scheduleInfo = document.getElementById('scheduleInfo');
+        const shippingDate = document.getElementById('shippingDate');
+        const shippingTime = document.getElementById('shippingTime');
 
         const unitPrice = {{ $unitPrice }};
         const shipping = {{ $shipping }};
-        const unit = "{{ $product['unit'] }}";
+        const unit = "{{ $product->unit }}";
 
         function formatPrice(value) {
             return 'Rp ' + Number(value).toLocaleString('id-ID');
@@ -404,14 +436,54 @@
             checkoutSubmit.classList.add('opacity-70', 'cursor-not-allowed');
         }
 
+        function updateScheduleInfo() {
+            if (!deliverySchedule || !scheduleInfo) return;
+            const selected = deliverySchedule.options[deliverySchedule.selectedIndex];
+            const destination = selected?.dataset?.destination;
+            const date = selected?.dataset?.date;
+            const time = selected?.dataset?.time;
+            if (!destination || !date || !time) {
+                scheduleInfo.classList.add('hidden');
+                scheduleInfo.textContent = '';
+                return;
+            }
+            scheduleInfo.classList.remove('hidden');
+            scheduleInfo.textContent = `Tujuan: ${destination} - ${date} - ${time}`;
+        }
+
+        function updateScheduleVisibility() {
+            const isScheduled = shippingMethod?.value === 'Pengiriman terjadwal';
+            scheduleFields?.classList.toggle('hidden', !isScheduled);
+            manualScheduleFields?.classList.toggle('hidden', isScheduled);
+
+            if (deliverySchedule) deliverySchedule.required = isScheduled;
+            if (shippingDate) shippingDate.required = !isScheduled;
+            if (shippingTime) shippingTime.required = !isScheduled;
+
+            if (isScheduled) {
+                updateScheduleInfo();
+            } else if (scheduleInfo) {
+                scheduleInfo.classList.add('hidden');
+                scheduleInfo.textContent = '';
+            }
+        }
+
         qtyInput.addEventListener('input', updateSummary);
         checkoutForm.addEventListener('input', checkValidity);
         checkoutForm.addEventListener('change', checkValidity);
+        if (shippingMethod) {
+            shippingMethod.addEventListener('change', updateScheduleVisibility);
+        }
+        if (deliverySchedule) {
+            deliverySchedule.addEventListener('change', updateScheduleInfo);
+        }
         checkValidity();
         updateSummary();
+        updateScheduleVisibility();
     </script>
 </body>
 </html>
+
 
 
 

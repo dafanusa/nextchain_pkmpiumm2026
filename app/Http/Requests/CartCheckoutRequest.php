@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CartCheckoutRequest extends FormRequest
 {
@@ -21,13 +22,20 @@ class CartCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
+        $scheduledMethod = $this->input('shipping_method') === 'Pengiriman terjadwal';
+
         return [
             'name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:30'],
             'address' => ['required', 'string', 'max:500'],
             'shipping_method' => ['required', 'string', 'max:120'],
-            'shipping_date' => ['required', 'date'],
-            'shipping_time' => ['required', 'string', 'max:40'],
+            'delivery_schedule_id' => [
+                Rule::requiredIf($scheduledMethod),
+                'integer',
+                Rule::exists('delivery_schedules', 'id')->where('is_active', true),
+            ],
+            'shipping_date' => ['nullable', Rule::requiredIf(! $scheduledMethod), 'date'],
+            'shipping_time' => ['nullable', Rule::requiredIf(! $scheduledMethod), 'string', 'max:40'],
             'note' => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -41,6 +49,8 @@ class CartCheckoutRequest extends FormRequest
             'shipping_method.required' => 'Metode pengiriman wajib dipilih.',
             'shipping_date.required' => 'Tanggal pengiriman wajib diisi.',
             'shipping_time.required' => 'Jam pengiriman wajib dipilih.',
+            'delivery_schedule_id.required' => 'Jadwal pengiriman wajib dipilih.',
+            'delivery_schedule_id.exists' => 'Jadwal pengiriman tidak tersedia.',
         ];
     }
 }

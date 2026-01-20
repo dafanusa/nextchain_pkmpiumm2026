@@ -28,6 +28,18 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getImageUrlAttribute(): string
+    {
+        $image = $this->image;
+        if (! $image) {
+            return asset('assets/ternakayam.jpg');
+        }
+
+        return str_starts_with($image, 'products/')
+            ? asset('storage/'.$image)
+            : asset('assets/'.$image);
+    }
+
     public function negotiationOffers(): HasMany
     {
         return $this->hasMany(NegotiationOffer::class);

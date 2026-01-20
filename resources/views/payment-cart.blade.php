@@ -128,6 +128,11 @@
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+                        <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                        Poin
+                        <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -366,8 +371,9 @@
                 subtotal += qty * price;
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-3';
+                const imageSrc = item.image_url || "{{ asset('assets/ternakayam.jpg') }}";
                 row.innerHTML = `
-                    <img src="${item.image_url || '{{ asset('assets') }}/'}${item.image || ''}" alt="${item.name}" class="h-12 w-16 rounded-xl object-cover">
+                    <img src="${imageSrc}" alt="${item.name}" class="h-12 w-16 rounded-xl object-cover">
                     <div class="flex-1">
                         <p class="text-sm font-semibold">${item.name}</p>
                         <p class="text-xs text-[var(--muted)]">${qty} ${item.unit}</p>
@@ -389,6 +395,7 @@
                 <p><span class="font-semibold text-[var(--ink)]">WA:</span> ${buyer.phone || '-'}</p>
                 <p><span class="font-semibold text-[var(--ink)]">Alamat:</span> ${buyer.address || '-'}</p>
                 <p><span class="font-semibold text-[var(--ink)]">Pengiriman:</span> ${buyer.shipping_method || '-'}</p>
+                ${buyer.delivery_destination ? `<p><span class="font-semibold text-[var(--ink)]">Tujuan terjadwal:</span> ${buyer.delivery_destination}</p>` : ''}
                 <p><span class="font-semibold text-[var(--ink)]">Jadwal:</span> ${buyer.shipping_date || '-'} ${buyer.shipping_time || ''}</p>
                 ${buyer.note ? `<p><span class="font-semibold text-[var(--ink)]">Catatan:</span> ${buyer.note}</p>` : ''}
                 <p><span class="font-semibold text-[var(--ink)]">Order ID:</span> ${orderId}</p>
@@ -496,5 +503,6 @@
     </script>
 </body>
 </html>
+
 
 

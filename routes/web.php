@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DeliveryScheduleController;
 use App\Http\Controllers\Admin\NegotiationOfferController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
@@ -12,87 +13,14 @@ use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Web\CartCheckoutController;
 use App\Http\Controllers\Web\CartController as WebCartController;
+use App\Http\Controllers\Web\InvoiceController;
 use App\Http\Controllers\Web\NegotiationController as WebNegotiationController;
 use App\Http\Controllers\Web\TestimonialWebController;
+use App\Models\DeliverySchedule;
 use App\Models\NegotiationOffer;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
-
-/* DATA PRODUK (SIMULASI) */
-$products = [
-    1 => [
-        'name' => 'Telur Ayam Ras Grade A',
-        'image' => 'ternakayam.jpg',
-        'images' => [
-            'ternakayam.jpg',
-            'ternakayam1.jpg',
-            'ternakayam2.jpg',
-            'ternakayam3.jpg',
-        ],
-        'supplier' => 'UD. AdeSaputra Farm',
-        'grade' => 'A',
-        'unit' => 'kg',
-        'price_min' => 26000,
-        'price_max' => 28000,
-        'moq' => 50,
-        'stock' => 1200,
-        'description' => 'Telur ayam ras grade A dengan ukuran seragam, cocok untuk retail dan kebutuhan harian.',
-    ],
-    2 => [
-        'name' => 'Telur Ayam Ras Grade B',
-        'image' => 'ternakayam1.jpg',
-        'images' => [
-            'ternakayam1.jpg',
-            'ternakayam.jpg',
-            'ternakayam2.jpg',
-            'ternakayam3.jpg',
-        ],
-        'supplier' => 'UD. AdeSaputra Farm',
-        'grade' => 'B',
-        'unit' => 'kg',
-        'price_min' => 23000,
-        'price_max' => 25000,
-        'moq' => 50,
-        'stock' => 980,
-        'description' => 'Grade B untuk kebutuhan volume besar dengan harga lebih efisien.',
-    ],
-    3 => [
-        'name' => 'Telur Omega',
-        'image' => 'ternakayam2.jpg',
-        'images' => [
-            'ternakayam2.jpg',
-            'ternakayam3.jpg',
-            'ternakayam.jpg',
-            'ternakayam1.jpg',
-        ],
-        'supplier' => 'UD. AdeSaputra Farm',
-        'grade' => 'Premium',
-        'unit' => 'kg',
-        'price_min' => 30000,
-        'price_max' => 33000,
-        'moq' => 30,
-        'stock' => 620,
-        'description' => 'Telur premium dengan nutrisi tinggi untuk segmen kesehatan dan horeka.',
-    ],
-    4 => [
-        'name' => 'Paket Telur 1 Peti',
-        'image' => 'ternakayam3.jpg',
-        'images' => [
-            'ternakayam3.jpg',
-            'ternakayam2.jpg',
-            'ternakayam1.jpg',
-            'ternakayam.jpg',
-        ],
-        'supplier' => 'UD. AdeSaputra Farm',
-        'grade' => 'Peti',
-        'unit' => 'peti',
-        'price_min' => 900000,
-        'price_max' => 950000,
-        'moq' => 1,
-        'stock' => 140,
-        'description' => 'Paket peti untuk distribusi cepat dan volume besar.',
-    ],
-];
+use Illuminate\Validation\Rule;
 
 /* HOME */
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -108,12 +36,30 @@ Route::post('/testimoni', [TestimonialWebController::class, 'store'])
     ->middleware('auth')
     ->name('testimonials.store');
 
+Route::get('/nota/{token}', [InvoiceController::class, 'public'])->name('invoice.public');
+Route::get('/n/{code}', [InvoiceController::class, 'publicShort'])->name('invoice.short');
+Route::get('/invoice/{order}/preview', [InvoiceController::class, 'preview'])
+    ->middleware('auth')
+    ->name('invoice.preview');
+Route::get('/invoice/{order}/download', [InvoiceController::class, 'download'])
+    ->middleware('auth')
+    ->name('invoice.download');
+Route::post('/invoice/{order}/email', [InvoiceController::class, 'sendEmail'])
+    ->middleware('auth')
+    ->name('invoice.email');
+Route::get('/invoice/{order}/whatsapp', [InvoiceController::class, 'whatsapp'])
+    ->middleware('auth')
+    ->name('invoice.whatsapp');
+
 /* ADMIN */
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::resource('users', UserController::class)->names('admin.users')->except(['show']);
     Route::resource('products', ProductController::class)->names('admin.products')->except(['show']);
     Route::resource('offers', NegotiationOfferController::class)->names('admin.offers')->only(['index', 'edit', 'update', 'destroy']);
+    Route::resource('delivery-schedules', DeliveryScheduleController::class)
+        ->names('admin.delivery-schedules')
+        ->except(['show']);
     Route::patch('offers/{offer}/approve', [NegotiationOfferController::class, 'approve'])->name('admin.offers.approve');
     Route::patch('offers/{offer}/reject', [NegotiationOfferController::class, 'reject'])->name('admin.offers.reject');
     Route::resource('orders', OrderController::class)->names('admin.orders')->only(['index', 'show', 'update']);
@@ -127,37 +73,41 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 // Halaman tentang disatukan di home.
 
 /* PRODUK */
-Route::get('/produk', function () use ($products) {
+Route::get('/produk', function () {
+    $products = Product::query()
+        ->where('is_active', true)
+        ->latest('id')
+        ->get();
+
     return view('product', compact('products'));
 })->name('produk');
 
 /* DETAIL */
-Route::get('/produk/{id}', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
-    $product = $products[$id];
+Route::get('/produk/{product}', function (Product $product) {
+    abort_if(! $product->is_active, 404);
+    $images = [$product->image_url];
 
-    return view('detail', compact('product'));
+    return view('detail', compact('product', 'images'));
 })->name('produk.detail');
 
 /* NEGOSIASI */
-Route::get('/produk/{id}/negosiasi', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
-    $product = $products[$id];
+Route::get('/produk/{product}/negosiasi', function (Product $product) {
+    abort_if(! $product->is_active, 404);
     $offers = \App\Models\NegotiationOffer::with('user')
-        ->where('product_id', $id)
+        ->where('product_id', $product->id)
         ->latest('id')
         ->take(12)
         ->get();
 
     $acceptedOffer = \App\Models\NegotiationOffer::with('user')
-        ->where('product_id', $id)
+        ->where('product_id', $product->id)
         ->where('status', 'accepted')
         ->latest('accepted_at')
         ->first();
 
     $userOffer = auth()->check()
         ? \App\Models\NegotiationOffer::query()
-            ->where('product_id', $id)
+            ->where('product_id', $product->id)
             ->where('user_id', auth()->id())
             ->latest('id')
             ->first()
@@ -177,36 +127,73 @@ Route::post('/produk/{id}/negosiasi/pesan', [WebNegotiationController::class, 's
     ->name('produk.negosiasi.message');
 
 /* CHECKOUT (SIMULASI FLOW) */
-Route::get('/checkout/{id}', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
-    $product = $products[$id];
-    $qty = max($product['moq'], (int) request('qty', $product['moq']));
-    $unitPrice = (int) round(($product['price_min'] + $product['price_max']) / 2);
+Route::get('/checkout/{product}', function (Product $product) {
+    abort_if(! $product->is_active, 404);
+    $qty = max($product->moq, (int) request('qty', $product->moq));
+    $unitPrice = (int) round(($product->price_min + $product->price_max) / 2);
     $subtotal = $unitPrice * $qty;
     $shipping = 25000;
     $total = $subtotal + $shipping;
-    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $id, 3, '0', STR_PAD_LEFT);
+    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT);
+    $schedules = DeliverySchedule::query()
+        ->where('is_active', true)
+        ->orderBy('delivery_date')
+        ->orderBy('delivery_time')
+        ->get();
 
-    return view('checkout', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId'));
+    return view('checkout', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'schedules'));
 })->middleware('auth')->name('checkout');
 
-Route::get('/checkout/{id}/payment', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
-    $product = $products[$id];
-    $qty = max($product['moq'], (int) request('qty', $product['moq']));
-    $unitPrice = (int) round(($product['price_min'] + $product['price_max']) / 2);
+Route::get('/checkout/{product}/payment', function (Product $product) {
+    abort_if(! $product->is_active, 404);
+    $qty = max($product->moq, (int) request('qty', $product->moq));
+    $unitPrice = (int) round(($product->price_min + $product->price_max) / 2);
     $subtotal = $unitPrice * $qty;
     $shipping = 25000;
     $total = $subtotal + $shipping;
-    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $id, 3, '0', STR_PAD_LEFT);
+    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT);
     $midtransClientKey = env('MIDTRANS_CLIENT_KEY');
+    $shippingMethod = (string) request('shipping_method', '');
+    $deliverySchedule = null;
+    $shippingDate = request('shipping_date', '');
+    $shippingTime = request('shipping_time', '');
+
+    if ($shippingMethod !== '') {
+        $validated = request()->validate([
+            'shipping_method' => ['required', 'string', 'max:120'],
+            'delivery_schedule_id' => [
+                Rule::requiredIf($shippingMethod === 'Pengiriman terjadwal'),
+                'integer',
+                Rule::exists('delivery_schedules', 'id')->where('is_active', true),
+            ],
+            'shipping_date' => ['nullable', Rule::requiredIf($shippingMethod !== 'Pengiriman terjadwal'), 'date'],
+            'shipping_time' => ['nullable', Rule::requiredIf($shippingMethod !== 'Pengiriman terjadwal'), 'string', 'max:40'],
+        ]);
+
+        $shippingDate = $validated['shipping_date'] ?? '';
+        $shippingTime = $validated['shipping_time'] ?? '';
+
+        if ($shippingMethod === 'Pengiriman terjadwal') {
+            $deliverySchedule = DeliverySchedule::query()
+                ->whereKey($validated['delivery_schedule_id'])
+                ->where('is_active', true)
+                ->first();
+
+            if ($deliverySchedule) {
+                $shippingDate = $deliverySchedule->delivery_date->format('Y-m-d');
+                $shippingTime = $deliverySchedule->delivery_time;
+            }
+        }
+    }
+
     $buyer = [
         'name' => request('name', ''),
         'phone' => request('phone', ''),
         'address' => request('address', ''),
-        'shipping_method' => request('shipping_method', ''),
-        'shipping_date' => request('shipping_date', ''),
-        'shipping_time' => request('shipping_time', ''),
+        'shipping_method' => $shippingMethod,
+        'shipping_date' => $shippingDate,
+        'shipping_time' => $shippingTime,
+        'delivery_destination' => $deliverySchedule?->destination,
         'note' => request('note', ''),
     ];
 
@@ -224,16 +211,17 @@ Route::get('/checkout/{id}/payment', function ($id) use ($products) {
                 'buyer_phone' => $buyer['phone'] ?: '-',
                 'buyer_address' => $buyer['address'] ?: '-',
                 'shipping_method' => $buyer['shipping_method'] ?: null,
+                'delivery_schedule_id' => $deliverySchedule?->id,
                 'shipping_date' => $buyer['shipping_date'] ?: null,
                 'shipping_time' => $buyer['shipping_time'] ?: null,
                 'note' => $buyer['note'] ?: null,
             ]
         );
 
-        if (! $order->items()->where('product_id', $id)->exists()) {
+        if (! $order->items()->where('product_id', $product->id)->exists()) {
             $order->items()->create([
-                'product_id' => $id,
-                'unit' => $product['unit'],
+                'product_id' => $product->id,
+                'unit' => $product->unit,
                 'price' => $unitPrice,
                 'qty' => $qty,
                 'line_total' => $subtotal,
@@ -244,16 +232,15 @@ Route::get('/checkout/{id}/payment', function ($id) use ($products) {
     return view('payment', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'midtransClientKey', 'buyer'));
 })->middleware('auth')->name('checkout.payment');
 
-Route::get('/checkout/{id}/midtrans-token', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
+Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
+    abort_if(! $product->is_active, 404);
 
-    $product = $products[$id];
-    $qty = max($product['moq'], (int) request('qty', $product['moq']));
-    $unitPrice = (int) round(($product['price_min'] + $product['price_max']) / 2);
+    $qty = max($product->moq, (int) request('qty', $product->moq));
+    $unitPrice = (int) round(($product->price_min + $product->price_max) / 2);
     $subtotal = $unitPrice * $qty;
     $shipping = 25000;
     $total = $subtotal + $shipping;
-    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $id, 3, '0', STR_PAD_LEFT).'-'.substr(uniqid(), -5);
+    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT).'-'.substr(uniqid(), -5);
 
     $payload = [
         'transaction_details' => [
@@ -262,10 +249,10 @@ Route::get('/checkout/{id}/midtrans-token', function ($id) use ($products) {
         ],
         'item_details' => [
             [
-                'id' => (string) $id,
+                'id' => (string) $product->id,
                 'price' => $unitPrice,
                 'quantity' => $qty,
-                'name' => $product['name'],
+                'name' => $product->name,
             ],
             [
                 'id' => 'shipping',
@@ -318,12 +305,26 @@ Route::get('/checkout/{id}/midtrans-token', function ($id) use ($products) {
     return response()->json(['token' => $data['token']]);
 })->middleware('auth')->name('checkout.midtrans');
 
-Route::get('/checkout/{id}/success', function ($id) use ($products) {
-    abort_if(! isset($products[$id]), 404);
-    $product = $products[$id];
-    $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $id, 3, '0', STR_PAD_LEFT);
+Route::get('/checkout/{product}/success', function (Product $product) {
+    abort_if(! $product->is_active, 404);
+    $orderId = request('orderId', 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT));
+    $order = \App\Models\Order::query()
+        ->where('order_number', $orderId)
+        ->where('user_id', auth()->id())
+        ->with(['items.product', 'deliverySchedule', 'payments'])
+        ->first();
 
-    return view('success', compact('product', 'orderId'));
+    if ($order) {
+        $order->ensureInvoiceData();
+        $order->update(['payment_status' => 'paid']);
+        \App\Jobs\SendInvoiceJob::dispatch($order->id);
+    }
+
+    return view('success', [
+        'product' => $product,
+        'orderId' => $orderId,
+        'order' => $order,
+    ]);
 })->middleware('auth')->name('checkout.success');
 
 /* KERANJANG */
@@ -347,8 +348,22 @@ Route::get('/checkout-cart/midtrans-token', [CartCheckoutController::class, 'mid
 
 Route::get('/checkout-cart/success', function () {
     $orderId = request('orderId', 'NC-CART-'.date('ymd').'-'.substr(uniqid(), -5));
+    $order = \App\Models\Order::query()
+        ->where('order_number', $orderId)
+        ->where('user_id', auth()->id())
+        ->with(['items.product', 'deliverySchedule', 'payments'])
+        ->first();
 
-    return view('success-cart', compact('orderId'));
+    if ($order) {
+        $order->ensureInvoiceData();
+        $order->update(['payment_status' => 'paid']);
+        \App\Jobs\SendInvoiceJob::dispatch($order->id);
+    }
+
+    return view('success-cart', [
+        'orderId' => $orderId,
+        'order' => $order,
+    ]);
 })->middleware('auth')->name('checkout.cart.success');
 
 /* DAFTAR NEGOSIASI (SEMUA PRODUK) */

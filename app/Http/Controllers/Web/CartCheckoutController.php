@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CartCheckoutRequest;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\DeliverySchedule;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Contracts\View\View;
@@ -25,8 +26,13 @@ class CartCheckoutController extends Controller
 
         $items = $cart->items()->with('product')->get();
         $cartItems = $items->map(fn ($item) => $this->mapCartItem($item))->values();
+        $schedules = DeliverySchedule::query()
+            ->where('is_active', true)
+            ->orderBy('delivery_date')
+            ->orderBy('delivery_time')
+            ->get();
 
-        return view('checkout-cart', compact('cartItems'));
+        return view('checkout-cart', compact('cartItems', 'schedules'));
     }
 
     public function storePayment(CartCheckoutRequest $request): RedirectResponse
@@ -47,6 +53,22 @@ class CartCheckoutController extends Controller
         $shipping = 25000;
         $total = $subtotal + $shipping;
         $orderNumber = 'NC-CART-'.date('ymd').'-'.Str::upper(Str::random(5));
+        $shippingMethod = $request->input('shipping_method');
+        $deliverySchedule = null;
+        $shippingDate = $request->input('shipping_date');
+        $shippingTime = $request->input('shipping_time');
+
+        if ($shippingMethod === 'Pengiriman terjadwal') {
+            $deliverySchedule = DeliverySchedule::query()
+                ->whereKey($request->input('delivery_schedule_id'))
+                ->where('is_active', true)
+                ->first();
+
+            if ($deliverySchedule) {
+                $shippingDate = $deliverySchedule->delivery_date;
+                $shippingTime = $deliverySchedule->delivery_time;
+            }
+        }
 
         $order = Order::create([
             'user_id' => $request->user()->id,
@@ -59,9 +81,10 @@ class CartCheckoutController extends Controller
             'buyer_name' => $request->input('name'),
             'buyer_phone' => $request->input('phone'),
             'buyer_address' => $request->input('address'),
-            'shipping_method' => $request->input('shipping_method'),
-            'shipping_date' => $request->input('shipping_date'),
-            'shipping_time' => $request->input('shipping_time'),
+            'shipping_method' => $shippingMethod,
+            'delivery_schedule_id' => $deliverySchedule?->id,
+            'shipping_date' => $shippingDate,
+            'shipping_time' => $shippingTime,
             'note' => $request->input('note'),
         ]);
 
@@ -74,6 +97,8 @@ class CartCheckoutController extends Controller
                 'line_total' => $item->qty * $item->price,
             ]);
         }
+
+        $selectedItems->each->delete();
 
         return redirect()->route('checkout.cart.payment', ['order' => $order->order_number]);
     }
@@ -88,7 +113,7 @@ class CartCheckoutController extends Controller
         $order = Order::query()
             ->where('order_number', $orderNumber)
             ->where('user_id', $request->user()->id)
-            ->with('items.product')
+            ->with(['items.product', 'deliverySchedule'])
             ->firstOrFail();
 
         $orderItems = $order->items->map(fn (OrderItem $item) => $this->mapOrderItem($item))->values();
@@ -104,6 +129,7 @@ class CartCheckoutController extends Controller
                 'shipping_method' => $order->shipping_method,
                 'shipping_date' => optional($order->shipping_date)->format('Y-m-d'),
                 'shipping_time' => $order->shipping_time,
+                'delivery_destination' => $order->deliverySchedule?->destination,
                 'note' => $order->note,
             ],
             'midtransClientKey' => $midtransClientKey,
