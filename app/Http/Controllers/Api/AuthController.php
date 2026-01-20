@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rules\Password;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -29,48 +31,48 @@ class AuthController extends Controller
             'role' => User::ROLE_USER,
         ]);
 
-        $token = auth('api')->login($user);
+        $token = JWTAuth::login($user);
 
         return $this->respondWithToken($token, $user);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        if (!$token = auth('api')->attempt($credentials)) {
+        if (! $token = JWTAuth::attempt($credentials)) {
             return response()->json(['message' => 'Email atau password salah.'], 401);
         }
 
-        return $this->respondWithToken($token, auth('api')->user());
+        return $this->respondWithToken($token, JWTAuth::user());
     }
 
-    public function me()
+    public function me(): JsonResponse
     {
-        return response()->json(auth('api')->user());
+        return response()->json(JWTAuth::user());
     }
 
-    public function refresh()
+    public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth('api')->refresh(), auth('api')->user());
+        return $this->respondWithToken(JWTAuth::refresh(), JWTAuth::user());
     }
 
-    public function logout()
+    public function logout(): JsonResponse
     {
-        auth('api')->logout();
+        JWTAuth::logout();
 
         return response()->json(['message' => 'Logout berhasil.']);
     }
 
-    private function respondWithToken(string $token, ?User $user)
+    private function respondWithToken(string $token, ?User $user): JsonResponse
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'user' => $user,
         ]);
     }
