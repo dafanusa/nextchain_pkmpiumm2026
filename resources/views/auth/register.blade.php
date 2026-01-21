@@ -46,7 +46,7 @@
                     </p>
                 </div>
                 <div class="flex items-center justify-between text-sm text-white/70">
-                    <span>UMKM UD. AdeSaputra Farm</span>
+                    <span>UMKM UD. Ade Saputra Farm</span>
                     <a href="{{ route('home') }}" class="text-white hover:text-white/90 font-semibold">Kembali ke Home</a>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                         <input type="password" name="password" required
                                class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                         <p class="text-xs text-[var(--muted)] mt-2">
-                            Minimal 12 karakter, kombinasi huruf besar, kecil, angka, dan simbol.
+                            Minimal 6 karakter, kombinasi huruf besar, kecil, angka, dan simbol.
                         </p>
                     </div>
                     <div>

@@ -142,7 +142,7 @@
                 <p class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Selesai</p>
                 <h1 class="text-4xl font-bold mt-2">Pembayaran Berhasil</h1>
                 <p class="text-[var(--muted)] mt-2 max-w-2xl">
-                    Terima kasih! Pesanan keranjang kamu sedang diproses oleh tim UD. AdeSaputra Farm.
+                    Terima kasih! Pesanan keranjang kamu sedang diproses oleh tim UD. Ade Saputra Farm.
                 </p>
             </div>
             <div class="stepper w-full max-w-md">
@@ -169,26 +169,26 @@
                         Kembali ke Produk
                     </a>
                     <a href="{{ route('negosiasi.list') }}"
-                       class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
+                       class="px-6 py-3 rounded-full bg-white border border-slate-200 font-semibold text-[var(--brand)] hover:border-[var(--brand)] hover:text-[var(--brand-dark)] transition">
                         Lihat Negosiasi
                     </a>
                 </div>
             </div>
 
             @if ($order)
-                <div class="mt-6 flex flex-wrap gap-3">
+                <div class="mt-6 grid grid-cols-3 gap-3">
                     <a href="{{ route('invoice.download', $order) }}"
-                       class="px-5 py-2.5 rounded-full border border-slate-200 text-sm font-semibold hover:border-[var(--brand)] transition">
+                       class="w-full px-3 py-2.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition text-center">
                         Cetak Nota
                     </a>
                     <a href="{{ route('invoice.whatsapp', $order) }}"
-                       class="px-5 py-2.5 rounded-full border border-emerald-200 text-sm font-semibold text-emerald-700 hover:border-emerald-300 transition">
+                       class="w-full px-3 py-2.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700 hover:border-emerald-300 transition text-center">
                         Kirim WA
                     </a>
                     <form method="post" action="{{ route('invoice.email', $order) }}">
                         @csrf
                         <button type="submit"
-                                class="px-5 py-2.5 rounded-full border border-blue-200 text-sm font-semibold text-blue-700 hover:border-blue-300 transition">
+                                class="w-full px-3 py-2.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700 hover:border-blue-300 transition">
                             Kirim Email
                         </button>
                     </form>
@@ -217,22 +217,24 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. AdeSaputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Menu</p>
-                <div class="flex flex-col gap-2">
-                    <a href="{{ route('home') }}" class="hover:text-white">Home</a>
-                    <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
-                    <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
-                    <a href="{{ route('home') }}#contact" class="hover:text-white">Contact</a>
-                </div>
+                <p class="text-base font-semibold text-white">Kontak</p>
+                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
+                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Kontak</p>
-                <p>Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
+                <div class="grid gap-1 text-xs text-white/80">
+                    <span>Rinaldy Achmad Roberth Fathoni S.AB., M.M</span>
+                    <span>Wahyu Firmansyah</span>
+                    <span>Azhubah Rizki Amalia</span>
+                    <span>Aisyah Putri Permata Sari</span>
+                    <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
+                    <span>Ayesha Fahrelia Ningrum</span>
+                </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -243,7 +245,7 @@
     @if ($order)
         @php
             $publicUrl = route('invoice.short', $order->invoice_short_code);
-            $waMessage = "Ini nota pembelian {$order->invoice_uid} dari UD. AdeSaputra Farm. Silakan unduh di {$publicUrl}";
+            $waMessage = "Ini nota pembelian {$order->invoice_uid} dari UD. Ade Saputra Farm. Silakan unduh di {$publicUrl}";
             $waUrl = 'https://wa.me/?text=' . rawurlencode($waMessage);
         @endphp
         <script>

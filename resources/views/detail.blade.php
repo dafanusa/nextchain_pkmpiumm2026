@@ -291,22 +291,24 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. AdeSaputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Menu</p>
-                <div class="flex flex-col gap-2">
-                    <a href="{{ route('home') }}" class="hover:text-white">Home</a>
-                    <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
-                    <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
-                    <a href="{{ route('home') }}#contact" class="hover:text-white">Contact</a>
-                </div>
+                <p class="text-base font-semibold text-white">Kontak</p>
+                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
+                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Kontak</p>
-                <p>Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
+                <div class="grid gap-1 text-xs text-white/80">
+                    <span>Rinaldy Achmad Roberth Fathoni S.AB., M.M</span>
+                    <span>Wahyu Firmansyah</span>
+                    <span>Azhubah Rizki Amalia</span>
+                    <span>Aisyah Putri Permata Sari</span>
+                    <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
+                    <span>Ayesha Fahrelia Ningrum</span>
+                </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">

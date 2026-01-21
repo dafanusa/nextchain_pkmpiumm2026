@@ -231,19 +231,19 @@
                                             <span class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">{{ $order->payment_status }}</span>
                                         </div>
                                         @if ($order->payment_status === 'paid')
-                                            <div class="flex flex-wrap justify-end gap-2 pt-3 text-sm font-semibold">
+                                            <div class="grid grid-cols-3 gap-2 pt-3 text-[11px] font-semibold sm:flex sm:flex-wrap sm:justify-end">
                                                 <a href="{{ route('invoice.download', $order) }}"
-                                                   class="inline-flex items-center px-4 py-2 rounded-full bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition">
+                                                   class="inline-flex items-center justify-center px-2.5 py-2 rounded-full bg-amber-600 text-white font-semibold whitespace-nowrap hover:bg-amber-700 transition">
                                                     Cetak Nota
                                                 </a>
                                                 <a href="{{ route('invoice.whatsapp', $order) }}"
-                                                   class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+                                                   class="inline-flex items-center justify-center px-2.5 py-2 rounded-full bg-emerald-600 text-white font-semibold whitespace-nowrap hover:bg-emerald-700 transition">
                                                     Kirim WA
                                                 </a>
                                                 <form method="post" action="{{ route('invoice.email', $order) }}">
                                                     @csrf
                                                     <button type="submit"
-                                                            class="inline-flex items-center px-4 py-2 rounded-full bg-blue-700 text-white text-xs font-semibold hover:bg-blue-800 transition">
+                                                            class="inline-flex w-full items-center justify-center px-2.5 py-2 rounded-full bg-blue-700 text-white font-semibold whitespace-nowrap hover:bg-blue-800 transition">
                                                         Kirim Email
                                                     </button>
                                                 </form>
@@ -278,22 +278,24 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. AdeSaputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Menu</p>
-                <div class="flex flex-col gap-2">
-                    <a href="{{ route('home') }}" class="hover:text-white">Home</a>
-                    <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
-                    <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
-                    <a href="{{ route('home') }}#contact" class="hover:text-white">Contact</a>
-                </div>
+                <p class="text-base font-semibold text-white">Kontak</p>
+                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
+                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Kontak</p>
-                <p>Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
+                <div class="grid gap-1 text-xs text-white/80">
+                    <span>Rinaldy Achmad Roberth Fathoni S.AB., M.M</span>
+                    <span>Wahyu Firmansyah</span>
+                    <span>Azhubah Rizki Amalia</span>
+                    <span>Aisyah Putri Permata Sari</span>
+                    <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
+                    <span>Ayesha Fahrelia Ningrum</span>
+                </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">

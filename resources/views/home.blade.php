@@ -139,6 +139,21 @@
             line-height: 1;
         }
 
+        .dev-card {
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .dev-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba(15, 61, 145, 0.35);
+        }
+
+        .dev-card:active,
+        .dev-card.is-pressed {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 10px 22px rgba(15, 61, 145, 0.28);
+        }
+
         .form-shell {
             background: #0f3d91;
             color: #ffffff;
@@ -263,13 +278,13 @@
         <section class="pt-14 pb-16 grid lg:grid-cols-2 gap-10 items-center" id="home">
             <div class="space-y-6 fade-up">
                 <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full soft-panel text-xs font-semibold text-[var(--brand)]">
-                    UMKM Peternakan Telur - UD. AdeSaputra Farm
+                    UMKM Peternakan Telur - UD. Ade Saputra Farm
                 </span>
                 <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                     Telur segar langsung dari farm, harga lebih terbuka dan mudah dinegosiasikan.
                 </h1>
                 <p class="text-[var(--muted)] text-lg max-w-xl">
-                    Semua produk di website ini milik UD. AdeSaputra Farm. Pembeli bisa melihat katalog,
+                    Semua produk di website ini milik UD. Ade Saputra Farm. Pembeli bisa melihat katalog,
                     melihat penawaran terbuka, dan menyepakati distribusi tanpa perantara.
                 </p>
                 <div class="flex flex-wrap gap-3">
@@ -283,10 +298,6 @@
                     </a>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-6">
-                    <div class="bg-white rounded-2xl p-4 stat-card shadow-sm">
-                        <p class="text-xs text-[var(--muted)]">Stok Harian</p>
-                        <p class="text-xl font-semibold">1.000+ kg</p>
-                    </div>
                     <div class="bg-white rounded-2xl p-4 stat-card shadow-sm">
                         <p class="text-xs text-[var(--muted)]">Harga Update</p>
                         <p class="text-xl font-semibold">Setiap 3 menit</p>
@@ -303,7 +314,7 @@
                 <div class="absolute -bottom-8 -right-6 w-32 h-32 rounded-full bg-[var(--mint)]/20 blur-2xl"></div>
                 <div class="grid gap-4">
                     <div class="bg-white rounded-[2rem] p-4 shadow-2xl float-slow">
-                        <img src="{{ asset('assets/hero.jpg') }}" alt="UD. AdeSaputra Farm" class="rounded-[1.5rem] w-full object-cover">
+                        <img src="{{ asset('assets/hero.jpg') }}" alt="UD. Ade Saputra Farm" class="rounded-[1.5rem] w-full object-cover">
                     </div>
                     <div class="soft-panel rounded-[2rem] p-5 shadow-lg flex items-center justify-between">
                         <div>
@@ -327,7 +338,7 @@
                         <span class="h-2.5 w-2.5 rounded-full bg-[var(--brand)]"></span>
                         Profil UMKM
                     </span>
-                    <h2 class="text-4xl sm:text-5xl font-bold">UD. AdeSaputra Farm</h2>
+                    <h2 class="text-4xl sm:text-5xl font-bold">UD. Ade Saputra Farm</h2>
                     <p class="text-[var(--muted)] text-lg sm:text-xl">
                         UMKM peternakan telur yang fokus pada kualitas produksi dan keterbukaan harga.
                         NEXTCHAIN membantu pembeli berinteraksi langsung dengan peternak tanpa perantara.
@@ -413,7 +424,7 @@
             <div class="max-w-7xl mx-auto px-6 reveal">
                 <h2 class="text-3xl sm:text-4xl font-bold mt-3">Gallery</h2>
                 <p class="text-[var(--muted)] mt-2 text-lg">
-                    Aktivitas harian dan kualitas telur UD. AdeSaputra Farm.
+                    Aktivitas harian dan kualitas telur UD. Ade Saputra Farm.
                 </p>
 
                 <div class="mt-8">
@@ -478,7 +489,7 @@
             <div class="bg-gradient-to-br from-[#0f3d91] to-[#1d5bbf] rounded-3xl p-8 text-white">
                 <h3 class="text-xl font-semibold">Profil Usaha</h3>
                 <p class="text-white/80 mt-3">
-                    UD. AdeSaputra Farm adalah UMKM peternakan telur yang berfokus pada kualitas produksi,
+                    UD. Ade Saputra Farm adalah UMKM peternakan telur yang berfokus pada kualitas produksi,
                     ketepatan distribusi, serta keterbukaan data harga untuk konsumen akhir.
                 </p>
                 <a href="{{ route('produk') }}"
@@ -497,7 +508,7 @@
                             <div class="flex items-center justify-between flex-wrap gap-3">
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Testimoni</p>
-                                    <h2 class="text-3xl sm:text-4xl font-bold mt-2">Suara pembeli tentang UD. AdeSaputra Farm</h2>
+                                    <h2 class="text-3xl sm:text-4xl font-bold mt-2">Suara pembeli tentang UD. Ade Saputra Farm</h2>
                                 </div>
                                 <div class="flex items-center gap-3 text-sm text-[var(--muted)]">
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white/80 border border-slate-200 px-3 py-1.5">
@@ -594,7 +605,7 @@
                 <div class="rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/70 bg-white">
                     <div class="aspect-[16/7] w-full">
                         <iframe
-                            title="Google Maps UD. AdeSaputra Farm"
+                            title="Google Maps UD. Ade Saputra Farm"
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.099997818247!2d112.597003!3d-7.9217!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78827c2b7c2e4b%3A0x9f3c5f3a9b4c3a6a!2sUniversitas%20Muhammadiyah%20Malang!5e0!3m2!1sen!2sid!4v1710000000000"
                             class="h-full w-full"
                             style="border:0;"
@@ -667,6 +678,105 @@
             </div>
         </section>
 
+        <section class="py-16 border-t border-slate-200/80 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="developer">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#0f3d91] via-[#1d4ed8] to-[#0b244f] text-white shadow-[0_40px_80px_rgba(15,61,145,0.35)]">
+                    <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+                    <div class="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-emerald-200/10 blur-3xl"></div>
+                    <div class="relative grid lg:grid-cols-[0.95fr_1.05fr] gap-6 p-8 lg:p-12 items-start">
+                        <div class="space-y-6">
+                            <p class="text-xs uppercase tracking-[0.35em] text-white/70">DEVELOPER NEXTCHAIN</p>
+                            <h2 class="text-3xl sm:text-4xl font-bold">Tim Pengembang NEXTCHAIN</h2>
+                            <p class="text-sm text-white/80 max-w-md leading-relaxed">
+                                Mahasiswa Universitas Muhammadiyah Malang menghadirkan NEXTCHAIN untuk UD. Ade Saputra Farm :
+                                platform digital generasi baru yang menyatukan katalog produk, negosiasi harga, dan alur transaksi
+                                terintegrasi agar pemesanan lebih cepat, transparan, dan memangkas rantai distribusi antara peternak
+                                dengan konsumen.
+                            </p>
+                            <div class="inline-flex items-center gap-3 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-xs">
+                                <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                PKM-PI Universitas Muhammadiyah Malang 2026
+                            </div>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2 max-w-2xl lg:max-w-none">
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/dospempkm.jpg') }}" alt="Nama Developer 1" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Rinaldy Achmad Roberth Fathoni S.AB., M.M</p>
+                                        <p class="text-xs text-white/70">Dosen Pembimbing</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/wahyu.jpg') }}" alt="Nama Developer 2" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Wahyu Firmansyah</p>
+                                        <p class="text-xs text-white/70">Ketua Tim</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/aisyah.jpg') }}" alt="Nama Developer 3" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Aisyah Putri Permata Sari</p>
+                                        <p class="text-xs text-white/70">Anggota Tim</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/amel.jpg') }}" alt="Nama Developer 4" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Azhubah Rizki Amalia</p>
+                                        <p class="text-xs text-white/70">Anggota Tim</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/dafa.jpg') }}" alt="Nama Developer 5" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Rizqullah Atsir Dafa Childyasa Nusa</p>
+                                        <p class="text-xs text-white/70">Anggota Tim</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dev-card w-full rounded-2xl bg-white/10 p-5 backdrop-blur">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative h-14 w-14 shrink-0">
+                                        <div class="absolute inset-0 rounded-full bg-white/15 ring-1 ring-white/20"></div>
+                                        <img src="{{ asset('assets/arum.jpg') }}" alt="Nama Developer 6" class="h-14 w-14 rounded-full object-cover ring-1 ring-white/30" onerror="this.remove();">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold leading-snug">Ayesha Fahrelia Ningrum</p>
+                                        <p class="text-xs text-white/70">Anggota Tim</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
@@ -674,7 +784,7 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. AdeSaputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
@@ -844,6 +954,14 @@
         galleryItems.forEach((item) => {
             item.addEventListener('click', (event) => {
                 event.preventDefault();
+            });
+        });
+
+        const devCards = Array.from(document.querySelectorAll('.dev-card'));
+        devCards.forEach((card) => {
+            card.addEventListener('click', () => {
+                card.classList.add('is-pressed');
+                setTimeout(() => card.classList.remove('is-pressed'), 180);
             });
         });
     </script>

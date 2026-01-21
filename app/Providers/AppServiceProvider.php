@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Cart;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (! app()->runningInConsole() && request()->header('x-forwarded-proto') === 'https') {
+            URL::forceScheme('https');
+        }
+
         RateLimiter::for('login', function ($request) {
             $key = strtolower((string) $request->input('email')).'|'.$request->ip();
 

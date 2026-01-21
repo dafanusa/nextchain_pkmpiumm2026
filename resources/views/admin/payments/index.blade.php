@@ -12,37 +12,39 @@
     @endif
 
     <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-        <table class="w-full text-sm">
-            <thead class="bg-slate-50 text-[var(--muted)]">
-                <tr>
-                    <th class="text-left px-4 py-3">Order</th>
-                    <th class="text-left px-4 py-3">Metode</th>
-                    <th class="text-left px-4 py-3">Status</th>
-                    <th class="text-right px-4 py-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($payments as $payment)
-                    <tr class="border-t border-slate-100">
-                        <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $payment->order?->order_number ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--muted)]">{{ $payment->method ?? '-' }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $payment->status }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.payments.edit', $payment) }}"
-                               class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-[560px] w-full text-sm">
+                <thead class="bg-slate-50 text-[var(--muted)]">
                     <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada pembayaran.</td>
+                        <th class="text-left px-4 py-3">Order</th>
+                        <th class="text-left px-4 py-3">Metode</th>
+                        <th class="text-left px-4 py-3">Status</th>
+                        <th class="text-right px-4 py-3">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($payments as $payment)
+                        <tr class="border-t border-slate-100">
+                            <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $payment->order?->order_number ?? '-' }}</td>
+                            <td class="px-4 py-3 text-[var(--muted)]">{{ $payment->method ?? '-' }}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $payment->status }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="{{ route('admin.payments.edit', $payment) }}"
+                                   class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada pembayaran.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="mt-4">

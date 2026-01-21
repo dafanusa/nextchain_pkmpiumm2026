@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
@@ -73,24 +74,24 @@ class InvoiceController extends Controller
         return view('invoices.order', [
             'order' => $order,
             'publicUrl' => route('invoice.short', $order->invoice_short_code),
-            'businessName' => 'UD. AdeSaputra Farm',
+            'businessName' => 'UD. Ade Saputra Farm',
         ]);
     }
 
-    private function buildPdf(Order $order)
+    private function buildPdf(Order $order): \Barryvdh\DomPDF\PDF
     {
         $order->loadMissing(['items.product', 'deliverySchedule', 'payments', 'user']);
 
         return Pdf::loadView('invoices.order', [
             'order' => $order,
             'publicUrl' => route('invoice.short', $order->invoice_short_code),
-            'businessName' => 'UD. AdeSaputra Farm',
+            'businessName' => 'UD. Ade Saputra Farm',
         ])->setPaper('a5', 'portrait');
     }
 
     private function authorizeOrder(Order $order): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if (! $user) {
             abort(403);
         }
@@ -114,7 +115,7 @@ class InvoiceController extends Controller
     private function getWhatsappUrl(Order $order): string
     {
         $publicUrl = route('invoice.short', $order->invoice_short_code);
-        $message = "Ini nota pembelian {$order->invoice_uid} dari UD. AdeSaputra Farm.\n\nDownload:\n{$publicUrl}";
+        $message = "Ini nota pembelian {$order->invoice_uid} dari UD. Ade Saputra Farm.\n\nDownload:\n{$publicUrl}";
 
         return 'https://wa.me/?text='.rawurlencode($message);
     }

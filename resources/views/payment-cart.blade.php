@@ -288,22 +288,24 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. AdeSaputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Menu</p>
-                <div class="flex flex-col gap-2">
-                    <a href="{{ route('home') }}" class="hover:text-white">Home</a>
-                    <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
-                    <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
-                    <a href="{{ route('home') }}#contact" class="hover:text-white">Contact</a>
-                </div>
+                <p class="text-base font-semibold text-white">Kontak</p>
+                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
+                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
             </div>
             <div class="space-y-3">
-                <p class="text-base font-semibold text-white">Kontak</p>
-                <p>Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
+                <div class="grid gap-1 text-xs text-white/80">
+                    <span>Rinaldy Achmad Roberth Fathoni S.AB., M.M</span>
+                    <span>Wahyu Firmansyah</span>
+                    <span>Azhubah Rizki Amalia</span>
+                    <span>Aisyah Putri Permata Sari</span>
+                    <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
+                    <span>Ayesha Fahrelia Ningrum</span>
+                </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -347,6 +349,7 @@
         const simPending = document.getElementById('simPending');
         const orderId = "{{ $order->order_number }}";
         const midtransKey = "{{ $midtransClientKey }}";
+        const qrisLogoUrl = "{{ asset('assets/qris.png') }}";
         const shippingFee = {{ (int) $order->shipping_fee }};
         const initialCartCount = {{ $cartCount ?? 0 }};
 
@@ -429,10 +432,8 @@
             const instructions = {
                 qris: `
                     <div class="bg-white rounded-2xl p-4 border border-slate-200 text-center">
-                        <div class="mx-auto h-40 w-40 bg-slate-100 border border-dashed border-slate-300 rounded-xl flex items-center justify-center text-xs text-slate-500">
-                            QR CODE
-                        </div>
-                        <p class="mt-3 text-xs text-[var(--muted)]">Scan QR di atas dengan e-wallet favorit.</p>
+                        <img src="${qrisLogoUrl}" alt="QRIS" class="mx-auto h-40 w-40 rounded-xl object-contain border border-slate-200 bg-white">
+                        <p class="mt-3 text-xs text-[var(--muted)]">Scan QRIS di atas dengan aplikasi bank atau e-wallet.</p>
                     </div>
                 `,
                 gopay: '<p>Gunakan GoPay untuk menyelesaikan pembayaran. Simulasi: buka aplikasi dan konfirmasi.</p>',
@@ -442,7 +443,7 @@
                 bni_va: '<p>Virtual Account BNI: <strong>8800 1122 3344</strong></p>',
                 mandiri_va: '<p>Virtual Account Mandiri: <strong>7000 8899 1100</strong></p>',
                 permata_va: '<p>Virtual Account Permata: <strong>8800 5544 3322</strong></p>',
-                bank_transfer: '<p>Transfer Bank: <strong>BRI 1234567890 a.n. UD. AdeSaputra Farm</strong></p>',
+                bank_transfer: '<p>Transfer Bank: <strong>BRI 1234567890 a.n. UD. Ade Saputra Farm</strong></p>',
                 all: '<p>Pilih metode di dropdown, lalu klik Bayar Sekarang.</p>',
             };
 
@@ -459,7 +460,8 @@
         simClose.addEventListener('click', closeSimModal);
 
         simConfirm.addEventListener('click', () => {
-            window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}`;
+            const method = paymentMethod.value;
+            window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}&method=${encodeURIComponent(method)}`;
         });
 
         simPending.addEventListener('click', () => {
@@ -477,7 +479,8 @@
                 payStatus.textContent = '';
                 window.snap.pay(token, {
                     onSuccess: () => {
-                        window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}`;
+                        const method = paymentMethod.value;
+                        window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}&method=${encodeURIComponent(method)}`;
                     },
                     onPending: () => {
                         payStatus.textContent = 'Pembayaran pending. Silakan selesaikan pembayaran.';

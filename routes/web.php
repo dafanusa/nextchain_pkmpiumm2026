@@ -18,6 +18,7 @@ use App\Http\Controllers\Web\NegotiationController as WebNegotiationController;
 use App\Http\Controllers\Web\TestimonialWebController;
 use App\Models\DeliverySchedule;
 use App\Models\NegotiationOffer;
+use App\Models\Payment;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
@@ -308,6 +309,7 @@ Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
 Route::get('/checkout/{product}/success', function (Product $product) {
     abort_if(! $product->is_active, 404);
     $orderId = request('orderId', 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT));
+    $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
         ->where('user_id', auth()->id())
@@ -317,6 +319,15 @@ Route::get('/checkout/{product}/success', function (Product $product) {
     if ($order) {
         $order->ensureInvoiceData();
         $order->update(['payment_status' => 'paid']);
+        if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {
+            Payment::query()->create([
+                'order_id' => $order->id,
+                'provider' => 'midtrans',
+                'method' => $method !== 'all' ? $method : null,
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+        }
         \App\Jobs\SendInvoiceJob::dispatch($order->id);
     }
 
@@ -348,6 +359,7 @@ Route::get('/checkout-cart/midtrans-token', [CartCheckoutController::class, 'mid
 
 Route::get('/checkout-cart/success', function () {
     $orderId = request('orderId', 'NC-CART-'.date('ymd').'-'.substr(uniqid(), -5));
+    $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
         ->where('user_id', auth()->id())
@@ -357,6 +369,15 @@ Route::get('/checkout-cart/success', function () {
     if ($order) {
         $order->ensureInvoiceData();
         $order->update(['payment_status' => 'paid']);
+        if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {
+            Payment::query()->create([
+                'order_id' => $order->id,
+                'provider' => 'midtrans',
+                'method' => $method !== 'all' ? $method : null,
+                'status' => 'paid',
+                'paid_at' => now(),
+            ]);
+        }
         \App\Jobs\SendInvoiceJob::dispatch($order->id);
     }
 

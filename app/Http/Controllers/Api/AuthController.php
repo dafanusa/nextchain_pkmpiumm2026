@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -20,7 +20,7 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'confirmed',
-                Password::min(12)->mixedCase()->numbers()->symbols()->uncompromised(),
+                Password::min(6),
             ],
         ]);
 

@@ -23,48 +23,50 @@
     @endif
 
     <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-        <table class="w-full text-sm">
-            <thead class="bg-slate-50 text-[var(--muted)]">
-                <tr>
-                    <th class="text-left px-4 py-3">Nama</th>
-                    <th class="text-left px-4 py-3">Email</th>
-                    <th class="text-left px-4 py-3">Poin</th>
-                    <th class="text-left px-4 py-3">Role</th>
-                    <th class="text-right px-4 py-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($users as $user)
-                    <tr class="border-t border-slate-100">
-                        <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $user->name }}</td>
-                        <td class="px-4 py-3 text-[var(--muted)]">{{ $user->email }}</td>
-                        <td class="px-4 py-3 text-[var(--muted)]">{{ $user->loyalty_points ?? 0 }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $user->role }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('admin.users.edit', $user) }}"
-                               class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
-                                Edit
-                            </a>
-                            <form action="{{ route('admin.users.destroy', $user) }}" method="post" class="inline">
-                                @csrf
-                                @method('delete')
-                                <button type="submit"
-                                        onclick="return confirm('Hapus user ini?')"
-                                        class="inline-flex px-3 py-1.5 rounded-full border border-red-200 text-xs font-semibold text-red-600 hover:border-red-300 transition">
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
+        <div class="overflow-x-auto">
+            <table class="min-w-[640px] w-full text-sm">
+                <thead class="bg-slate-50 text-[var(--muted)]">
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada user.</td>
+                        <th class="text-left px-4 py-3">Nama</th>
+                        <th class="text-left px-4 py-3">Email</th>
+                        <th class="text-left px-4 py-3">Poin</th>
+                        <th class="text-left px-4 py-3">Role</th>
+                        <th class="text-right px-4 py-3">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($users as $user)
+                        <tr class="border-t border-slate-100">
+                            <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $user->name }}</td>
+                            <td class="px-4 py-3 text-[var(--muted)]">{{ $user->email }}</td>
+                            <td class="px-4 py-3 text-[var(--muted)]">{{ $user->loyalty_points ?? 0 }}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $user->role }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right space-x-2">
+                                <a href="{{ route('admin.users.edit', $user) }}"
+                                   class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                    Edit
+                                </a>
+                                <form action="{{ route('admin.users.destroy', $user) }}" method="post" class="inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit"
+                                            onclick="return confirm('Hapus user ini?')"
+                                            class="inline-flex px-3 py-1.5 rounded-full border border-red-200 text-xs font-semibold text-red-600 hover:border-red-300 transition">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada user.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="mt-4">

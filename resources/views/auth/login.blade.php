@@ -94,7 +94,7 @@
                     </p>
                 </div>
                 <div class="flex items-center justify-between text-sm text-white/70">
-                    <span>UD. AdeSaputra Farm</span>
+                    <span>UD. Ade Saputra Farm</span>
                     <a href="{{ route('home') }}" class="text-white hover:text-white/90 font-semibold">Kembali ke Home</a>
                 </div>
             </div>
