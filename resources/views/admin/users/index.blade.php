@@ -29,8 +29,8 @@
                     <tr>
                         <th class="text-left px-4 py-3">Nama</th>
                         <th class="text-left px-4 py-3">Email</th>
-                        <th class="text-left px-4 py-3">Poin</th>
                         <th class="text-left px-4 py-3">Role</th>
+                        <th class="text-left px-4 py-3">Terdaftar</th>
                         <th class="text-right px-4 py-3">Aksi</th>
                     </tr>
                 </thead>
@@ -39,9 +39,11 @@
                         <tr class="border-t border-slate-100">
                             <td class="px-4 py-3 font-semibold text-[var(--ink)]">{{ $user->name }}</td>
                             <td class="px-4 py-3 text-[var(--muted)]">{{ $user->email }}</td>
-                            <td class="px-4 py-3 text-[var(--muted)]">{{ $user->loyalty_points ?? 0 }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $user->role }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-[var(--muted)]">
+                                {{ $user->created_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
                             </td>
                             <td class="px-4 py-3 text-right space-x-2">
                                 <a href="{{ route('admin.users.edit', $user) }}"
@@ -73,3 +75,6 @@
         {{ $users->links() }}
     </div>
 @endsection
+
+
+

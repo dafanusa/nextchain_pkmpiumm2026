@@ -100,8 +100,9 @@
 <body>
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">
+            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
                 NEXTCHAIN
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -123,14 +124,23 @@
                         <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
-                </a>
+                    </a>
                 @auth
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <a href="{{ route('profile.show') }}"
+                       class="hidden sm:inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/40 text-white hover:bg-white/10 transition"
+                       aria-label="Profil">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="9" r="4" />
+                        </svg>
+                    </a>
                     <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
                         <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-                        Poin
+                    Poin
                         <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
                     </span>
                     <form method="post" action="{{ route('logout') }}">
@@ -153,7 +163,7 @@
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
-    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
         <line x1="4" y1="12" x2="20" y2="12"></line>
         <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -234,15 +244,15 @@
                 <div class="flex justify-between text-sm text-[var(--muted)]">
                     <span>Subtotal</span>
                     <span id="summarySubtotal">Rp 0</span>
-                </div>
+                    </div>
                 <div class="flex justify-between text-sm text-[var(--muted)]">
                     <span>Estimasi ongkir</span>
                     <span id="summaryShipping">Rp 0</span>
-                </div>
+                    </div>
                 <div class="border-t border-dashed border-slate-200 pt-4 flex justify-between text-base font-semibold">
                     <span>Total</span>
                     <span class="text-[var(--brand)]" id="summaryTotal">Rp 0</span>
-                </div>
+                    </div>
                 <div class="flex flex-wrap gap-3 pt-2">
                     <button id="payNowBtn"
                             class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition disabled:opacity-70 disabled:cursor-not-allowed">
@@ -293,8 +303,8 @@
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Kontak</p>
-                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="max-w-xs">Jl. Dusun Rojopasang, Juranglondo, Gerbo, Kec. Purwodadi, Kab. Pasuruan, Prov. Jawa Timur.</p>
+                <a href="https://wa.me/6281230384757" class="hover:text-white">WhatsApp: 0812-3038-4757</a>
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
@@ -305,7 +315,7 @@
                     <span>Aisyah Putri Permata Sari</span>
                     <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
                     <span>Ayesha Fahrelia Ningrum</span>
-                </div>
+                    </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -394,14 +404,22 @@
             payNowBtn.disabled = !hasItems;
 
             const buyerHtml = `
-                <p><span class="font-semibold text-[var(--ink)]">Nama:</span> ${buyer.name || '-'}</p>
-                <p><span class="font-semibold text-[var(--ink)]">WA:</span> ${buyer.phone || '-'}</p>
-                <p><span class="font-semibold text-[var(--ink)]">Alamat:</span> ${buyer.address || '-'}</p>
-                <p><span class="font-semibold text-[var(--ink)]">Pengiriman:</span> ${buyer.shipping_method || '-'}</p>
-                ${buyer.delivery_destination ? `<p><span class="font-semibold text-[var(--ink)]">Tujuan terjadwal:</span> ${buyer.delivery_destination}</p>` : ''}
-                <p><span class="font-semibold text-[var(--ink)]">Jadwal:</span> ${buyer.shipping_date || '-'} ${buyer.shipping_time || ''}</p>
-                ${buyer.note ? `<p><span class="font-semibold text-[var(--ink)]">Catatan:</span> ${buyer.note}</p>` : ''}
-                <p><span class="font-semibold text-[var(--ink)]">Order ID:</span> ${orderId}</p>
+                <p><span class="font-semibold text-[var(--ink)]">Nama:</span>
+                    ${buyer.name || '-'}</p>
+                <p><span class="font-semibold text-[var(--ink)]">WA:</span>
+                    ${buyer.phone || '-'}</p>
+                <p><span class="font-semibold text-[var(--ink)]">Alamat:</span>
+                    ${buyer.address || '-'}</p>
+                <p><span class="font-semibold text-[var(--ink)]">Pengiriman:</span>
+                    ${buyer.shipping_method || '-'}</p>
+                ${buyer.delivery_destination ? `<p><span class="font-semibold text-[var(--ink)]">Tujuan terjadwal:</span>
+                    ${buyer.delivery_destination}</p>` : ''}
+                <p><span class="font-semibold text-[var(--ink)]">Jadwal:</span>
+                    ${buyer.shipping_date || '-'} ${buyer.shipping_time || ''}</p>
+                ${buyer.note ? `<p><span class="font-semibold text-[var(--ink)]">Catatan:</span>
+                    ${buyer.note}</p>` : ''}
+                <p><span class="font-semibold text-[var(--ink)]">Order ID:</span>
+                    ${orderId}</p>
             `;
             buyerSummary.innerHTML = buyerHtml;
         }
@@ -506,6 +524,14 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 

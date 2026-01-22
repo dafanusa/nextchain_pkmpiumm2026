@@ -39,45 +39,115 @@
     <div class="min-h-screen flex overflow-x-hidden">
         <aside class="w-72 hidden lg:flex flex-col bg-[var(--brand)] text-white px-6 py-8 fixed top-0 left-0 h-screen">
             <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">NEXTCHAIN</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xl font-bold">NEXTCHAIN</span>
+                </div>
                 <span class="text-xs uppercase tracking-[0.3em] text-white/70">Admin</span>
             </div>
             <nav class="mt-10 space-y-2 text-sm">
                 <a href="{{ route('admin.dashboard') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.dashboard') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                    Dashboard
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.dashboard') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 13h7V3H3zM14 21h7v-8h-7zM14 3h7v6h-7zM3 21h7v-6H3z"></path>
+                    </svg>
+                    <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.users.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.users.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                    Users
-                </a>
+                <div class="rounded-3xl {{ request()->routeIs('admin.users.*') ? 'bg-white/10 border border-white/10' : '' }}" data-admin-submenu-wrap="users">
+                <button type="button"
+                            class="w-full flex items-center justify-between px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.users.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}"
+                            data-admin-submenu="users">
+                        <span class="flex items-center gap-3">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="9" r="4"></circle>
+                            </svg>
+                            <span>Users</span>
+                        </span>
+                        <svg data-admin-submenu-caret viewBox="0 0 24 24" class="h-4 w-4 transition-transform {{ request()->routeIs('admin.users.*') ? 'rotate-180' : '' }}"
+                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </button>
+                    <div class="pl-4 pr-2 pb-3 space-y-1 {{ request()->routeIs('admin.users.*') ? '' : 'hidden' }}" data-admin-submenu-panel="users">
+                        <a href="{{ route('admin.users.index') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.users.index') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            Users List
+                        </a>
+                        <a href="{{ route('admin.users.detail') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.users.detail') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            Detail User
+                        </a>
+                    </div>
+                </div>
                 <a href="{{ route('admin.products.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.products.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.products.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 7H4l8-4 8 4z"></path>
+                        <path d="M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                        <path d="M12 7v12"></path>
+                    </svg>
                     Products
                 </a>
                 <a href="{{ route('admin.delivery-schedules.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.delivery-schedules.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.delivery-schedules.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <path d="M16 2v4M8 2v4M3 10h18"></path>
+                    </svg>
                     Delivery Schedules
                 </a>
                 <a href="{{ route('admin.offers.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.offers.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.offers.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 5h16a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                    </svg>
                     Negotiations
                 </a>
                 <a href="{{ route('admin.orders.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.orders.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.orders.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 4h12l2 4H4l2-4z"></path>
+                        <path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                    </svg>
                     Orders
                 </a>
                 <a href="{{ route('admin.payments.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.payments.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.payments.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <path d="M3 10h18"></path>
+                        <path d="M7 15h4"></path>
+                    </svg>
                     Payments
                 </a>
-                <a href="{{ route('admin.testimonials.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.testimonials.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                    Testimonials
+                <a href="{{ route('admin.financial-reports.index') }}"
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.financial-reports.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19h16"></path>
+                        <path d="M7 16V8"></path>
+                        <path d="M12 16V5"></path>
+                        <path d="M17 16v-3"></path>
+                    </svg>
+                    Laporan Keuangan
                 </a>
                 <a href="{{ route('admin.carts.index') }}"
-                   class="block px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.carts.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.carts.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="9" cy="20" r="1.5"></circle>
+                        <circle cx="17" cy="20" r="1.5"></circle>
+                        <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
+                    </svg>
                     Carts
+                </a>
+                <a href="{{ route('admin.testimonials.index') }}"
+                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.testimonials.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15a4 4 0 0 1-4 4H7l-4 3v-3a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                        <path d="M8 10h8M8 14h6"></path>
+                    </svg>
+                    Testimonials
                 </a>
             </nav>
             <div class="mt-auto pt-6 space-y-3">
@@ -116,15 +186,97 @@
 
             <div id="adminMobileMenu"
                  class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
-                <a href="{{ route('admin.dashboard') }}" class="admin-menu-link block rounded-lg px-2 py-1">Dashboard</a>
-                <a href="{{ route('admin.users.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Users</a>
-                <a href="{{ route('admin.products.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Products</a>
-                <a href="{{ route('admin.delivery-schedules.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Delivery Schedules</a>
-                <a href="{{ route('admin.offers.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Negotiations</a>
-                <a href="{{ route('admin.orders.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Orders</a>
-                <a href="{{ route('admin.payments.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Payments</a>
-                <a href="{{ route('admin.testimonials.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Testimonials</a>
-                <a href="{{ route('admin.carts.index') }}" class="admin-menu-link block rounded-lg px-2 py-1">Carts</a>
+                <a href="{{ route('admin.dashboard') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 13h7V3H3zM14 21h7v-8h-7zM14 3h7v6h-7zM3 21h7v-6H3z"></path>
+                    </svg>
+                    Dashboard
+                </a>
+                <button type="button"
+                        class="admin-menu-link flex w-full items-center justify-between rounded-lg px-2 py-1"
+                        data-admin-submenu="users-mobile">
+                    <span class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            <circle cx="12" cy="9" r="4"></circle>
+                        </svg>
+                        Users
+                    </span>
+                    <svg data-admin-submenu-caret viewBox="0 0 24 24" class="h-4 w-4 transition-transform {{ request()->routeIs('admin.users.*') ? 'rotate-180' : '' }}"
+                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                </button>
+                <div class="pl-2 space-y-1 {{ request()->routeIs('admin.users.*') ? '' : 'hidden' }}" data-admin-submenu-panel="users-mobile">
+                    <a href="{{ route('admin.users.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs">
+                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        Users List
+                    </a>
+                    <a href="{{ route('admin.users.detail') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs">
+                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        Detail User
+                    </a>
+                </div>
+                <a href="{{ route('admin.products.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 7H4l8-4 8 4z"></path>
+                        <path d="M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                        <path d="M12 7v12"></path>
+                    </svg>
+                    Products
+                </a>
+                <a href="{{ route('admin.delivery-schedules.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <path d="M16 2v4M8 2v4M3 10h18"></path>
+                    </svg>
+                    Delivery Schedules
+                </a>
+                <a href="{{ route('admin.offers.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 5h16a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                    </svg>
+                    Negotiations
+                </a>
+                <a href="{{ route('admin.orders.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 4h12l2 4H4l2-4z"></path>
+                        <path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    Orders
+                </a>
+                <a href="{{ route('admin.payments.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <path d="M3 10h18"></path>
+                        <path d="M7 15h4"></path>
+                    </svg>
+                    Payments
+                </a>
+                <a href="{{ route('admin.financial-reports.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19h16"></path>
+                        <path d="M7 16V8"></path>
+                        <path d="M12 16V5"></path>
+                        <path d="M17 16v-3"></path>
+                    </svg>
+                    Laporan Keuangan
+                </a>
+                <a href="{{ route('admin.carts.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="9" cy="20" r="1.5"></circle>
+                        <circle cx="17" cy="20" r="1.5"></circle>
+                        <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
+                    </svg>
+                    Carts
+                </a>
+                <a href="{{ route('admin.testimonials.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15a4 4 0 0 1-4 4H7l-4 3v-3a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                        <path d="M8 10h8M8 14h6"></path>
+                    </svg>
+                    Testimonials
+                </a>
                 <div class="pt-2 border-t border-white/10">
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
@@ -155,8 +307,34 @@
                 adminMobileMenu.classList.toggle('pointer-events-auto');
             });
         }
+
+        const submenuButtons = document.querySelectorAll('[data-admin-submenu]');
+        submenuButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const key = button.getAttribute('data-admin-submenu');
+                const panel = document.querySelector(`[data-admin-submenu-panel="${key}"]`);
+                const wrapper = document.querySelector(`[data-admin-submenu-wrap="${key}"]`);
+                if (!panel) {
+                    return;
+                }
+
+                panel.classList.toggle('hidden');
+                const icon = button.querySelector('[data-admin-submenu-caret]');
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+                if (wrapper) {
+                    wrapper.classList.toggle('bg-white/10');
+                    wrapper.classList.toggle('border');
+                    wrapper.classList.toggle('border-white/10');
+                }
+            });
+        });
     </script>
 </body>
 </html>
+
+
+
 
 

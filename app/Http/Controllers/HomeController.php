@@ -27,7 +27,7 @@ class HomeController extends Controller
         $heroUnit = $heroProduct?->unit ?? 'kg';
         $heroGrade = $heroProduct?->grade ?? 'A';
 
-        return view('home', compact(
+        return view('pages.home', compact(
             'testimonials',
             'featuredProducts',
             'heroProduct',

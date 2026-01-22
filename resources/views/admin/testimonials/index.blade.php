@@ -19,6 +19,7 @@
                         <th class="text-left px-4 py-3">Nama</th>
                         <th class="text-left px-4 py-3">Rating</th>
                         <th class="text-left px-4 py-3">Status</th>
+                        <th class="text-left px-4 py-3">Waktu</th>
                         <th class="text-right px-4 py-3">Aksi</th>
                     </tr>
                 </thead>
@@ -34,6 +35,9 @@
                                 <div class="mt-2 text-xs text-[var(--muted)]">
                                     {{ $testimonial->message }}
                                 </div>
+                            </td>
+                            <td class="px-4 py-3 text-[var(--muted)]">
+                                {{ $testimonial->created_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
                             </td>
                             <td class="px-4 py-3 text-right flex flex-wrap justify-end gap-2">
                                 @if (! $testimonial->is_approved)
@@ -59,7 +63,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada testimoni.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada testimoni.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -71,3 +75,6 @@
         {{ $testimonials->links() }}
     </div>
 @endsection
+
+
+

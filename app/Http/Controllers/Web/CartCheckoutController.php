@@ -13,6 +13,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class CartCheckoutController extends Controller
@@ -20,7 +22,7 @@ class CartCheckoutController extends Controller
     public function checkout(): View
     {
         $cart = Cart::firstOrCreate(
-            ['user_id' => auth()->id(), 'status' => 'active'],
+            ['user_id' => Auth::id(), 'status' => 'active'],
             ['status' => 'active']
         );
 
@@ -32,7 +34,7 @@ class CartCheckoutController extends Controller
             ->orderBy('delivery_time')
             ->get();
 
-        return view('checkout-cart', compact('cartItems', 'schedules'));
+        return view('checkout.checkout-cart', compact('cartItems', 'schedules'));
     }
 
     public function storePayment(CartCheckoutRequest $request): RedirectResponse
@@ -117,9 +119,9 @@ class CartCheckoutController extends Controller
             ->firstOrFail();
 
         $orderItems = $order->items->map(fn (OrderItem $item) => $this->mapOrderItem($item))->values();
-        $midtransClientKey = env('MIDTRANS_CLIENT_KEY');
+        $midtransClientKey = config('services.midtrans.client_key');
 
-        return view('payment-cart', [
+        return view('payment.payment-cart', [
             'order' => $order,
             'orderItems' => $orderItems,
             'buyer' => [
@@ -193,29 +195,23 @@ class CartCheckoutController extends Controller
             $payload['enabled_payments'] = [$method];
         }
 
-        $serverKey = env('MIDTRANS_SERVER_KEY');
+        $serverKey = config('services.midtrans.server_key');
         if (empty($serverKey)) {
             return response()->json(['error' => 'MIDTRANS_SERVER_KEY belum diatur.'], 500);
         }
 
-        $ch = curl_init('https://app.sandbox.midtrans.com/snap/v1/transactions');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Accept: application/json',
-            'Authorization: Basic '.base64_encode($serverKey.':'),
-        ]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+        ])
+            ->withBasicAuth($serverKey, '')
+            ->asJson()
+            ->post('https://app.sandbox.midtrans.com/snap/v1/transactions', $payload);
 
-        if ($httpCode !== 201 && $httpCode !== 200) {
-            return response()->json(['error' => 'Gagal membuat token Midtrans.', 'detail' => $response], 500);
+        if (! $response->successful()) {
+            return response()->json(['error' => 'Gagal membuat token Midtrans.', 'detail' => $response->body()], 500);
         }
 
-        $data = json_decode($response, true);
+        $data = $response->json();
         if (! isset($data['token'])) {
             return response()->json(['error' => 'Token Midtrans tidak ditemukan.', 'detail' => $data], 500);
         }

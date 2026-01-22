@@ -180,8 +180,9 @@
 <body>
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">
+            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
                 NEXTCHAIN
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
 
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
@@ -205,14 +206,23 @@
                         <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
-                </a>
+                    </a>
                 @auth
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <a href="{{ route('profile.show') }}"
+                       class="hidden sm:inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/40 text-white hover:bg-white/10 transition"
+                       aria-label="Profil">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="9" r="4" />
+                        </svg>
+                    </a>
                     <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
                         <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-                        Poin
+                    Poin
                         <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
                     </span>
                     <form method="post" action="{{ route('logout') }}">
@@ -235,7 +245,7 @@
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
-    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
         <line x1="4" y1="12" x2="20" y2="12"></line>
         <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -255,11 +265,12 @@
             <div class="pt-2 border-t border-white/10 space-y-2">
                 @auth
                     <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
-                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                <a href="{{ route('profile.show') }}" class="block text-sm font-semibold text-white">Profil</a>
+                    <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
                     <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
                     Poin
                     <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
-                </span>
+                    </span>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full text-left text-sm font-semibold text-white">
@@ -275,57 +286,52 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6">
-        <section class="pt-14 pb-16 grid lg:grid-cols-2 gap-10 items-center" id="home">
-            <div class="space-y-6 fade-up">
-                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full soft-panel text-xs font-semibold text-[var(--brand)]">
-                    UMKM Peternakan Telur - UD. Ade Saputra Farm
-                </span>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                    Telur segar langsung dari farm, harga lebih terbuka dan mudah dinegosiasikan.
-                </h1>
-                <p class="text-[var(--muted)] text-lg max-w-xl">
-                    Semua produk di website ini milik UD. Ade Saputra Farm. Pembeli bisa melihat katalog,
-                    melihat penawaran terbuka, dan menyepakati distribusi tanpa perantara.
-                </p>
-                <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('produk') }}"
-                       class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition">
-                        Lihat Produk UMKM
-                    </a>
-                    <a href="{{ route('negosiasi.list') }}"
-                       class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
-                        Daftar Negosiasi
-                    </a>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-6">
-                    <div class="bg-white rounded-2xl p-4 stat-card shadow-sm">
-                        <p class="text-xs text-[var(--muted)]">Harga Update</p>
-                        <p class="text-xl font-semibold">Setiap 3 menit</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-4 stat-card shadow-sm">
-                        <p class="text-xs text-[var(--muted)]">Distribusi</p>
-                        <p class="text-xl font-semibold">Fleksibel</p>
-                    </div>
-                </div>
-            </div>
+                <section class="pt-14 pb-16" id="home">
+            <div class="relative overflow-hidden rounded-[2.5rem] bg-[var(--brand)] text-white shadow-[0_30px_70px_rgba(15,61,145,0.28)]">
+                <img src="{{ asset('assets/home.jpg') }}" alt="UD. Ade Saputra Farm" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#0b214f]/90 via-[#0b214f]/70 to-[#0b214f]/20"></div>
+                <div class="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+                <div class="absolute -bottom-24 -right-20 h-64 w-64 rounded-full bg-emerald-300/10 blur-3xl"></div>
 
-            <div class="relative fade-up">
-                <div class="absolute -top-6 -left-6 w-24 h-24 rounded-2xl bg-[var(--accent)]/20 blur-xl"></div>
-                <div class="absolute -bottom-8 -right-6 w-32 h-32 rounded-full bg-[var(--mint)]/20 blur-2xl"></div>
-                <div class="grid gap-4">
-                    <div class="bg-white rounded-[2rem] p-4 shadow-2xl float-slow">
-                        <img src="{{ asset('assets/hero.jpg') }}" alt="UD. Ade Saputra Farm" class="rounded-[1.5rem] w-full object-cover">
-                    </div>
-                    <div class="soft-panel rounded-[2rem] p-5 shadow-lg flex items-center justify-between">
-                        <div>
-                            <p class="text-xs text-[var(--muted)]">Harga hari ini</p>
-                            <p class="text-2xl font-bold text-[var(--brand)]">
-                                Rp {{ number_format($heroPriceMin) }} - Rp {{ number_format($heroPriceMax) }}/{{ $heroUnit }}
-                            </p>
-                            <p class="text-xs text-[var(--muted)] mt-1">Grade {{ $heroGrade }} - update real-time</p>
+                <div class="relative px-8 py-12 sm:px-12 lg:px-16 lg:py-16">
+                    <div class="max-w-3xl space-y-6">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/90">
+                            UD. Ade Saputra Farm
+                        </span>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl">
+                            Telur segar, Harga jujur, dan Negosiasi mudah.
+                        </h1>
+                        <p class="text-white/80 text-base sm:text-lg max-w-md">
+                            Lihat katalog, ajukan penawaran terbaik,<br>dan atur distribusi dengan cepat.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('produk') }}"
+                               class="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-300 text-slate-900 font-semibold ring-1 ring-white/40 shadow-[0_16px_34px_rgba(245,158,11,0.5)] hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(245,158,11,0.6)] transition">
+                                Jelajahi Produk
+                                <svg viewBox="0 0 24 24" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M5 12h14"/>
+                                    <path d="M13 6l6 6-6 6"/>
+                                </svg>
+                            </a>
+                            <a href="{{ route('negosiasi.list') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/40 bg-[#0b214f]/90 text-white font-semibold shadow-[0_12px_28px_rgba(11,33,79,0.6)] hover:bg-[#0b214f] hover:border-white/60 transition">
+                                Ajukan Penawaran
+                                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 17l10-10"/>
+                                    <path d="M7 7h10v10"/>
+                                </svg>
+                            </a>
                         </div>
-                        <img src="{{ asset('assets/ternakayam.jpg') }}" alt="Telur segar"
-                             class="w-20 h-20 rounded-2xl object-cover border border-white">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 text-sm text-white/80 max-w-md">
+                            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                                <p class="text-[11px] uppercase tracking-wider text-white/60">Harga Update</p>
+                                <p class="mt-1 text-base font-semibold">Setiap 3 menit</p>
+                            </div>
+                            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                                <p class="text-[11px] uppercase tracking-wider text-white/60">Distribusi</p>
+                                <p class="mt-1 text-base font-semibold">Terjadwal & fleksibel</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -336,7 +342,7 @@
                 <div class="space-y-6">
                     <span class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 text-sm font-semibold text-[var(--brand)] shadow-sm border border-slate-200/60">
                         <span class="h-2.5 w-2.5 rounded-full bg-[var(--brand)]"></span>
-                        Profil UMKM
+                    Profil UMKM
                     </span>
                     <h2 class="text-4xl sm:text-5xl font-bold">UD. Ade Saputra Farm</h2>
                     <p class="text-[var(--muted)] text-lg sm:text-xl">
@@ -510,16 +516,21 @@
                                     <p class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Testimoni</p>
                                     <h2 class="text-3xl sm:text-4xl font-bold mt-2">Suara pembeli tentang UD. Ade Saputra Farm</h2>
                                 </div>
+                                @php
+                                    $testimonialRatings = collect($testimonials ?? [])->pluck('rating')->filter()->map(fn ($value) => (int) $value);
+                                    $testimonialCount = $testimonialRatings->count();
+                                    $averageRating = $testimonialCount > 0 ? round($testimonialRatings->avg(), 1) : 0;
+                                @endphp
                                 <div class="flex items-center gap-3 text-sm text-[var(--muted)]">
                                     <span class="inline-flex items-center gap-2 rounded-full bg-white/80 border border-slate-200 px-3 py-1.5">
-                                        <span class="text-base font-semibold text-[var(--brand)]">4.9</span>
-                                        Rata-rata
+                                        <span class="text-base font-semibold text-[var(--brand)]">{{ number_format($averageRating, 1) }}</span>
+                    Rata-rata
                                     </span>
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-white/80 border border-slate-200 px-3 py-1.5">
-                                        <span class="text-base font-semibold text-[var(--brand)]">78%</span>
-                                        Order ulang
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/80 border border-slate-200 px-3 py-1.5">
+                                        <span class="text-base font-semibold text-[var(--brand)]">{{ $testimonialCount }}</span>
+                    Total testimoni
                                     </span>
-                                </div>
+                    </div>
                             </div>
                             <div class="grid md:grid-cols-2 gap-6">
                                 @forelse ($testimonials ?? [] as $t)
@@ -528,9 +539,22 @@
                                         <div>
                                             <p class="text-xs uppercase tracking-widest text-[var(--muted)]">{{ $t->role ?? 'Pembeli' }}</p>
                                             <p class="text-lg font-semibold mt-2 text-[var(--ink)]">{{ $t->name }}</p>
-                                            <p class="text-xs text-[var(--muted)] mt-1">{{ $t->rating }}/5</p>
+                                            @php
+                                                $rating = (int) ($t->rating ?? 0);
+                                            @endphp
+                                            <div class="mt-2 flex items-center gap-1">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <svg viewBox="0 0 20 20"
+                                                         class="h-4 w-4 {{ $i <= $rating ? 'text-amber-400' : 'text-slate-200' }}"
+                                                         fill="currentColor"
+                                                         aria-hidden="true">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.1 3.388a1 1 0 0 0 .95.69h3.565c.969 0 1.371 1.24.588 1.81l-2.884 2.095a1 1 0 0 0-.364 1.118l1.1 3.388c.3.921-.755 1.688-1.54 1.118l-2.884-2.095a1 1 0 0 0-1.175 0l-2.884 2.095c-.784.57-1.838-.197-1.539-1.118l1.1-3.388a1 1 0 0 0-.364-1.118L2.35 8.815c-.783-.57-.38-1.81.588-1.81h3.566a1 1 0 0 0 .95-.69l1.1-3.388Z"/>
+                                                    </svg>
+                                                @endfor
+                                                <span class="text-xs text-[var(--muted)] ml-1">{{ $rating }}/5</span>
+                    </div>
                                         </div>
-                                        <div class="quote-mark text-[var(--brand)]">“</div>
+                                        <div class="quote-mark text-[var(--brand)]" aria-hidden="true">&ldquo;</div>
                                     </div>
                                     <p class="text-sm text-[var(--muted)] mt-3 leading-relaxed">{{ $t->message }}</p>
                                 </div>
@@ -606,7 +630,7 @@
                     <div class="aspect-[16/7] w-full">
                         <iframe
                             title="Google Maps UD. Ade Saputra Farm"
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.099997818247!2d112.597003!3d-7.9217!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78827c2b7c2e4b%3A0x9f3c5f3a9b4c3a6a!2sUniversitas%20Muhammadiyah%20Malang!5e0!3m2!1sen!2sid!4v1710000000000"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4878.781846080625!2d112.7805477!3d-7.849893400000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd62d0050889509%3A0xaa5fd49b6d349a35!2sUD.ADESAputra%20farm!5e1!3m2!1sid!2sid!4v1769071772478!5m2!1sid!2sid"
                             class="h-full w-full"
                             style="border:0;"
                             allowfullscreen=""
@@ -618,30 +642,38 @@
 
                 <div class="mt-10 grid md:grid-cols-2 gap-6">
                     <div class="flex items-center gap-4 border border-slate-200 rounded-2xl p-5 bg-white/80">
-                        <div class="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 font-bold">
-                            📍
+                        <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-[var(--brand)]">
+                            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 21s6-5.25 6-10a6 6 0 1 0-12 0c0 4.75 6 10 6 10Z"/>
+                                <circle cx="12" cy="11" r="2.25"/>
+                            </svg>
                         </div>
                         <div>
                             <p class="text-sm text-[var(--muted)]">Address</p>
                             <p class="font-semibold text-[var(--ink)]">
-                                Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan
+                                Jl. Dusun Rojopasang, Juranglondo, Gerbo, Kec. Purwodadi, Kab. Pasuruan, Prov. Jawa Timur.
                             </p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 border border-slate-200 rounded-2xl p-5 bg-white/80">
-                        <div class="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold">
-                            WA
+                        <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-[var(--brand)]">
+                            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 5h16a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/>
+                            </svg>
                         </div>
                         <div>
                             <p class="text-sm text-[var(--muted)]">WhatsApp</p>
-                            <a href="https://wa.me/6281247889969" class="font-semibold text-[var(--brand)]">
-                                0812-4788-9969
+                            <a href="https://wa.me/6281230384757" class="font-semibold text-[var(--brand)]">
+                                0812-3038-4757                                                                                                                                                       
                             </a>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 border border-slate-200 rounded-2xl p-5 bg-white/80">
-                        <div class="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                            ⏰
+                        <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-[var(--brand)]">
+                            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="8"/>
+                                <path d="M12 8v4l3 2"/>
+                            </svg>
                         </div>
                         <div>
                             <p class="text-sm text-[var(--muted)]">Opening Hours</p>
@@ -649,12 +681,15 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4 border border-slate-200 rounded-2xl p-5 bg-white/80">
-                        <div class="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 font-bold">
-                            ⇢
+                        <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-[var(--brand)]">
+                            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M7 17L17 7"/>
+                                <path d="M7 7h10v10"/>
+                            </svg>
                         </div>
                         <div>
                             <p class="text-sm text-[var(--muted)]">Directions</p>
-                            <a href="https://maps.google.com/?q=Universitas+Muhammadiyah+Malang"
+                            <a href="https://maps.app.goo.gl/ewZdyMyoPFn3VgRk7"
                                target="_blank"
                                class="font-semibold text-[var(--brand)]">
                                 Lihat rute terbaik
@@ -664,12 +699,12 @@
                 </div>
 
                 <div class="mt-8 flex flex-wrap justify-center gap-4">
-                    <a href="https://maps.google.com/?q=Universitas+Muhammadiyah+Malang"
+                    <a href="https://maps.app.goo.gl/ewZdyMyoPFn3VgRk7"
                        target="_blank"
                        class="px-6 py-3 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-dark)] transition">
                         Buka Google Maps
                     </a>
-                    <a href="https://wa.me/6281247889969"
+                    <a href="https://wa.me/6281230384757"
                        class="px-6 py-3 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition">
                         Chat WhatsApp
                     </a>
@@ -695,7 +730,7 @@
                             </p>
                             <div class="inline-flex items-center gap-3 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-xs">
                                 <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                PKM-PI Universitas Muhammadiyah Malang 2026
+                    PKM-PI Universitas Muhammadiyah Malang 2026
                             </div>
                         </div>
                         <div class="grid gap-4 sm:grid-cols-2 max-w-2xl lg:max-w-none">
@@ -798,8 +833,8 @@
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Kontak</p>
-                <p>Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p>Jl. Dusun Rojopasang, Juranglondo, Gerbo, Kec. Purwodadi, Kab. Pasuruan, Prov. Jawa Timur.</p>
+                <a href="https://wa.me/6281230384757" class="hover:text-white">WhatsApp: 0812-3038-4757</a>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -967,6 +1002,15 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 

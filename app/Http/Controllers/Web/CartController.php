@@ -54,7 +54,7 @@ class CartController extends Controller
                 ->get();
         }
 
-        return view('cart', compact('cartItems', 'cartCount', 'orderHistory'));
+        return view('cart.cart', compact('cartItems', 'cartCount', 'orderHistory'));
     }
 
     public function store(CartItemStoreRequest $request): JsonResponse

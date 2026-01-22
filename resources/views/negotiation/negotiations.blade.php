@@ -314,8 +314,9 @@
 <body>
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">
+            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
                 NEXTCHAIN
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -337,14 +338,23 @@
                         <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
-                </a>
+                    </a>
                 @auth
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <a href="{{ route('profile.show') }}"
+                       class="hidden sm:inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/40 text-white hover:bg-white/10 transition"
+                       aria-label="Profil">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="9" r="4" />
+                        </svg>
+                    </a>
                     <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
                         <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-                        Poin
+                    Poin
                         <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
                     </span>
                     <form method="post" action="{{ route('logout') }}">
@@ -367,7 +377,7 @@
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
-    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
         <line x1="4" y1="12" x2="20" y2="12"></line>
         <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -388,12 +398,13 @@
         <div class="pt-2 border-t border-white/10 space-y-2">
             @auth
                 <span class="block text-xs text-white/70">Hai, {{ strtok(auth()->user()->name, ' ') }}</span>
-                <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
+                <a href="{{ route('profile.show') }}" class="block text-sm font-semibold text-white">Profil</a>
+                    <span class="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1 text-[11px] font-semibold">
                     <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
                     Poin
                     <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
-                </span>
-                <form method="post" action="{{ route('logout') }}">
+                    </span>
+                    <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left text-sm font-semibold text-white">
                         Logout
@@ -458,10 +469,14 @@
                         <p class="text-xs text-[var(--muted)]">Jumlah penawar aktif dan total volume tawaran per produk.</p>
                     </div>
                     <div class="chart-legend">
-                        <span><span class="legend-swatch" style="background:#1d4ed8"></span>Jumlah Penawar</span>
-                        <span><span class="legend-swatch" style="background:#10b981"></span>Total Volume</span>
-                        <span><span class="legend-swatch" style="background:#f59e0b"></span>Rata-rata Harga</span>
-                        <span><span class="legend-swatch" style="background:#7c3aed"></span>Rata-rata Volume/User</span>
+                        <span><span class="legend-swatch" style="background:#1d4ed8"></span>
+                    Jumlah Penawar</span>
+                    <span><span class="legend-swatch" style="background:#10b981"></span>
+                    Total Volume</span>
+                    <span><span class="legend-swatch" style="background:#f59e0b"></span>
+                    Rata-rata Harga</span>
+                    <span><span class="legend-swatch" style="background:#7c3aed"></span>
+                    Rata-rata Volume/User</span>
                     </div>
                 </div>
                 <div class="chart-panel mt-4">
@@ -496,10 +511,10 @@
                                 </div>
                                 <div class="bar-meta">
                                     <span>Penawar aktif: {{ $row['count'] }} orang</span>
-                                    <span>Total volume: {{ number_format($row['total_qty']) }} {{ $row['unit'] }}</span>
-                                    <span>Rata-rata: Rp {{ number_format($row['avg_price']) }} / {{ $row['unit'] }}</span>
-                                    <span>Rata-rata volume: {{ number_format($avgVol, 1) }} {{ $row['unit'] }}/user</span>
-                                </div>
+                    <span>Total volume: {{ number_format($row['total_qty']) }} {{ $row['unit'] }}</span>
+                    <span>Rata-rata: Rp {{ number_format($row['avg_price']) }} / {{ $row['unit'] }}</span>
+                    <span>Rata-rata volume: {{ number_format($avgVol, 1) }} {{ $row['unit'] }}/user</span>
+                    </div>
                             </div>
                         @endforeach
                     </div>
@@ -516,7 +531,7 @@
                          class="h-44 w-full rounded-2xl object-cover">
                     <div class="flex items-center justify-between">
                         <span class="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Produk</span>
-                        <span class="text-xs font-semibold text-emerald-600">
+                    <span class="text-xs font-semibold text-emerald-600">
                             {{ isset($offersByProduct[$id]) ? count($offersByProduct[$id]) : 0 }} tawaran aktif
                         </span>
                     </div>
@@ -527,9 +542,9 @@
                         </p>
                         <div class="price-pill" data-min="{{ $product['price_min'] }}" data-max="{{ $product['price_max'] }}" data-unit="{{ $product['unit'] }}">
                             <span class="price-dot"></span>
-                            Harga realtime
+                    Harga realtime
                             <span class="live-price">Rp {{ number_format($product['price_min']) }} / {{ $product['unit'] }}</span>
-                        </div>
+                    </div>
                     </div>
                 </div>
 
@@ -537,7 +552,7 @@
                     @forelse ($offersByProduct[$id] ?? [] as $offer)
                         <div class="relative bg-gray-50 rounded-2xl p-4 border border-gray-100">
                             <span class="absolute left-0 top-4 h-8 w-1 rounded-full bg-[var(--brand)]"></span>
-                            <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between">
                                 <p class="text-sm font-semibold">{{ $offer['user'] }}</p>
                                 <span class="text-xs font-semibold
                                     @if (($offer['status'] ?? '') === 'accepted') text-emerald-600
@@ -546,7 +561,7 @@
                                     @endif">
                                     {{ ucfirst($offer['status'] ?? 'pending') }}
                                 </span>
-                            </div>
+                    </div>
                             <p class="text-base font-semibold text-[var(--ink)] mt-2">
                                 Rp {{ number_format($offer['price']) }} / {{ $product['unit'] }}
                             </p>
@@ -587,8 +602,8 @@
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Kontak</p>
-                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="max-w-xs">Jl. Dusun Rojopasang, Juranglondo, Gerbo, Kec. Purwodadi, Kab. Pasuruan, Prov. Jawa Timur.</p>
+                <a href="https://wa.me/6281230384757" class="hover:text-white">WhatsApp: 0812-3038-4757</a>
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
@@ -599,7 +614,7 @@
                     <span>Aisyah Putri Permata Sari</span>
                     <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
                     <span>Ayesha Fahrelia Ningrum</span>
-                </div>
+                    </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -637,6 +652,15 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 

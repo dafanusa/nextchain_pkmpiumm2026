@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeliveryScheduleController;
+use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\NegotiationOfferController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
@@ -15,11 +16,14 @@ use App\Http\Controllers\Web\CartCheckoutController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\InvoiceController;
 use App\Http\Controllers\Web\NegotiationController as WebNegotiationController;
+use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\TestimonialWebController;
 use App\Models\DeliverySchedule;
 use App\Models\NegotiationOffer;
 use App\Models\Payment;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
@@ -32,6 +36,12 @@ Route::post('/register', [WebAuthController::class, 'register'])->middleware('th
 Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [ProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profil/photo', [ProfileController::class, 'destroyPhoto'])->name('profile.photo.destroy');
+});
 
 Route::post('/testimoni', [TestimonialWebController::class, 'store'])
     ->middleware('auth')
@@ -55,7 +65,8 @@ Route::get('/invoice/{order}/whatsapp', [InvoiceController::class, 'whatsapp'])
 /* ADMIN */
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::resource('users', UserController::class)->names('admin.users')->except(['show']);
+    Route::resource('users', UserController::class)->names('admin.users');
+    Route::get('users-detail', [UserController::class, 'detail'])->name('admin.users.detail');
     Route::resource('products', ProductController::class)->names('admin.products')->except(['show']);
     Route::resource('offers', NegotiationOfferController::class)->names('admin.offers')->only(['index', 'edit', 'update', 'destroy']);
     Route::resource('delivery-schedules', DeliveryScheduleController::class)
@@ -65,6 +76,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('offers/{offer}/reject', [NegotiationOfferController::class, 'reject'])->name('admin.offers.reject');
     Route::resource('orders', OrderController::class)->names('admin.orders')->only(['index', 'show', 'update']);
     Route::resource('payments', PaymentController::class)->names('admin.payments')->only(['index', 'edit', 'update']);
+    Route::get('financial-reports', [FinancialReportController::class, 'index'])->name('admin.financial-reports.index');
+    Route::post('financial-reports', [FinancialReportController::class, 'store'])->name('admin.financial-reports.store');
+    Route::get('financial-reports/{report}/csv', [FinancialReportController::class, 'csv'])->name('admin.financial-reports.csv');
+    Route::get('financial-reports/{report}/download', [FinancialReportController::class, 'download'])->name('admin.financial-reports.download');
+    Route::delete('financial-reports/{report}', [FinancialReportController::class, 'destroy'])->name('admin.financial-reports.destroy');
     Route::resource('testimonials', TestimonialController::class)->names('admin.testimonials')->only(['index', 'edit', 'update', 'destroy']);
     Route::patch('testimonials/{testimonial}/approve', [TestimonialController::class, 'approve'])->name('admin.testimonials.approve');
     Route::resource('carts', CartController::class)->names('admin.carts')->only(['index', 'show', 'destroy']);
@@ -80,7 +96,7 @@ Route::get('/produk', function () {
         ->latest('id')
         ->get();
 
-    return view('product', compact('products'));
+    return view('products.product', compact('products'));
 })->name('produk');
 
 /* DETAIL */
@@ -88,7 +104,7 @@ Route::get('/produk/{product}', function (Product $product) {
     abort_if(! $product->is_active, 404);
     $images = [$product->image_url];
 
-    return view('detail', compact('product', 'images'));
+    return view('products.detail', compact('product', 'images'));
 })->name('produk.detail');
 
 /* NEGOSIASI */
@@ -106,10 +122,10 @@ Route::get('/produk/{product}/negosiasi', function (Product $product) {
         ->latest('accepted_at')
         ->first();
 
-    $userOffer = auth()->check()
+    $userOffer = Auth::check()
         ? \App\Models\NegotiationOffer::query()
             ->where('product_id', $product->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->latest('id')
             ->first()
         : null;
@@ -118,7 +134,7 @@ Route::get('/produk/{product}/negosiasi', function (Product $product) {
         ? $userOffer->messages()->with('user')->oldest('id')->get()
         : collect();
 
-    return view('negotiation', compact('product', 'offers', 'acceptedOffer', 'userOffer', 'messages'));
+    return view('negotiation.negotiation', compact('product', 'offers', 'acceptedOffer', 'userOffer', 'messages'));
 })->name('produk.negosiasi');
 Route::post('/produk/{id}/negosiasi', [WebNegotiationController::class, 'store'])
     ->middleware('auth')
@@ -142,7 +158,7 @@ Route::get('/checkout/{product}', function (Product $product) {
         ->orderBy('delivery_time')
         ->get();
 
-    return view('checkout', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'schedules'));
+    return view('checkout.checkout', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'schedules'));
 })->middleware('auth')->name('checkout');
 
 Route::get('/checkout/{product}/payment', function (Product $product) {
@@ -153,7 +169,7 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
     $shipping = 25000;
     $total = $subtotal + $shipping;
     $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT);
-    $midtransClientKey = env('MIDTRANS_CLIENT_KEY');
+    $midtransClientKey = config('services.midtrans.client_key');
     $shippingMethod = (string) request('shipping_method', '');
     $deliverySchedule = null;
     $shippingDate = request('shipping_date', '');
@@ -198,17 +214,17 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
         'note' => request('note', ''),
     ];
 
-    if (auth()->check()) {
+    if (Auth::check()) {
         $order = \App\Models\Order::firstOrCreate(
             ['order_number' => $orderId],
             [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shipping,
                 'total' => $total,
-                'buyer_name' => $buyer['name'] ?: auth()->user()->name,
+                'buyer_name' => $buyer['name'] ?: Auth::user()->name,
                 'buyer_phone' => $buyer['phone'] ?: '-',
                 'buyer_address' => $buyer['address'] ?: '-',
                 'shipping_method' => $buyer['shipping_method'] ?: null,
@@ -230,7 +246,7 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
         }
     }
 
-    return view('payment', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'midtransClientKey', 'buyer'));
+    return view('payment.payment', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'midtransClientKey', 'buyer'));
 })->middleware('auth')->name('checkout.payment');
 
 Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
@@ -276,29 +292,23 @@ Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
         $payload['enabled_payments'] = [$method];
     }
 
-    $serverKey = env('MIDTRANS_SERVER_KEY');
+    $serverKey = config('services.midtrans.server_key');
     if (empty($serverKey)) {
         return response()->json(['error' => 'MIDTRANS_SERVER_KEY belum diatur.'], 500);
     }
 
-    $ch = curl_init('https://app.sandbox.midtrans.com/snap/v1/transactions');
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Accept: application/json',
-        'Authorization: Basic '.base64_encode($serverKey.':'),
-    ]);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    $response = Http::withHeaders([
+        'Accept' => 'application/json',
+    ])
+        ->withBasicAuth($serverKey, '')
+        ->asJson()
+        ->post('https://app.sandbox.midtrans.com/snap/v1/transactions', $payload);
 
-    if ($httpCode !== 201 && $httpCode !== 200) {
-        return response()->json(['error' => 'Gagal membuat token Midtrans.', 'detail' => $response], 500);
+    if (! $response->successful()) {
+        return response()->json(['error' => 'Gagal membuat token Midtrans.', 'detail' => $response->body()], 500);
     }
 
-    $data = json_decode($response, true);
+    $data = $response->json();
     if (! isset($data['token'])) {
         return response()->json(['error' => 'Token Midtrans tidak ditemukan.', 'detail' => $data], 500);
     }
@@ -312,7 +322,7 @@ Route::get('/checkout/{product}/success', function (Product $product) {
     $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
-        ->where('user_id', auth()->id())
+        ->where('user_id', Auth::id())
         ->with(['items.product', 'deliverySchedule', 'payments'])
         ->first();
 
@@ -331,7 +341,7 @@ Route::get('/checkout/{product}/success', function (Product $product) {
         \App\Jobs\SendInvoiceJob::dispatch($order->id);
     }
 
-    return view('success', [
+    return view('success.success', [
         'product' => $product,
         'orderId' => $orderId,
         'order' => $order,
@@ -362,7 +372,7 @@ Route::get('/checkout-cart/success', function () {
     $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
-        ->where('user_id', auth()->id())
+        ->where('user_id', Auth::id())
         ->with(['items.product', 'deliverySchedule', 'payments'])
         ->first();
 
@@ -381,7 +391,7 @@ Route::get('/checkout-cart/success', function () {
         \App\Jobs\SendInvoiceJob::dispatch($order->id);
     }
 
-    return view('success-cart', [
+    return view('success.success-cart', [
         'orderId' => $orderId,
         'order' => $order,
     ]);
@@ -432,5 +442,5 @@ Route::get('/negosiasi', function () {
             })->values()->all();
         })->all();
 
-    return view('negotiations', compact('products', 'offersByProduct'));
+    return view('negotiation.negotiations', compact('products', 'offersByProduct'));
 })->name('negosiasi.list');

@@ -3,21 +3,33 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DateFilterRequest;
 use App\Http\Requests\Admin\UpdateNegotiationOfferRequest;
 use App\Models\NegotiationOffer;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 class NegotiationOfferController extends Controller
 {
-    public function index()
+    public function index(DateFilterRequest $request): View
     {
-        $offers = NegotiationOffer::with(['product', 'user'])->orderByDesc('id')->paginate(20);
+        $date = $request->validated()['date'] ?? null;
+
+        $offersQuery = NegotiationOffer::query()
+            ->with(['product', 'user'])
+            ->orderByDesc('id');
+
+        if ($date) {
+            $offersQuery->whereDate('created_at', $date);
+        }
+
+        $offers = $offersQuery->paginate(20)->withQueryString();
 
         return view('admin.offers.index', compact('offers'));
     }
 
-    public function edit(NegotiationOffer $offer)
+    public function edit(NegotiationOffer $offer): View
     {
         return view('admin.offers.form', compact('offer'));
     }
@@ -49,7 +61,7 @@ class NegotiationOfferController extends Controller
         return redirect()->route('admin.offers.index')->with('success', 'Tawaran diperbarui.');
     }
 
-    public function destroy(NegotiationOffer $offer)
+    public function destroy(NegotiationOffer $offer): RedirectResponse
     {
         $offer->delete();
 

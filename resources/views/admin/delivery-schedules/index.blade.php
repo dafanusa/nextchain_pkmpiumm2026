@@ -70,3 +70,6 @@
         {{ $schedules->links() }}
     </div>
 @endsection
+
+
+

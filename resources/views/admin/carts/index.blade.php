@@ -13,7 +13,7 @@
 
     <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
-            <table class="min-w-[520px] w-full text-sm">
+            <table class="min-w-130 w-full text-sm">
                 <thead class="bg-slate-50 text-[var(--muted)]">
                     <tr>
                         <th class="text-left px-4 py-3">User</th>
@@ -56,3 +56,6 @@
         {{ $carts->links() }}
     </div>
 @endsection
+
+
+

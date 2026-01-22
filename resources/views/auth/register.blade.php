@@ -31,29 +31,52 @@
             border: 1px solid rgba(148, 163, 184, 0.35);
             box-shadow: 0 24px 50px rgba(15, 61, 145, 0.12);
         }
+
+        .panel {
+            background: linear-gradient(135deg, rgba(15, 61, 145, 0.98), rgba(10, 45, 108, 0.96));
+        }
     </style>
 </head>
 
 <body>
-    <main class="min-h-screen flex items-center justify-center px-6 py-12">
+    <main class="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
+        <div class="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-24 -left-32 h-72 w-72 rounded-full bg-indigo-200/30 blur-3xl"></div>
         <div class="w-full max-w-5xl grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-stretch">
-            <div class="rounded-[2.5rem] bg-[var(--brand)] text-white p-10 flex flex-col justify-between">
-                <div class="space-y-4">
-                    <p class="text-xs uppercase tracking-[0.4em] text-white/70">NEXTCHAIN</p>
+            <div class="panel rounded-[2.5rem] text-white p-10 flex flex-col justify-between relative overflow-hidden">
+                <img src="{{ asset('assets/ternakayam1.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover opacity-20" aria-hidden="true">
+                <div class="absolute inset-0 bg-gradient-to-b from-[#0f3d91]/70 via-[#0f3d91]/80 to-[#0a2d6c]/90"></div>
+                <div class="relative space-y-6">
+                    <div class="flex items-center gap-3 text-xs uppercase tracking-[0.4em] text-white/80">
+                        <span>Nextchain</span>
+                        <span class="h-1 w-1 rounded-full bg-white/70"></span>
+                        <span>UMM</span>
+                    </div>
+                    <div class="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white/90">
+                        <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-7 w-7 object-contain">
+                        Universitas Muhammadiyah Malang
+                    </div>
                     <h1 class="text-4xl font-bold leading-tight">Bergabung untuk akses harga real-time dan negosiasi cepat.</h1>
-                    <p class="text-white/75 text-base">
-                        Buat akun untuk menyimpan keranjang, pantau penawaran, dan checkout lebih cepat.
+                    <p class="text-white/80 text-base">
+                        Buat akun untuk simpan keranjang, pantau penawaran, dan checkout lebih cepat.
                     </p>
                 </div>
-                <div class="flex items-center justify-between text-sm text-white/70">
+                <div class="relative flex items-center justify-between text-sm text-white/80">
                     <span>UMKM UD. Ade Saputra Farm</span>
                     <a href="{{ route('home') }}" class="text-white hover:text-white/90 font-semibold">Kembali ke Home</a>
                 </div>
             </div>
 
             <div class="glass rounded-[2.5rem] p-8">
+                <div class="flex items-center justify-between">
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
+                        <span class="text-lg font-semibold tracking-wide">NEXTCHAIN</span>
+                        <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-8 w-8 object-contain">
+                    </a>
+                    <span class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Register</span>
+                </div>
                 <div class="space-y-2">
-                    <h2 class="text-2xl font-semibold">Daftar Akun</h2>
+                    <h2 class="text-2xl font-semibold mt-6">Daftar Akun</h2>
                     <p class="text-[var(--muted)] text-sm">
                         Isi data berikut untuk membuat akun baru.
                     </p>
@@ -111,3 +134,6 @@
     </main>
 </body>
 </html>
+
+
+

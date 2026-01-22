@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pesanan Keranjang Selesai - NEXTCHAIN</title>
+    <title>Pesanan Selesai - NEXTCHAIN</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -63,8 +63,9 @@
 <body>
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight">
+            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
                 NEXTCHAIN
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -86,14 +87,23 @@
                         <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
                     </svg>
                     <span class="cart-count absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-amber-400 text-[10px] font-semibold text-white flex items-center justify-center">0</span>
-                </a>
+                    </a>
                 @auth
                     <span class="hidden sm:inline-flex items-center px-4 py-2 rounded-full border border-white/40 text-sm font-semibold text-white">
                         Hai, {{ strtok(auth()->user()->name, ' ') }}
                     </span>
+                    <a href="{{ route('profile.show') }}"
+                       class="hidden sm:inline-flex items-center justify-center h-9 w-9 rounded-full border border-white/40 text-white hover:bg-white/10 transition"
+                       aria-label="Profil">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="9" r="4" />
+                        </svg>
+                    </a>
                     <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-emerald-400/20 text-emerald-50 border border-emerald-200/30 px-3 py-1.5 text-xs font-semibold shadow-[0_0_12px_rgba(16,185,129,0.25)]">
                         <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
-                        Poin
+                    Poin
                         <span class="rounded-full bg-emerald-500/40 px-2 py-0.5 text-white">{{ auth()->user()->loyalty_points ?? 0 }}</span>
                     </span>
                     <form method="post" action="{{ route('logout') }}">
@@ -116,7 +126,7 @@
                 <button id="menuBtn"
                         class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
-    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
         <line x1="4" y1="12" x2="20" y2="12"></line>
         <line x1="4" y1="18" x2="20" y2="18"></line>
@@ -142,7 +152,7 @@
                 <p class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Selesai</p>
                 <h1 class="text-4xl font-bold mt-2">Pembayaran Berhasil</h1>
                 <p class="text-[var(--muted)] mt-2 max-w-2xl">
-                    Terima kasih! Pesanan keranjang kamu sedang diproses oleh tim UD. Ade Saputra Farm.
+                    Terima kasih! Pesanan kamu sedang diproses oleh tim UD. Ade Saputra Farm.
                 </p>
             </div>
             <div class="stepper w-full max-w-md">
@@ -156,10 +166,10 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div class="flex items-center gap-4">
                     <div class="h-14 w-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold">
-                        OK
+                        ✓
                     </div>
                     <div>
-                        <p class="text-lg font-semibold">Pesanan keranjang selesai</p>
+                        <p class="text-lg font-semibold">Pesanan {{ $product->name }}</p>
                         <p class="text-sm text-[var(--muted)]">Order ID: {{ $orderId }}</p>
                     </div>
                 </div>
@@ -202,7 +212,7 @@
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-4">
                     <p class="text-xs uppercase tracking-wide">Kontak Admin</p>
-                    <p class="text-base font-semibold text-[var(--ink)] mt-2">WA 0812-4788-9969</p>
+                    <p class="text-base font-semibold text-[var(--ink)] mt-2">WA 0812-3038-4757</p>
                 </div>
                 <div class="bg-gray-50 rounded-2xl p-4">
                     <p class="text-xs uppercase tracking-wide">Estimasi</p>
@@ -222,8 +232,8 @@
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Kontak</p>
-                <p class="max-w-xs">Pasuruan Jl. Delima Desa Pakukerto, Kec. KarangPlosos, Kab. Pasuruan</p>
-                <a href="https://wa.me/6281247889969" class="hover:text-white">WhatsApp: 0812-4788-9969</a>
+                <p class="max-w-xs">Jl. Dusun Rojopasang, Juranglondo, Gerbo, Kec. Purwodadi, Kab. Pasuruan, Prov. Jawa Timur.</p>
+                <a href="https://wa.me/6281230384757" class="hover:text-white">WhatsApp: 0812-3038-4757</a>
             </div>
             <div class="space-y-3">
                 <p class="text-base font-semibold text-white">Tim Pengembang NEXTCHAIN</p>
@@ -234,7 +244,7 @@
                     <span>Aisyah Putri Permata Sari</span>
                     <span>Rizqullah Atsir Dafa Childyasa Nusa</span>
                     <span>Ayesha Fahrelia Ningrum</span>
-                </div>
+                    </div>
             </div>
         </div>
         <div class="border-t border-white/10 py-4 text-center text-xs text-white/70">
@@ -287,6 +297,18 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
