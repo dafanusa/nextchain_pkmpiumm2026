@@ -48,4 +48,11 @@ class PaymentController extends Controller
 
         return redirect()->route('admin.payments.index')->with('success', 'Pembayaran diperbarui.');
     }
+
+    public function destroy(Payment $payment): RedirectResponse
+    {
+        $payment->delete();
+
+        return redirect()->route('admin.payments.index')->with('success', 'Pembayaran dihapus.');
+    }
 }

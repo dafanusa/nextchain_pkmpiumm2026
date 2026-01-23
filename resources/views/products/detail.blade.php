@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="overflow-x-hidden">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ $product->name }} - Detail NEXTCHAIN</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
@@ -87,14 +88,15 @@
     </style>
 </head>
 
-<body>
-    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+<body class="overflow-x-hidden">
+    <div id="top"></div>
+    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-tight inline-flex items-center gap-2 whitespace-nowrap">
+                <span>NEXTCHAIN</span>
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-9 w-9 sm:h-12 sm:w-12 object-contain">
             </a>
-            <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
+            <nav class="hidden xl:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
                 <a href="{{ route('produk') }}" class="text-white border-b-2 border-white/80 pb-0.5">Produk</a>
                 <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
@@ -151,7 +153,7 @@
                     </a>
                 @endauth
                 <button id="menuBtn"
-                        class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        class="xl:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
                     <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
@@ -162,7 +164,7 @@
         </div>
     </header>
 
-    <div id="mobileMenu" class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+    <div id="mobileMenu" class="xl:hidden fixed top-16 left-0 right-0 z-40 px-4 sm:px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden overflow-y-auto overflow-y-auto">
         <a href="{{ route('home') }}" class="block">Home</a>
         <a href="{{ route('produk') }}" class="block">Produk</a>
         <a href="{{ route('cart') }}" class="block">Keranjang</a>
@@ -193,33 +195,58 @@
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <a href="{{ route('produk') }}" class="text-sm text-[var(--muted)] hover:text-[var(--ink)]">
             Kembali ke katalog
         </a>
 
-        <div class="mt-6 grid lg:grid-cols-2 gap-10 items-start">
-            <div class="bg-white rounded-3xl p-4 shadow-lg">
-                <img src="{{ $images[0] ?? $product->image_url }}"
-                     id="mainImage"
-                     alt="{{ $product->name }}"
-                     class="w-full h-80 object-cover rounded-2xl">
+        <div class="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10 items-start">
+            <div class="space-y-4 lg:-mt-6">
+                <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-col">
+                    <div class="relative w-full aspect-[4/5] lg:max-h-[480px] overflow-hidden rounded-2xl bg-slate-100">
+                        <img src="{{ $images[0] ?? $product->image_url }}"
+                             id="mainImage"
+                             alt="{{ $product->name }}"
+                             class="absolute inset-0 h-full w-full object-cover">
+                    </div>
 
-                @if (!empty($images))
-                <div class="grid grid-cols-4 gap-3 mt-4">
-                    @foreach ($images as $img)
-                        <img src="{{ $img }}"
-                             alt="Thumbnail {{ $product->name }}"
-                             onclick="document.getElementById('mainImage').src='{{ $img }}'"
-                             class="h-20 w-full object-cover rounded-xl cursor-pointer border border-transparent hover:border-[var(--brand)] transition">
-                    @endforeach
+                    @if (!empty($images))
+                    <div class="grid grid-cols-4 gap-3 mt-4">
+                        @foreach ($images as $img)
+                            <img src="{{ $img }}"
+                                 alt="Thumbnail {{ $product->name }}"
+                                 onclick="document.getElementById('mainImage').src='{{ $img }}'"
+                                 class="h-20 w-full object-cover rounded-xl cursor-pointer border border-transparent hover:border-[var(--brand)] transition">
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
-                @endif
+
+                <div class="bg-white rounded-3xl p-6 shadow-lg">
+                    <h2 class="text-lg font-semibold">Deskripsi Produk</h2>
+                    <p class="text-[var(--muted)] mt-2 leading-relaxed">
+                        {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
+                    </p>
+                    <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm text-[var(--muted)]">
+                        <div class="bg-gray-50 rounded-2xl p-4">
+                            <p class="text-xs uppercase tracking-wide">Distribusi</p>
+                            <p class="text-base font-semibold text-[var(--ink)] mt-2">
+                                Pickup farm atau pengiriman terjadwal
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-4">
+                            <p class="text-xs uppercase tracking-wide">Kemasan</p>
+                            <p class="text-base font-semibold text-[var(--ink)] mt-2">
+                                Sesuai kebutuhan volume
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-6">
                 <div>
-                    <h1 class="text-3xl font-bold">{{ $product->name }}</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold">{{ $product->name }}</h1>
                     <p class="text-[var(--muted)] mt-2">
                         Mitra: {{ $product->supplier }} - Grade {{ $product->grade ?? '-' }}
                     </p>
@@ -247,28 +274,33 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg">
-                    <h2 class="text-lg font-semibold">Deskripsi Produk</h2>
-                    <p class="text-[var(--muted)] mt-2 leading-relaxed">
-                        {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
-                    </p>
-                    <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm text-[var(--muted)]">
-                        <div class="bg-gray-50 rounded-2xl p-4">
-                            <p class="text-xs uppercase tracking-wide">Distribusi</p>
-                            <p class="text-base font-semibold text-[var(--ink)] mt-2">
-                                Pickup farm atau pengiriman terjadwal
-                            </p>
+                <div class="bg-white rounded-3xl p-6 shadow-lg min-h-[360px] lg:min-h-[420px] flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p class="text-xs text-[var(--muted)]">Transparansi harga</p>
+                            <h3 class="text-lg font-semibold">Grafik Harga</h3>
                         </div>
-                        <div class="bg-gray-50 rounded-2xl p-4">
-                            <p class="text-xs uppercase tracking-wide">Kemasan</p>
-                            <p class="text-base font-semibold text-[var(--ink)] mt-2">
-                                Sesuai kebutuhan volume
-                            </p>
+                        <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 p-1">
+                            <button type="button"
+                                    class="price-range-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-[var(--brand)] shadow-sm"
+                                    data-range="daily">
+                                Harian
+                            </button>
+                            <button type="button"
+                                    class="price-range-btn px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--muted)]"
+                                    data-range="weekly">
+                                Mingguan
+                            </button>
                         </div>
                     </div>
+                    <div class="mt-4 flex-1">
+                        <canvas id="priceChart" height="240" class="h-full w-full"></canvas>
+                    </div>
+                    <p class="text-xs text-[var(--muted)] mt-3">
+                        Data diambil dari update harga admin (Asia/Jakarta).
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     <a href="{{ route('produk.negosiasi', $product) }}"
                        class="inline-flex items-center justify-center w-full px-4 py-2.5 sm:px-6 sm:py-3 text-[12px] sm:text-sm action-btn btn-nego">
                         Mulai Negosiasi
@@ -298,7 +330,7 @@
     </main>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
@@ -328,35 +360,10 @@
     </footer>
 
     <script>
-        const menuBtn = document.getElementById('menuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                                mobileMenu.classList.toggle('max-h-0');
-                mobileMenu.classList.toggle('opacity-0');
-                mobileMenu.classList.toggle('-translate-y-2');
-                mobileMenu.classList.toggle('pointer-events-none');
-                mobileMenu.classList.toggle('max-h-96');
-                mobileMenu.classList.toggle('opacity-100');
-                mobileMenu.classList.toggle('translate-y-0');
-                mobileMenu.classList.toggle('pointer-events-auto');
-            });
-        }
-
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
+        const initialCartCount = {{ $cartCount ?? 0 }};
         const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
         const loginUrl = "{{ route('login') }}";
-        const initialCartCount = {{ $cartCount ?? 0 }};
-        const toast = document.getElementById('toast');
-        const toastText = document.getElementById('toastText');
-        let toastTimer = null;
-        function getCurrentCartCount() {
-            const firstBadge = cartCounts[0];
-            if (!firstBadge) {
-                return 0;
-            }
-            return Number(firstBadge.textContent || 0);
-        }
 
         function updateCartBadge(count) {
             cartCounts.forEach((badge) => {
@@ -366,54 +373,137 @@
             });
         }
 
-        function showToast(message) {
-            if (!toast || !toastText) {
-                return;
+        const priceData = {
+            daily: {
+                labels: @json($dailyLabels ?? []),
+                min: @json($dailyMin ?? []),
+                max: @json($dailyMax ?? []),
+            },
+            weekly: {
+                labels: @json($weeklyLabels ?? []),
+                min: @json($weeklyMin ?? []),
+                max: @json($weeklyMax ?? []),
+            },
+        };
+
+        const chartCanvas = document.getElementById('priceChart');
+        let priceChart = null;
+
+        function renderChart(range) {
+            if (!chartCanvas) return;
+
+            const dataSet = priceData[range];
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: dataSet.labels,
+                    datasets: [
+                        {
+                            label: 'Harga Min',
+                            data: dataSet.min,
+                            borderColor: '#0f3d91',
+                            backgroundColor: 'rgba(15, 61, 145, 0.15)',
+                            tension: 0.35,
+                            spanGaps: true,
+                        },
+                        {
+                            label: 'Harga Max',
+                            data: dataSet.max,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                            tension: 0.35,
+                            spanGaps: true,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: (value) => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                            },
+                        },
+                    },
+                },
+            };
+
+            if (priceChart) {
+                priceChart.destroy();
             }
-            toastText.textContent = message;
-            toast.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            if (toastTimer) {
-                clearTimeout(toastTimer);
-            }
-            toastTimer = setTimeout(() => {
-                toast.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
-                toast.classList.remove('opacity-100', 'translate-y-0');
-            }, 2600);
+            priceChart = new Chart(chartCanvas, chartConfig);
         }
 
-        const addBtn = document.getElementById('addToCartBtn');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => {
-                if (!isAuthenticated) {
-                    showLoginPrompt();
+        const rangeButtons = Array.from(document.querySelectorAll('.price-range-btn'));
+        rangeButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                rangeButtons.forEach((button) => {
+                    button.classList.remove('bg-white', 'text-[var(--brand)]', 'shadow-sm');
+                    button.classList.add('text-[var(--muted)]');
+                });
+                btn.classList.add('bg-white', 'text-[var(--brand)]', 'shadow-sm');
+                btn.classList.remove('text-[var(--muted)]');
+                renderChart(btn.dataset.range);
+            });
+        });
+
+        renderChart('daily');
+
+                const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (menuBtn && mobileMenu) {
+            let isMenuOpen = false;
+            let allowScrollClose = false;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = 'calc(100vh - 4rem)';
+                isMenuOpen = true;
+                allowScrollClose = false;
+                setTimeout(() => {
+                    allowScrollClose = true;
+                }, 150);
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = '0px';
+                isMenuOpen = false;
+            };
+
+            menuBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isMenuOpen) {
+                    closeMenu();
                     return;
                 }
-                fetch("{{ route('cart.items.store') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                    },
-                    body: JSON.stringify({ product_id: addBtn.dataset.id, qty: 1 }),
-                }).then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw new Error(data.message || 'Gagal menambahkan ke keranjang.');
-                    }
-                    return data;
-                }).then((data) => {
-                        if (typeof data.count === 'number') {
-                            updateCartBadge(data.count);
-                        } else {
-                            updateCartBadge(getCurrentCartCount() + 1);
-                        }
-                        showToast('Produk ditambahkan ke keranjang.');
-                    }).catch((error) => {
-                        showToast(error.message);
-                    });
+                openMenu();
+            });
+
+            window.addEventListener('scroll', () => {
+                if (isMenuOpen && allowScrollClose) {
+                    closeMenu();
+                }
+            }, { passive: true });
+            window.addEventListener('resize', closeMenu);
+            mobileMenu.querySelectorAll('a, button').forEach((item) => {
+                item.addEventListener('click', closeMenu);
             });
         }
+
 
         function showLoginPrompt() {
             const promptEl = document.getElementById('authPrompt');
@@ -464,8 +554,27 @@
             authCloseBtn.addEventListener('click', () => authPrompt.classList.add('hidden'));
         }
     </script>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

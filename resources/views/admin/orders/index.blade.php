@@ -12,7 +12,7 @@
                    class="rounded-full bg-amber-100 px-4 py-2 text-sm text-amber-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
         </div>
         <button type="submit"
-                class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 transition">
+                class="inline-flex items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-dark)] transition">
             Tampilkan
         </button>
         <a href="{{ route('admin.orders.index') }}"
@@ -48,14 +48,23 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="inline-flex flex-nowrap items-center gap-2">
-                                <a href="{{ route('admin.orders.show', $order) }}"
-                                   class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
-                                    Detail
-                                </a>
-                                <a href="{{ route('invoice.download', $order) }}"
-                                   class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-xs font-semibold text-blue-700 hover:border-blue-300 hover:bg-blue-100 transition">
-                                    Cetak Nota
-                                </a>
+                                    <a href="{{ route('admin.orders.show', $order) }}"
+                                       class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                        Detail
+                                    </a>
+                                    <a href="{{ route('invoice.download', $order) }}"
+                                       class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-xs font-semibold text-blue-700 hover:border-blue-300 hover:bg-blue-100 transition">
+                                        Cetak Nota
+                                    </a>
+                                    <form action="{{ route('admin.orders.destroy', $order) }}" method="post" class="inline">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit"
+                                                onclick="return confirm('Hapus order ini?')"
+                                                class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-xs font-semibold text-red-700 hover:border-red-300 hover:bg-red-100 transition">
+                                            Hapus
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -73,6 +82,7 @@
         {{ $orders->links() }}
     </div>
 @endsection
+
 
 
 

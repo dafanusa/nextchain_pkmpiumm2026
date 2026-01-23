@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\NegotiationOfferController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PriceHistoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
@@ -21,7 +22,9 @@ use App\Http\Controllers\Web\TestimonialWebController;
 use App\Models\DeliverySchedule;
 use App\Models\NegotiationOffer;
 use App\Models\Payment;
+use App\Models\PriceHistory;
 use App\Models\Product;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -68,14 +71,17 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class)->names('admin.users');
     Route::get('users-detail', [UserController::class, 'detail'])->name('admin.users.detail');
     Route::resource('products', ProductController::class)->names('admin.products')->except(['show']);
+    Route::get('products/price', [ProductController::class, 'price'])->name('admin.products.price');
+    Route::patch('products/{product}/price', [ProductController::class, 'updatePrice'])->name('admin.products.price.update');
+    Route::get('price-histories', [PriceHistoryController::class, 'index'])->name('admin.price-histories.index');
     Route::resource('offers', NegotiationOfferController::class)->names('admin.offers')->only(['index', 'edit', 'update', 'destroy']);
     Route::resource('delivery-schedules', DeliveryScheduleController::class)
         ->names('admin.delivery-schedules')
         ->except(['show']);
     Route::patch('offers/{offer}/approve', [NegotiationOfferController::class, 'approve'])->name('admin.offers.approve');
     Route::patch('offers/{offer}/reject', [NegotiationOfferController::class, 'reject'])->name('admin.offers.reject');
-    Route::resource('orders', OrderController::class)->names('admin.orders')->only(['index', 'show', 'update']);
-    Route::resource('payments', PaymentController::class)->names('admin.payments')->only(['index', 'edit', 'update']);
+    Route::resource('orders', OrderController::class)->names('admin.orders')->only(['index', 'show', 'update', 'destroy']);
+    Route::resource('payments', PaymentController::class)->names('admin.payments')->only(['index', 'edit', 'update', 'destroy']);
     Route::get('financial-reports', [FinancialReportController::class, 'index'])->name('admin.financial-reports.index');
     Route::post('financial-reports', [FinancialReportController::class, 'store'])->name('admin.financial-reports.store');
     Route::get('financial-reports/{report}/csv', [FinancialReportController::class, 'csv'])->name('admin.financial-reports.csv');
@@ -103,8 +109,62 @@ Route::get('/produk', function () {
 Route::get('/produk/{product}', function (Product $product) {
     abort_if(! $product->is_active, 404);
     $images = [$product->image_url];
+    $today = now('Asia/Jakarta')->startOfDay();
+    $histories = PriceHistory::query()
+        ->where('product_id', $product->id)
+        ->orderBy('price_date')
+        ->get();
 
-    return view('products.detail', compact('product', 'images'));
+    if ($histories->isEmpty()) {
+        $histories = collect([
+            new PriceHistory([
+                'price_date' => $today->copy(),
+                'price_min' => $product->price_min,
+                'price_max' => $product->price_max,
+            ]),
+        ]);
+    }
+
+    $dailyStart = $today->copy()->subDays(13);
+    $historyMap = $histories->keyBy(fn (PriceHistory $history) => $history->price_date->format('Y-m-d'));
+    $dailyLabels = [];
+    $dailyMin = [];
+    $dailyMax = [];
+
+    $current = $dailyStart->copy();
+    while ($current->lte($today)) {
+        $key = $current->format('Y-m-d');
+        $history = $historyMap->get($key);
+        $dailyLabels[] = $current->format('d M');
+        $dailyMin[] = $history?->price_min;
+        $dailyMax[] = $history?->price_max;
+        $current->addDay();
+    }
+
+    $weeklyStart = $today->copy()->startOfWeek(Carbon::MONDAY)->subWeeks(7);
+    $weeklyLabels = [];
+    $weeklyMin = [];
+    $weeklyMax = [];
+
+    for ($week = 0; $week < 8; $week++) {
+        $start = $weeklyStart->copy()->addWeeks($week);
+        $end = $start->copy()->endOfWeek(Carbon::SUNDAY);
+        $weekData = $histories->filter(fn (PriceHistory $history) => $history->price_date->between($start, $end));
+        $weeklyLabels[] = $start->format('d M');
+        $weeklyMin[] = $weekData->isEmpty() ? null : (int) round($weekData->avg('price_min'));
+        $weeklyMax[] = $weekData->isEmpty() ? null : (int) round($weekData->avg('price_max'));
+    }
+
+    return view('products.detail', compact(
+        'product',
+        'images',
+        'dailyLabels',
+        'dailyMin',
+        'dailyMax',
+        'weeklyLabels',
+        'weeklyMin',
+        'weeklyMax'
+    ));
 })->name('produk.detail');
 
 /* NEGOSIASI */
@@ -144,7 +204,41 @@ Route::post('/produk/{id}/negosiasi/pesan', [WebNegotiationController::class, 's
     ->name('produk.negosiasi.message');
 
 /* CHECKOUT (SIMULASI FLOW) */
-Route::get('/checkout/{product}', function (Product $product) {
+$isScheduleAvailable = function (DeliverySchedule $schedule, Carbon $now): bool {
+    if (! $schedule->delivery_date) {
+        return false;
+    }
+
+    $today = $now->copy()->startOfDay();
+    $scheduleDate = $schedule->delivery_date->copy()->startOfDay();
+
+    if ($scheduleDate->lt($today)) {
+        return false;
+    }
+
+    if ($scheduleDate->gt($today)) {
+        return true;
+    }
+
+    $matches = [];
+    preg_match_all('/(\d{1,2})[.:](\d{2})/', (string) $schedule->delivery_time, $matches);
+    if (empty($matches[0])) {
+        return true;
+    }
+
+    $lastIndex = count($matches[0]) - 1;
+    $hour = str_pad($matches[1][$lastIndex], 2, '0', STR_PAD_LEFT);
+    $minute = $matches[2][$lastIndex];
+    $endDateTime = Carbon::createFromFormat(
+        'Y-m-d H:i',
+        $scheduleDate->format('Y-m-d').' '.$hour.':'.$minute,
+        'Asia/Jakarta'
+    );
+
+    return $now->lte($endDateTime);
+};
+
+Route::get('/checkout/{product}', function (Product $product) use ($isScheduleAvailable) {
     abort_if(! $product->is_active, 404);
     $qty = max($product->moq, (int) request('qty', $product->moq));
     $unitPrice = (int) round(($product->price_min + $product->price_max) / 2);
@@ -152,16 +246,19 @@ Route::get('/checkout/{product}', function (Product $product) {
     $shipping = 25000;
     $total = $subtotal + $shipping;
     $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT);
+    $now = now('Asia/Jakarta');
     $schedules = DeliverySchedule::query()
         ->where('is_active', true)
         ->orderBy('delivery_date')
         ->orderBy('delivery_time')
-        ->get();
+        ->get()
+        ->filter(fn (DeliverySchedule $schedule) => $isScheduleAvailable($schedule, $now))
+        ->values();
 
     return view('checkout.checkout', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'schedules'));
 })->middleware('auth')->name('checkout');
 
-Route::get('/checkout/{product}/payment', function (Product $product) {
+Route::get('/checkout/{product}/payment', function (Product $product) use ($isScheduleAvailable) {
     abort_if(! $product->is_active, 404);
     $qty = max($product->moq, (int) request('qty', $product->moq));
     $unitPrice = (int) round(($product->price_min + $product->price_max) / 2);
@@ -179,26 +276,32 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
         $validated = request()->validate([
             'shipping_method' => ['required', 'string', 'max:120'],
             'delivery_schedule_id' => [
-                Rule::requiredIf($shippingMethod === 'Pengiriman terjadwal'),
+                Rule::requiredIf(in_array($shippingMethod, ['Pengiriman terjadwal', 'Pickup di farm'], true)),
                 'integer',
                 Rule::exists('delivery_schedules', 'id')->where('is_active', true),
             ],
-            'shipping_date' => ['nullable', Rule::requiredIf($shippingMethod !== 'Pengiriman terjadwal'), 'date'],
-            'shipping_time' => ['nullable', Rule::requiredIf($shippingMethod !== 'Pengiriman terjadwal'), 'string', 'max:40'],
+            'shipping_date' => ['nullable', Rule::requiredIf(! in_array($shippingMethod, ['Pengiriman terjadwal', 'Pickup di farm'], true)), 'date'],
+            'shipping_time' => ['nullable', Rule::requiredIf(! in_array($shippingMethod, ['Pengiriman terjadwal', 'Pickup di farm'], true)), 'string', 'max:40'],
         ]);
 
         $shippingDate = $validated['shipping_date'] ?? '';
         $shippingTime = $validated['shipping_time'] ?? '';
 
-        if ($shippingMethod === 'Pengiriman terjadwal') {
+        if (in_array($shippingMethod, ['Pengiriman terjadwal', 'Pickup di farm'], true)) {
+            $expectedType = $shippingMethod === 'Pickup di farm' ? 'pickup' : 'scheduled';
             $deliverySchedule = DeliverySchedule::query()
                 ->whereKey($validated['delivery_schedule_id'])
                 ->where('is_active', true)
+                ->where('schedule_type', $expectedType)
                 ->first();
 
-            if ($deliverySchedule) {
+            if ($deliverySchedule && $isScheduleAvailable($deliverySchedule, now('Asia/Jakarta'))) {
                 $shippingDate = $deliverySchedule->delivery_date->format('Y-m-d');
                 $shippingTime = $deliverySchedule->delivery_time;
+            } else {
+                return redirect()->back()->withErrors([
+                    'delivery_schedule_id' => 'Jadwal sudah lewat. Silakan pilih jadwal lain.',
+                ])->withInput();
             }
         }
     }
@@ -231,6 +334,7 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
                 'delivery_schedule_id' => $deliverySchedule?->id,
                 'shipping_date' => $buyer['shipping_date'] ?: null,
                 'shipping_time' => $buyer['shipping_time'] ?: null,
+                'shipping_status' => 'processing',
                 'note' => $buyer['note'] ?: null,
             ]
         );
@@ -244,6 +348,7 @@ Route::get('/checkout/{product}/payment', function (Product $product) {
                 'line_total' => $subtotal,
             ]);
         }
+        $buyer['shipping_status'] = $order->shipping_status ?? 'processing';
     }
 
     return view('payment.payment', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'midtransClientKey', 'buyer'));

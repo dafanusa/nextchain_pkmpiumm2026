@@ -38,10 +38,18 @@ class OrderController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'in:pending,processing,completed,canceled'],
             'payment_status' => ['required', 'in:unpaid,paid,failed,refunded'],
+            'shipping_status' => ['required', 'in:processing,shipped,delivered'],
         ]);
 
         $order->update($validated);
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Order diperbarui.');
+    }
+
+    public function destroy(Order $order): RedirectResponse
+    {
+        $order->delete();
+
+        return redirect()->route('admin.orders.index')->with('success', 'Order dihapus.');
     }
 }

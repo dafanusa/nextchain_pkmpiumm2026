@@ -39,6 +39,7 @@
 </head>
 
 <body>
+    <div id="top"></div>
     <main class="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
         <div class="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-32 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl"></div>
@@ -46,8 +47,7 @@
             <div class="glass rounded-[2.5rem] p-8">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                        <span class="text-lg font-semibold tracking-wide">NEXTCHAIN</span>
-                        <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-8 w-8 object-contain">
+                        <span class="text-lg font-semibold tracking-wide">NEXTCHAIN</span>                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-8 w-8 object-contain">
                     </a>
                     <span class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Login</span>
                 </div>
@@ -107,8 +107,7 @@
                         <span class="h-1 w-1 rounded-full bg-white/70"></span>
                         <span>UMM</span>
                     </div>
-                    <div class="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white/90">
-                        <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-7 w-7 object-contain">
+                    <div class="flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white/90">                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-7 w-7 object-contain">
                         Universitas Muhammadiyah Malang
                     </div>
                     <h1 class="text-4xl font-bold leading-tight">Login untuk akses penawaran dan checkout lebih cepat.</h1>
@@ -130,8 +129,20 @@
             </div>
         </div>
     </main>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
 
 
 

@@ -14,6 +14,7 @@ class DeliverySchedule extends Model
         'destination',
         'delivery_date',
         'delivery_time',
+        'schedule_type',
         'is_active',
     ];
 

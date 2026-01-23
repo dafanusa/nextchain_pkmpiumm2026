@@ -41,6 +41,13 @@
                            class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
                 </div>
                 <div>
+                    <label class="text-sm font-semibold">Tipe Jadwal</label>
+                    <select name="schedule_type" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+                        <option value="scheduled" @selected(old('schedule_type', $schedule->schedule_type ?? 'scheduled') === 'scheduled')>Pengiriman Terjadwal</option>
+                        <option value="pickup" @selected(old('schedule_type', $schedule->schedule_type ?? 'scheduled') === 'pickup')>Pickup di Farm</option>
+                    </select>
+                </div>
+                <div>
                     <label class="text-sm font-semibold">Status</label>
                     <select name="is_active" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
                         <option value="1" @selected(old('is_active', $schedule->is_active ?? true))>Aktif</option>
@@ -62,6 +69,7 @@
         </form>
     </div>
 @endsection
+
 
 
 

@@ -35,11 +35,11 @@
 </head>
 
 <body>
-    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div id="top"></div>
+    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+                NEXTCHAIN                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -273,6 +273,76 @@
                 @endif
             </div>
         </div>
+
+        <div class="mt-8 glass rounded-3xl p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h2 class="text-lg font-semibold">Riwayat Pesanan</h2>
+                    <p class="text-sm text-[var(--muted)]">Pantau status pengiriman dari pesanan terbaru kamu.</p>
+                </div>
+            </div>
+
+            @php
+                $shippingStatusMap = [
+                    'processing' => ['label' => 'Diproses', 'class' => 'bg-amber-100 text-amber-700 border-amber-200'],
+                    'shipped' => ['label' => 'Dikirim', 'class' => 'bg-blue-100 text-blue-700 border-blue-200'],
+                    'delivered' => ['label' => 'Diterima', 'class' => 'bg-emerald-100 text-emerald-700 border-emerald-200'],
+                ];
+            @endphp
+
+            @if ($orders->isEmpty())
+                <div class="mt-6 rounded-2xl border border-slate-200 bg-white px-5 py-6 text-sm text-[var(--muted)]">
+                    Belum ada pesanan yang tercatat. Yuk mulai belanja produk favoritmu.
+                </div>
+            @else
+                <div class="mt-6 space-y-4">
+                    @foreach ($orders as $order)
+                        @php
+                            $statusKey = $order->shipping_status ?? 'processing';
+                            $statusData = $shippingStatusMap[$statusKey] ?? $shippingStatusMap['processing'];
+                            $items = $order->items ?? collect();
+                            $visibleItems = $items->take(2);
+                            $remainingCount = $items->count() - $visibleItems->count();
+                        @endphp
+                        <div class="rounded-2xl border border-slate-200 bg-white px-5 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="space-y-2">
+                                <div class="flex flex-wrap items-center gap-3 text-sm">
+                                    <span class="font-semibold text-[var(--ink)]">{{ $order->order_number }}</span>
+                                    <span class="text-[var(--muted)]">
+                                        {{ $order->created_at?->format('d M Y H:i') }}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-[var(--muted)]">
+                                    <span class="font-semibold text-[var(--ink)]">Total:</span>
+                                    Rp {{ number_format($order->total ?? 0) }}
+                                </div>
+                                <div class="text-xs text-[var(--muted)]">
+                                    <span class="font-semibold text-[var(--ink)]">Pengiriman:</span>
+                                    {{ $order->shipping_method ?: '-' }}
+                                    @if ($order->shipping_date)
+                                        • {{ $order->shipping_date->format('d M Y') }} {{ $order->shipping_time }}
+                                    @endif
+                                </div>
+                                @if ($items->isNotEmpty())
+                                    <div class="text-xs text-[var(--muted)]">
+                                        <span class="font-semibold text-[var(--ink)]">Item:</span>
+                                        {{ $visibleItems->pluck('product.name')->filter()->implode(', ') }}
+                                        @if ($remainingCount > 0)
+                                            dan {{ $remainingCount }} lainnya
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs font-semibold {{ $statusData['class'] }}">
+                                    {{ $statusData['label'] }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
     </main>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
@@ -306,20 +376,51 @@
     </footer>
 
     <script>
-        const menuBtn = document.getElementById('menuBtn');
+                const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('max-h-0');
-                mobileMenu.classList.toggle('opacity-0');
-                mobileMenu.classList.toggle('-translate-y-2');
-                mobileMenu.classList.toggle('pointer-events-none');
-                mobileMenu.classList.toggle('max-h-96');
-                mobileMenu.classList.toggle('opacity-100');
-                mobileMenu.classList.toggle('translate-y-0');
-                mobileMenu.classList.toggle('pointer-events-auto');
+            let isMenuOpen = false;
+            let allowScrollClose = false;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = 'calc(100vh - 4rem)';
+                isMenuOpen = true;
+                allowScrollClose = false;
+                setTimeout(() => {
+                    allowScrollClose = true;
+                }, 150);
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = '0px';
+                isMenuOpen = false;
+            };
+
+            menuBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isMenuOpen) {
+                    closeMenu();
+                    return;
+                }
+                openMenu();
+            });
+
+            window.addEventListener('scroll', () => {
+                if (isMenuOpen && allowScrollClose) {
+                    closeMenu();
+                }
+            }, { passive: true });
+            window.addEventListener('resize', closeMenu);
+            mobileMenu.querySelectorAll('a, button').forEach((item) => {
+                item.addEventListener('click', closeMenu);
             });
         }
+
+
 
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const initialCartCount = {{ $cartCount ?? 0 }};
@@ -366,7 +467,22 @@
             });
         }
     </script>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
 
 

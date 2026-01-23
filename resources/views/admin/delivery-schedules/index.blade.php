@@ -23,6 +23,7 @@
                 <thead class="bg-slate-50 text-[var(--muted)]">
                     <tr>
                         <th class="text-left px-4 py-3">Tujuan</th>
+                        <th class="text-left px-4 py-3">Tipe</th>
                         <th class="text-left px-4 py-3">Tanggal</th>
                         <th class="text-left px-4 py-3">Jam</th>
                         <th class="text-left px-4 py-3">Status</th>
@@ -33,6 +34,9 @@
                     @forelse ($schedules as $schedule)
                         <tr class="border-t border-slate-100">
                             <td class="px-4 py-3 text-[var(--ink)] font-semibold">{{ $schedule->destination }}</td>
+                            <td class="px-4 py-3 text-[var(--muted)]">
+                                {{ $schedule->schedule_type === 'pickup' ? 'Pickup' : 'Terjadwal' }}
+                            </td>
                             <td class="px-4 py-3 text-[var(--muted)]">{{ $schedule->delivery_date->format('d M Y') }}</td>
                             <td class="px-4 py-3 text-[var(--muted)]">{{ $schedule->delivery_time }}</td>
                             <td class="px-4 py-3">
@@ -58,7 +62,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada jadwal.</td>
+                            <td colspan="6" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada jadwal.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -70,6 +74,7 @@
         {{ $schedules->links() }}
     </div>
 @endsection
+
 
 
 

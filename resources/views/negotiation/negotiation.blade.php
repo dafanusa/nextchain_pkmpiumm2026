@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="overflow-x-hidden">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,19 +48,20 @@
     </style>
 </head>
 
-<body>
+<body class="overflow-x-hidden">
+    <div id="top"></div>
     <div class="fixed inset-0 -z-10 overflow-hidden">
         <div class="absolute -top-20 -left-24 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl"></div>
         <div class="absolute top-20 right-0 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl"></div>
         <div class="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl"></div>
     </div>
-    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-tight inline-flex items-center gap-2 whitespace-nowrap">
+                <span>NEXTCHAIN</span>
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-9 w-9 sm:h-12 sm:w-12 object-contain">
             </a>
-            <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
+            <nav class="hidden xl:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
                 <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
                 <a href="{{ route('negosiasi.list') }}" class="text-white border-b-2 border-white/80 pb-0.5">Negosiasi</a>
@@ -117,7 +118,7 @@
                     </a>
                 @endauth
                 <button id="menuBtn"
-                        class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        class="xl:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
                     <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
@@ -128,7 +129,7 @@
         </div>
     </header>
 
-    <div id="mobileMenu" class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+    <div id="mobileMenu" class="xl:hidden fixed top-16 left-0 right-0 z-40 px-4 sm:px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden overflow-y-auto overflow-y-auto">
         <a href="{{ route('home') }}" class="block">Home</a>
         <a href="{{ route('produk') }}" class="block">Produk</a>
         <a href="{{ route('cart') }}" class="block">Keranjang</a>
@@ -159,14 +160,14 @@
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
-        <div class="md:hidden mb-4">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div class="xl:hidden mb-4">
             <a href="{{ route('produk.detail', $product) }}"
                class="inline-flex items-center text-sm font-semibold text-[var(--brand)]">
                 Kembali ke Detail Produk
             </a>
         </div>
-        <div class="grid gap-8 lg:grid-cols-12">
+        <div class="grid gap-6 sm:gap-8 lg:grid-cols-12">
             <section class="order-1 lg:order-none lg:col-span-4 glass-card rounded-3xl p-6">
                 <h1 class="text-2xl font-bold">Negosiasi Harga</h1>
                 <p class="text-[var(--muted)] mt-2">
@@ -340,14 +341,14 @@
                 </div>
 
                 @auth
-                    <div class="mt-4 flex gap-2">
-                        <input id="chatInput" placeholder="Tulis pesan..."
-                               class="flex-1 border rounded-full px-4 py-2">
-                        <button id="sendMsgBtn"
-                                class="bg-[var(--brand)] text-white px-5 py-2 rounded-full font-semibold hover:bg-[var(--brand-dark)] transition">
-                            Kirim
-                        </button>
-                    </div>
+                <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                    <input id="chatInput" placeholder="Tulis pesan..."
+                           class="flex-1 border rounded-full px-4 py-2">
+                    <button id="sendMsgBtn"
+                            class="w-full sm:w-auto bg-[var(--brand)] text-white px-5 py-2 rounded-full font-semibold hover:bg-[var(--brand-dark)] transition">
+                        Kirim
+                    </button>
+                </div>
                 @else
                     <div class="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-3 text-sm text-[var(--muted)]">
                         Login dulu untuk mengirim pesan negosiasi.
@@ -363,20 +364,51 @@
     </div>
 
     <script>
-        const menuBtn = document.getElementById('menuBtn');
+                const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('max-h-0');
-                mobileMenu.classList.toggle('opacity-0');
-                mobileMenu.classList.toggle('-translate-y-2');
-                mobileMenu.classList.toggle('pointer-events-none');
-                mobileMenu.classList.toggle('max-h-96');
-                mobileMenu.classList.toggle('opacity-100');
-                mobileMenu.classList.toggle('translate-y-0');
-                mobileMenu.classList.toggle('pointer-events-auto');
+            let isMenuOpen = false;
+            let allowScrollClose = false;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = 'calc(100vh - 4rem)';
+                isMenuOpen = true;
+                allowScrollClose = false;
+                setTimeout(() => {
+                    allowScrollClose = true;
+                }, 150);
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = '0px';
+                isMenuOpen = false;
+            };
+
+            menuBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isMenuOpen) {
+                    closeMenu();
+                    return;
+                }
+                openMenu();
+            });
+
+            window.addEventListener('scroll', () => {
+                if (isMenuOpen && allowScrollClose) {
+                    closeMenu();
+                }
+            }, { passive: true });
+            window.addEventListener('resize', closeMenu);
+            mobileMenu.querySelectorAll('a, button').forEach((item) => {
+                item.addEventListener('click', closeMenu);
             });
         }
+
+
 
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const initialCartCount = {{ $cartCount ?? 0 }};
@@ -645,7 +677,7 @@
     </script>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
@@ -673,8 +705,27 @@
             (c) 2026 NEXTCHAIN - PKM-PI UMM 2026
         </div>
     </footer>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

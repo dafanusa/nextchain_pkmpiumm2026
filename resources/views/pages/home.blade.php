@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="overflow-x-hidden">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -177,15 +177,16 @@
     </style>
 </head>
 
-<body>
-    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+<body class="overflow-x-hidden">
+    <div id="top"></div>
+    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-tight inline-flex items-center gap-2 whitespace-nowrap">
+                <span>NEXTCHAIN</span>
+                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-9 w-9 sm:h-12 sm:w-12 object-contain">
             </a>
 
-            <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
+            <nav class="hidden xl:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="#home" class="nav-link text-white border-b-2 border-white/80 pb-0.5">Home</a>
                 <a href="{{ route('produk') }}" class="hover:text-white">Produk</a>
                 <a href="{{ route('negosiasi.list') }}" class="hover:text-white">Negosiasi</a>
@@ -243,7 +244,7 @@
                     </a>
                 @endauth
                 <button id="menuBtn"
-                        class="md:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
+                        class="xl:hidden px-3 py-1.5 rounded-full border border-white/40 text-sm font-semibold text-white">
     <span class="sr-only">Menu</span>
                     <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="4" y1="6" x2="20" y2="6"></line>
@@ -253,7 +254,7 @@
             </div>
         </div>
 
-        <div id="mobileMenu" class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+        <div id="mobileMenu" class="xl:hidden fixed top-16 left-0 right-0 z-40 px-4 sm:px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden overflow-y-auto overflow-y-auto">
             <a href="#home" class="block">Home</a>
             <a href="{{ route('produk') }}" class="block">Produk</a>
             <a href="{{ route('cart') }}" class="block">Keranjang</a>
@@ -285,20 +286,20 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6">
-                <section class="pt-14 pb-16" id="home">
-            <div class="relative overflow-hidden rounded-[2.5rem] bg-[var(--brand)] text-white shadow-[0_30px_70px_rgba(15,61,145,0.28)]">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6">
+        <section class="pt-10 sm:pt-14 pb-12 sm:pb-16" id="home">
+            <div class="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-[var(--brand)] text-white shadow-[0_30px_70px_rgba(15,61,145,0.28)]">
                 <img src="{{ asset('assets/home.jpg') }}" alt="UD. Ade Saputra Farm" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#0b214f]/90 via-[#0b214f]/70 to-[#0b214f]/20"></div>
                 <div class="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
                 <div class="absolute -bottom-24 -right-20 h-64 w-64 rounded-full bg-emerald-300/10 blur-3xl"></div>
 
-                <div class="relative px-8 py-12 sm:px-12 lg:px-16 lg:py-16">
+                <div class="relative px-6 py-10 sm:px-10 lg:px-16 lg:py-16">
                     <div class="max-w-3xl space-y-6">
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/90">
                             UD. Ade Saputra Farm
                         </span>
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl">
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl">
                             Telur segar, Harga jujur, dan Negosiasi mudah.
                         </h1>
                         <p class="text-white/80 text-base sm:text-lg max-w-md">
@@ -337,8 +338,8 @@
             </div>
         </section>
 
-        <section class="py-16 border-t border-slate-200/80 bg-white/60 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="tentang">
-            <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+        <section class="py-14 sm:py-16 border-t border-slate-200/80 bg-white/60 w-full" id="tentang">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 sm:gap-10 items-center">
                 <div class="space-y-6">
                     <span class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/80 text-sm font-semibold text-[var(--brand)] shadow-sm border border-slate-200/60">
                         <span class="h-2.5 w-2.5 rounded-full bg-[var(--brand)]"></span>
@@ -392,8 +393,8 @@
             </div>
         </section>
 
-        <section class="py-12 border-t border-slate-200/80 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="produk-unggulan">
-            <div class="max-w-7xl mx-auto px-6">
+        <section class="py-12 border-t border-slate-200/80 w-full" id="produk-unggulan">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <h2 class="text-3xl font-bold">Produk Unggulan UMKM</h2>
                 <a href="{{ route('produk') }}" class="text-sm font-semibold text-[var(--brand)]">Lihat semua produk</a>
@@ -426,8 +427,8 @@
             </div>
         </section>
 
-        <section class="py-14 border-t border-slate-200/80 bg-white/60 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="galeri">
-            <div class="max-w-7xl mx-auto px-6 reveal">
+        <section class="py-14 border-t border-slate-200/80 bg-white/60 w-full" id="galeri">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 reveal">
                 <h2 class="text-3xl sm:text-4xl font-bold mt-3">Gallery</h2>
                 <p class="text-[var(--muted)] mt-2 text-lg">
                     Aktivitas harian dan kualitas telur UD. Ade Saputra Farm.
@@ -469,8 +470,8 @@
         </section>
 
 
-        <section id="profil" class="py-16 border-t border-slate-200/80 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-            <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+        <section id="profil" class="py-16 border-t border-slate-200/80 w-full">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 items-center">
             <div class="space-y-4">
                 <h2 class="text-3xl font-bold">Kenapa beli langsung di sini?</h2>
                 <p class="text-[var(--muted)] text-lg">
@@ -506,8 +507,8 @@
             </div>
         </section>
 
-        <section class="py-16 border-t border-slate-200/80 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="testimoni">
-            <div class="max-w-7xl mx-auto px-6">
+        <section class="py-16 border-t border-slate-200/80 w-full" id="testimoni">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
                 <div class="testi-slab rounded-[2.5rem] px-8 py-10 lg:px-12 lg:py-14">
                     <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-start">
                         <div class="space-y-6">
@@ -619,8 +620,8 @@
             </div>
         </section>
 
-        <section class="py-16 border-t border-slate-200/80 bg-white/60 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="contact">
-            <div class="max-w-7xl mx-auto px-6">
+        <section class="py-16 border-t border-slate-200/80 bg-white/60 w-full" id="contact">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
                 <div class="text-center space-y-3">
                     <h2 class="text-3xl sm:text-4xl font-bold">Contact</h2>
                 </div>
@@ -713,8 +714,8 @@
             </div>
         </section>
 
-        <section class="py-16 border-t border-slate-200/80 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]" id="developer">
-            <div class="max-w-7xl mx-auto px-6">
+        <section class="py-14 sm:py-16 border-t border-slate-200/80 w-full" id="developer">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
                 <div class="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#0f3d91] via-[#1d4ed8] to-[#0b244f] text-white shadow-[0_40px_80px_rgba(15,61,145,0.35)]">
                     <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
                     <div class="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-emerald-200/10 blur-3xl"></div>
@@ -815,7 +816,7 @@
     </main>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
@@ -846,17 +847,48 @@
                 const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('max-h-0');
-                mobileMenu.classList.toggle('opacity-0');
-                mobileMenu.classList.toggle('-translate-y-2');
-                mobileMenu.classList.toggle('pointer-events-none');
-                mobileMenu.classList.toggle('max-h-96');
-                mobileMenu.classList.toggle('opacity-100');
-                mobileMenu.classList.toggle('translate-y-0');
-                mobileMenu.classList.toggle('pointer-events-auto');
+            let isMenuOpen = false;
+            let allowScrollClose = false;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = 'calc(100vh - 4rem)';
+                isMenuOpen = true;
+                allowScrollClose = false;
+                setTimeout(() => {
+                    allowScrollClose = true;
+                }, 150);
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = '0px';
+                isMenuOpen = false;
+            };
+
+            menuBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isMenuOpen) {
+                    closeMenu();
+                    return;
+                }
+                openMenu();
+            });
+
+            window.addEventListener('scroll', () => {
+                if (isMenuOpen && allowScrollClose) {
+                    closeMenu();
+                }
+            }, { passive: true });
+            window.addEventListener('resize', closeMenu);
+            mobileMenu.querySelectorAll('a, button').forEach((item) => {
+                item.addEventListener('click', closeMenu);
             });
         }
+
+
 
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const initialCartCount = {{ $cartCount ?? 0 }};
@@ -1000,8 +1032,27 @@
             });
         });
     </script>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

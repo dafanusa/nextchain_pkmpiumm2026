@@ -30,6 +30,7 @@ class Order extends Model
         'delivery_schedule_id',
         'shipping_date',
         'shipping_time',
+        'shipping_status',
         'note',
     ];
 

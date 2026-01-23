@@ -18,7 +18,7 @@
                    class="rounded-full bg-amber-100 px-4 py-2 text-sm text-amber-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
         </div>
         <button type="submit"
-                class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 transition">
+                class="inline-flex items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-dark)] transition">
             Tampilkan
         </button>
         <a href="{{ route('admin.payments.index') }}"
@@ -51,10 +51,21 @@
                                 {{ $payment->paid_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? $payment->created_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('admin.payments.edit', $payment) }}"
-                                   class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
-                                    Edit
-                                </a>
+                                <div class="inline-flex flex-nowrap items-center gap-2">
+                                    <a href="{{ route('admin.payments.edit', $payment) }}"
+                                       class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('admin.payments.destroy', $payment) }}" method="post" class="inline">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit"
+                                                onclick="return confirm('Hapus pembayaran ini?')"
+                                                class="inline-flex whitespace-nowrap px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-xs font-semibold text-red-700 hover:border-red-300 hover:bg-red-100 transition">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -71,6 +82,7 @@
         {{ $payments->links() }}
     </div>
 @endsection
+
 
 
 

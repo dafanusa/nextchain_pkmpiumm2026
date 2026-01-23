@@ -46,6 +46,14 @@
                     </select>
                 </div>
                 <div>
+                    <label class="text-sm font-semibold">Status Pengiriman</label>
+                    <select name="shipping_status" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+                        <option value="processing" @selected($order->shipping_status === 'processing')>Diproses</option>
+                        <option value="shipped" @selected($order->shipping_status === 'shipped')>Dikirim</option>
+                        <option value="delivered" @selected($order->shipping_status === 'delivered')>Diterima</option>
+                    </select>
+                </div>
+                <div>
                     <label class="text-sm font-semibold">Status Pembayaran</label>
                     <select name="payment_status" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
                         <option value="unpaid" @selected($order->payment_status === 'unpaid')>Unpaid</option>
@@ -68,6 +76,7 @@
         </div>
     </div>
 @endsection
+
 
 
 

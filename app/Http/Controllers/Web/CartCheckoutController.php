@@ -13,6 +13,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -28,11 +29,14 @@ class CartCheckoutController extends Controller
 
         $items = $cart->items()->with('product')->get();
         $cartItems = $items->map(fn ($item) => $this->mapCartItem($item))->values();
+        $now = now('Asia/Jakarta');
         $schedules = DeliverySchedule::query()
             ->where('is_active', true)
             ->orderBy('delivery_date')
             ->orderBy('delivery_time')
-            ->get();
+            ->get()
+            ->filter(fn (DeliverySchedule $schedule) => $this->isScheduleAvailable($schedule, $now))
+            ->values();
 
         return view('checkout.checkout-cart', compact('cartItems', 'schedules'));
     }
@@ -60,15 +64,19 @@ class CartCheckoutController extends Controller
         $shippingDate = $request->input('shipping_date');
         $shippingTime = $request->input('shipping_time');
 
-        if ($shippingMethod === 'Pengiriman terjadwal') {
+        if (in_array($shippingMethod, ['Pengiriman terjadwal', 'Pickup di farm'], true)) {
+            $expectedType = $shippingMethod === 'Pickup di farm' ? 'pickup' : 'scheduled';
             $deliverySchedule = DeliverySchedule::query()
                 ->whereKey($request->input('delivery_schedule_id'))
                 ->where('is_active', true)
+                ->where('schedule_type', $expectedType)
                 ->first();
 
-            if ($deliverySchedule) {
+            if ($deliverySchedule && $this->isScheduleAvailable($deliverySchedule, now('Asia/Jakarta'))) {
                 $shippingDate = $deliverySchedule->delivery_date;
                 $shippingTime = $deliverySchedule->delivery_time;
+            } else {
+                $deliverySchedule = null;
             }
         }
 
@@ -87,6 +95,7 @@ class CartCheckoutController extends Controller
             'delivery_schedule_id' => $deliverySchedule?->id,
             'shipping_date' => $shippingDate,
             'shipping_time' => $shippingTime,
+            'shipping_status' => 'processing',
             'note' => $request->input('note'),
         ]);
 
@@ -132,6 +141,7 @@ class CartCheckoutController extends Controller
                 'shipping_date' => optional($order->shipping_date)->format('Y-m-d'),
                 'shipping_time' => $order->shipping_time,
                 'delivery_destination' => $order->deliverySchedule?->destination,
+                'shipping_status' => $order->shipping_status ?? 'processing',
                 'note' => $order->note,
             ],
             'midtransClientKey' => $midtransClientKey,
@@ -266,5 +276,54 @@ class CartCheckoutController extends Controller
         return str_starts_with($image, 'products/')
             ? asset('storage/'.$image)
             : asset('assets/'.$image);
+    }
+
+    private function isScheduleAvailable(DeliverySchedule $schedule, Carbon $now): bool
+    {
+        if (! $schedule->delivery_date) {
+            return false;
+        }
+
+        $today = $now->copy()->startOfDay();
+        $scheduleDate = $schedule->delivery_date->copy()->startOfDay();
+
+        if ($scheduleDate->lt($today)) {
+            return false;
+        }
+
+        if ($scheduleDate->gt($today)) {
+            return true;
+        }
+
+        $endTime = $this->extractEndTime($schedule->delivery_time);
+        if (! $endTime) {
+            return true;
+        }
+
+        $endDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $scheduleDate->format('Y-m-d').' '.$endTime,
+            'Asia/Jakarta'
+        );
+
+        return $now->lte($endDateTime);
+    }
+
+    private function extractEndTime(?string $timeRange): ?string
+    {
+        if (! $timeRange) {
+            return null;
+        }
+
+        preg_match_all('/(\d{1,2})[.:](\d{2})/', $timeRange, $matches);
+        if (empty($matches[0])) {
+            return null;
+        }
+
+        $lastIndex = count($matches[0]) - 1;
+        $hour = str_pad($matches[1][$lastIndex], 2, '0', STR_PAD_LEFT);
+        $minute = $matches[2][$lastIndex];
+
+        return $hour.':'.$minute;
     }
 }

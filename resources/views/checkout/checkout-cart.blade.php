@@ -37,11 +37,11 @@
 </head>
 
 <body>
-    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div id="top"></div>
+    <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+                NEXTCHAIN                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -113,7 +113,7 @@
         </div>
     </header>
 
-    <div id="mobileMenu" class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+    <div id="mobileMenu" class="md:hidden fixed top-16 left-0 right-0 z-40 px-6 pb-4 space-y-2 text-sm text-white/90 bg-[var(--brand)] mobile-menu transition-all duration-300 ease-out max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden overflow-y-auto">
         <a href="{{ route('home') }}" class="block">Home</a>
         <a href="{{ route('produk') }}" class="block">Produk</a>
         <a href="{{ route('cart') }}" class="block">Keranjang</a>
@@ -184,11 +184,15 @@
                                     class="mt-2 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
                                 <option value="" disabled selected>Pilih jadwal tersedia</option>
                                 @forelse ($schedules ?? [] as $schedule)
+                                    @php
+                                        $scheduleTime = str_replace('.', ':', $schedule->delivery_time ?? '');
+                                    @endphp
                                     <option value="{{ $schedule->id }}"
                                             data-destination="{{ $schedule->destination }}"
                                             data-date="{{ $schedule->delivery_date->format('Y-m-d') }}"
-                                            data-time="{{ $schedule->delivery_time }}">
-                                        {{ $schedule->destination }} - {{ $schedule->delivery_date->format('d M Y') }} ({{ $schedule->delivery_time }})
+                                            data-time="{{ $scheduleTime }}"
+                                            data-type="{{ $schedule->schedule_type }}">
+                                        {{ $schedule->destination }} - {{ $schedule->delivery_date->format('d M Y') }} ({{ $scheduleTime }})
                                     </option>
                                 @empty
                                     <option value="" disabled>Belum ada jadwal tersedia</option>
@@ -290,20 +294,51 @@
     </footer>
 
     <script>
-        const menuBtn = document.getElementById('menuBtn');
+                const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('max-h-0');
-                mobileMenu.classList.toggle('opacity-0');
-                mobileMenu.classList.toggle('-translate-y-2');
-                mobileMenu.classList.toggle('pointer-events-none');
-                mobileMenu.classList.toggle('max-h-96');
-                mobileMenu.classList.toggle('opacity-100');
-                mobileMenu.classList.toggle('translate-y-0');
-                mobileMenu.classList.toggle('pointer-events-auto');
+            let isMenuOpen = false;
+            let allowScrollClose = false;
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = 'calc(100vh - 4rem)';
+                isMenuOpen = true;
+                allowScrollClose = false;
+                setTimeout(() => {
+                    allowScrollClose = true;
+                }, 150);
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.add('max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                mobileMenu.style.maxHeight = '0px';
+                isMenuOpen = false;
+            };
+
+            menuBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isMenuOpen) {
+                    closeMenu();
+                    return;
+                }
+                openMenu();
+            });
+
+            window.addEventListener('scroll', () => {
+                if (isMenuOpen && allowScrollClose) {
+                    closeMenu();
+                }
+            }, { passive: true });
+            window.addEventListener('resize', closeMenu);
+            mobileMenu.querySelectorAll('a, button').forEach((item) => {
+                item.addEventListener('click', closeMenu);
             });
         }
+
+
 
         const cartCounts = Array.from(document.querySelectorAll('.cart-count'));
         const checkoutItemsEl = document.getElementById('checkoutItems');
@@ -351,16 +386,35 @@
             scheduleInfo.textContent = `Tujuan: ${destination} - ${date} - ${time}`;
         }
 
+        function filterScheduleOptions() {
+            if (!deliverySchedule) return;
+            const method = shippingMethod?.value;
+            const usesSchedule = method === 'Pengiriman terjadwal' || method === 'Pickup di farm';
+            const expectedType = method === 'Pickup di farm' ? 'pickup' : 'scheduled';
+
+            Array.from(deliverySchedule.options).forEach((option) => {
+                if (!option.value) return;
+                const type = option.dataset.type || 'scheduled';
+                option.hidden = usesSchedule ? type !== expectedType : true;
+            });
+
+            if (usesSchedule) {
+                deliverySchedule.value = '';
+            }
+        }
+
         function updateScheduleVisibility() {
-            const isScheduled = shippingMethod?.value === 'Pengiriman terjadwal';
-            scheduleFields?.classList.toggle('hidden', !isScheduled);
-            manualScheduleFields?.classList.toggle('hidden', isScheduled);
+            const method = shippingMethod?.value;
+            const usesSchedule = method === 'Pengiriman terjadwal' || method === 'Pickup di farm';
+            scheduleFields?.classList.toggle('hidden', !usesSchedule);
+            manualScheduleFields?.classList.toggle('hidden', usesSchedule);
 
-            if (deliverySchedule) deliverySchedule.required = isScheduled;
-            if (shippingDate) shippingDate.required = !isScheduled;
-            if (shippingTime) shippingTime.required = !isScheduled;
+            if (deliverySchedule) deliverySchedule.required = usesSchedule;
+            if (shippingDate) shippingDate.required = !usesSchedule;
+            if (shippingTime) shippingTime.required = !usesSchedule;
 
-            if (isScheduled) {
+            if (usesSchedule) {
+                filterScheduleOptions();
                 updateScheduleInfo();
             } else if (scheduleInfo) {
                 scheduleInfo.classList.add('hidden');
@@ -418,8 +472,23 @@
         renderCheckout();
         updateScheduleVisibility();
     </script>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
 
 
 

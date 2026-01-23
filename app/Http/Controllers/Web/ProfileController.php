@@ -44,6 +44,12 @@ class ProfileController extends Controller
             ->flatMap(fn (Cart $cart) => $cart->items)
             ->sum('qty');
 
+        $orders = Order::query()
+            ->where('user_id', $user->id)
+            ->with(['items.product'])
+            ->latest()
+            ->get();
+
         return view('profile.index', [
             'user' => $user,
             'ordersCount' => Order::query()->where('user_id', $user->id)->count(),
@@ -54,6 +60,7 @@ class ProfileController extends Controller
                 ->sum('qty'),
             'profilePhotoUrl' => $profilePhotoUrl,
             'cartCount' => $cartCount,
+            'orders' => $orders,
         ]);
     }
 

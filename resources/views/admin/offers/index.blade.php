@@ -18,7 +18,7 @@
                    class="rounded-full bg-amber-100 px-4 py-2 text-sm text-amber-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
         </div>
         <button type="submit"
-                class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 transition">
+                class="inline-flex items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-dark)] transition">
             Tampilkan
         </button>
         <a href="{{ route('admin.offers.index') }}"
@@ -116,6 +116,7 @@
         {{ $offers->links() }}
     </div>
 @endsection
+
 
 
 

@@ -143,6 +143,7 @@
     </style>
 </head>
 <body>
+    <div id="top"></div>
         <div class="header">
             <div class="header-title">
                 <p class="title">{{ $businessName }}</p>
@@ -252,8 +253,18 @@
             Terima kasih sudah berbelanja di {{ $businessName }}.
         </div>
     </div>
-</body>
+    <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 14l6-6 6 6" />
+        </svg>
+    </a></body>
 </html>
+
+
+
+
+
+
 
 
 

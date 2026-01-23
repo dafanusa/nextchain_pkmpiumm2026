@@ -44,4 +44,9 @@ class Product extends Model
     {
         return $this->hasMany(NegotiationOffer::class);
     }
+
+    public function priceHistories(): HasMany
+    {
+        return $this->hasMany(PriceHistory::class);
+    }
 }
