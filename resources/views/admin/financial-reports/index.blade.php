@@ -1,11 +1,11 @@
 @extends('admin.layout')
 
-@section('title', 'Laporan Keuangan')
+@section('title', 'Laporan Pemasukan')
 
 @section('content')
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-            <h2 class="text-lg font-semibold">Laporan Keuangan</h2>
+            <h2 class="text-lg font-semibold">Laporan Pemasukan</h2>
             <p class="text-sm text-[var(--muted)]">Pilih order, simpan laporan, lalu unduh CSV atau PDF.</p>
         </div>
     </div>
@@ -159,7 +159,7 @@
                         @forelse ($reports as $report)
                             <tr class="border-t border-slate-100">
                                 <td class="px-4 py-3 font-semibold text-[var(--ink)]">
-                                    {{ $report->report_name ?? 'Laporan Keuangan' }}
+                                    {{ $report->report_name ?? 'Laporan Pemasukan' }}
                                 </td>
                                 <td class="px-4 py-3 text-[var(--muted)]">
                                     @if ($report->date_from && $report->date_to)

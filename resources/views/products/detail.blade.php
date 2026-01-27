@@ -200,9 +200,9 @@
             Kembali ke katalog
         </a>
 
-        <div class="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10 items-start">
-            <div class="space-y-4 lg:-mt-6">
-                <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-col">
+        <div class="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+            <div class="flex h-full flex-col gap-4 lg:-mt-6">
+                <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-1 flex-col">
                     <div class="relative w-full aspect-[4/5] lg:max-h-[480px] overflow-hidden rounded-2xl bg-slate-100">
                         <img src="{{ $images[0] ?? $product->image_url }}"
                              id="mainImage"
@@ -222,7 +222,7 @@
                     @endif
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg">
+                <div class="bg-white rounded-3xl p-6 shadow-lg mt-3">
                     <h2 class="text-lg font-semibold">Deskripsi Produk</h2>
                     <p class="text-[var(--muted)] mt-2 leading-relaxed">
                         {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
@@ -244,7 +244,7 @@
                 </div>
             </div>
 
-            <div class="space-y-6">
+            <div class="flex h-full flex-col gap-6">
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold">{{ $product->name }}</h1>
                     <p class="text-[var(--muted)] mt-2">
@@ -274,7 +274,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg min-h-[360px] lg:min-h-[420px] flex flex-col">
+                <div class="bg-white rounded-3xl p-6 shadow-lg min-h-[400px] lg:min-h-[440px] flex flex-1 flex-col">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <p class="text-xs text-[var(--muted)]">Transparansi harga</p>
@@ -294,10 +294,10 @@
                         </div>
                     </div>
                     <div class="mt-4 flex-1">
-                        <canvas id="priceChart" height="240" class="h-full w-full"></canvas>
+                        <canvas id="priceChart" class="h-full w-full"></canvas>
                     </div>
                     <p class="text-xs text-[var(--muted)] mt-3">
-                        Data diambil dari update harga admin (Asia/Jakarta).
+                        Data diambil dari update harga admin UD Ade Saputra Farm.
                     </p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
@@ -389,35 +389,87 @@
         const chartCanvas = document.getElementById('priceChart');
         let priceChart = null;
 
+        const formatPrice = (value) => Number(value).toLocaleString('id-ID');
+        const toNumber = (value) => {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        };
+
         function renderChart(range) {
             if (!chartCanvas) return;
 
             const dataSet = priceData[range];
+            let lastMin = null;
+            let lastMax = null;
+            const normalizedMin = dataSet.min.map((minValue) => {
+                const min = toNumber(minValue);
+                if (min !== null && min !== 0) {
+                    lastMin = min;
+                }
+                return lastMin;
+            });
+            const normalizedMax = dataSet.max.map((maxValue) => {
+                const max = toNumber(maxValue);
+                if (max !== null && max !== 0) {
+                    lastMax = max;
+                }
+                return lastMax;
+            });
+            const rangeData = normalizedMin.map((minValue, index) => {
+                const min = minValue ?? normalizedMax[index];
+                const max = normalizedMax[index] ?? minValue;
+
+                if (min === null || max === null) {
+                    return null;
+                }
+
+                const low = Math.min(min, max);
+                const high = Math.max(min, max);
+
+                return [low, high];
+            });
+
+            const paletteFill = [
+                'rgba(34, 197, 94, 0.25)',
+                'rgba(59, 130, 246, 0.25)',
+                'rgba(249, 115, 22, 0.25)',
+                'rgba(168, 85, 247, 0.25)',
+                'rgba(14, 165, 233, 0.25)',
+                'rgba(239, 68, 68, 0.25)',
+            ];
+            const paletteBorder = [
+                '#22c55e',
+                '#3b82f6',
+                '#f97316',
+                '#a855f7',
+                '#0ea5e9',
+                '#ef4444',
+            ];
+            const barFills = dataSet.labels.map((_, index) => paletteFill[index % paletteFill.length]);
+            const barBorders = dataSet.labels.map((_, index) => paletteBorder[index % paletteBorder.length]);
+
             const chartConfig = {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: dataSet.labels,
                     datasets: [
                         {
-                            label: 'Harga Min',
-                            data: dataSet.min,
-                            borderColor: '#0f3d91',
-                            backgroundColor: 'rgba(15, 61, 145, 0.15)',
-                            tension: 0.35,
-                            spanGaps: true,
-                        },
-                        {
-                            label: 'Harga Max',
-                            data: dataSet.max,
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                            tension: 0.35,
-                            spanGaps: true,
+                            label: 'Min - Max',
+                            data: rangeData,
+                            backgroundColor: barFills,
+                            borderColor: barBorders,
+                            borderWidth: 2,
+                            borderRadius: 0,
+                            borderSkipped: false,
+                            barThickness: 18,
+                            maxBarThickness: 24,
+                            minBarLength: 8,
                         },
                     ],
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: true,
@@ -428,11 +480,33 @@
                                 pointStyle: 'circle',
                             },
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const index = context.dataIndex;
+                                    const min = normalizedMin[index];
+                                    const max = normalizedMax[index];
+                                    if (min === null || max === null || min === undefined || max === undefined) {
+                                        return 'Rentang: -';
+                                    }
+                                    return `Rentang: Rp ${formatPrice(min)} - Rp ${formatPrice(max)}`;
+                                },
+                            },
+                        },
                     },
                     scales: {
+                        x: {
+                            stacked: false,
+                            offset: true,
+                        },
                         y: {
+                            stacked: false,
+                            beginAtZero: true,
                             ticks: {
-                                callback: (value) => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                                maxTicksLimit: 4,
+                                count: 4,
+                                includeBounds: true,
+                                callback: (value) => 'Rp ' + formatPrice(value),
                             },
                         },
                     },
@@ -560,14 +634,6 @@
         </svg>
     </a></body>
 </html>
-
-
-
-
-
-
-
-
 
 
 

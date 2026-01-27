@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Order extends Model
@@ -32,10 +33,12 @@ class Order extends Model
         'shipping_time',
         'shipping_status',
         'note',
+        'stock_deducted_at',
     ];
 
     protected $casts = [
         'shipping_date' => 'date',
+        'stock_deducted_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -56,6 +59,38 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function deductStockIfNeeded(): void
+    {
+        if ($this->stock_deducted_at) {
+            return;
+        }
+
+        $this->loadMissing('items');
+        $qtyByProduct = $this->items
+            ->groupBy('product_id')
+            ->map(fn ($items) => (int) $items->sum('qty'));
+
+        DB::transaction(function () use ($qtyByProduct) {
+            foreach ($qtyByProduct as $productId => $qty) {
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                $product = Product::query()->whereKey($productId)->lockForUpdate()->first();
+                if (! $product) {
+                    continue;
+                }
+
+                $nextStock = max(0, (int) $product->stock - $qty);
+                if ($nextStock !== (int) $product->stock) {
+                    $product->update(['stock' => $nextStock]);
+                }
+            }
+        });
+
+        $this->forceFill(['stock_deducted_at' => now()])->save();
     }
 
     public function ensureInvoiceData(): void

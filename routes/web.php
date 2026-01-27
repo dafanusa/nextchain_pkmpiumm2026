@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CartController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeliveryScheduleController;
+use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\NegotiationOfferController;
 use App\Http\Controllers\Admin\OrderController;
@@ -87,6 +88,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('financial-reports/{report}/csv', [FinancialReportController::class, 'csv'])->name('admin.financial-reports.csv');
     Route::get('financial-reports/{report}/download', [FinancialReportController::class, 'download'])->name('admin.financial-reports.download');
     Route::delete('financial-reports/{report}', [FinancialReportController::class, 'destroy'])->name('admin.financial-reports.destroy');
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('admin.expenses.index');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('admin.expenses.store');
+    Route::get('expenses/csv', [ExpenseController::class, 'csv'])->name('admin.expenses.csv');
+    Route::get('expenses/download', [ExpenseController::class, 'download'])->name('admin.expenses.download');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('admin.expenses.destroy');
     Route::resource('testimonials', TestimonialController::class)->names('admin.testimonials')->only(['index', 'edit', 'update', 'destroy']);
     Route::patch('testimonials/{testimonial}/approve', [TestimonialController::class, 'approve'])->name('admin.testimonials.approve');
     Route::resource('carts', CartController::class)->names('admin.carts')->only(['index', 'show', 'destroy']);
@@ -431,7 +437,8 @@ Route::get('/checkout/{product}/success', function (Product $product) {
         ->with(['items.product', 'deliverySchedule', 'payments'])
         ->first();
 
-    if ($order) {
+    if ($order && $order->payment_status !== 'paid') {
+        $order->deductStockIfNeeded();
         $order->ensureInvoiceData();
         $order->update(['payment_status' => 'paid']);
         if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {
@@ -481,7 +488,8 @@ Route::get('/checkout-cart/success', function () {
         ->with(['items.product', 'deliverySchedule', 'payments'])
         ->first();
 
-    if ($order) {
+    if ($order && $order->payment_status !== 'paid') {
+        $order->deductStockIfNeeded();
         $order->ensureInvoiceData();
         $order->update(['payment_status' => 'paid']);
         if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {

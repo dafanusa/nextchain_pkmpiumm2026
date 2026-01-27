@@ -78,12 +78,18 @@
                     <div class="pl-4 pr-2 pb-3 space-y-1 {{ request()->routeIs('admin.users.*') ? '' : 'hidden' }}" data-admin-submenu-panel="users">
                         <a href="{{ route('admin.users.index') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.users.index') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                <path d="M8 9h8M8 13h6"></path>
+                            </svg>
                             Users List
                         </a>
                         <a href="{{ route('admin.users.detail') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.users.detail') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="4" y="3" width="16" height="18" rx="3"></rect>
+                                <path d="M9 9h6M9 13h6M9 17h4"></path>
+                            </svg>
                             Detail User
                         </a>
                     </div>
@@ -108,12 +114,19 @@
                     <div class="pl-4 pr-2 pb-3 space-y-1 {{ (request()->routeIs('admin.products.*') && !request()->routeIs('admin.products.price')) || request()->routeIs('admin.carts.*') ? '' : 'hidden' }}" data-admin-submenu-panel="products">
                         <a href="{{ route('admin.products.index') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.products.index') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20 7H4l8-4 8 4z"></path>
+                                <path d="M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                            </svg>
                             List Produk
                         </a>
                         <a href="{{ route('admin.carts.index') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.carts.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="9" cy="20" r="1.5"></circle>
+                                <circle cx="17" cy="20" r="1.5"></circle>
+                                <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
+                            </svg>
                             List Carts
                         </a>
                     </div>
@@ -124,10 +137,8 @@
                             data-admin-submenu="prices">
                         <span class="flex items-center gap-3">
                             <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M4 19h16"></path>
-                                <path d="M7 16V8"></path>
-                                <path d="M12 16V5"></path>
-                                <path d="M17 16v-3"></path>
+                                <path d="M12 1.5v21"></path>
+                                <path d="M16 6.5c0-2-1.8-3.5-4-3.5s-4 1.5-4 3.5 1.8 3.5 4 3.5 4 1.5 4 3.5-1.8 3.5-4 3.5-4-1.5-4-3.5"></path>
                             </svg>
                             <span>Harga</span>
                         </span>
@@ -139,13 +150,60 @@
                     <div class="pl-4 pr-2 pb-3 space-y-1 {{ request()->routeIs('admin.products.price') || request()->routeIs('admin.price-histories.*') ? '' : 'hidden' }}" data-admin-submenu-panel="prices">
                         <a href="{{ route('admin.products.price') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.products.price') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 6v12"></path>
+                                <path d="M9 9l3-3 3 3"></path>
+                            </svg>
                             Update Harga
                         </a>
                         <a href="{{ route('admin.price-histories.index') }}"
                            class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.price-histories.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                            <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M7 4v16"></path>
+                                <path d="M11 8h8"></path>
+                                <path d="M11 12h8"></path>
+                                <path d="M11 16h6"></path>
+                            </svg>
                             Riwayat Harga
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-3xl {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? 'bg-white/10 border border-white/10' : '' }}" data-admin-submenu-wrap="reports">
+                    <button type="button"
+                            class="w-full flex items-center justify-between px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}"
+                            data-admin-submenu="reports">
+                        <span class="flex items-center gap-3">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 19h16"></path>
+                                <path d="M7 16V8"></path>
+                                <path d="M12 16V5"></path>
+                                <path d="M17 16v-3"></path>
+                            </svg>
+                            <span>Laporan Keuangan</span>
+                        </span>
+                        <svg data-admin-submenu-caret viewBox="0 0 24 24" class="h-4 w-4 transition-transform {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? 'rotate-180' : '' }}"
+                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </button>
+                    <div class="pl-4 pr-2 pb-3 space-y-1 {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? '' : 'hidden' }}" data-admin-submenu-panel="reports">
+                        <a href="{{ route('admin.financial-reports.index') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.financial-reports.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 19V5"></path>
+                                <path d="M8 9l4-4 4 4"></path>
+                                <path d="M6 19h12"></path>
+                            </svg>
+                            Laporan Pemasukan
+                        </a>
+                        <a href="{{ route('admin.expenses.index') }}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-xs hover:bg-white/10 {{ request()->routeIs('admin.expenses.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                            <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 5v14"></path>
+                                <path d="M8 15l4 4 4-4"></path>
+                                <path d="M6 5h12"></path>
+                            </svg>
+                            Laporan Pengeluaran
                         </a>
                     </div>
                 </div>
@@ -180,16 +238,6 @@
                         <path d="M7 15h4"></path>
                     </svg>
                     Payments
-                </a>
-                <a href="{{ route('admin.financial-reports.index') }}"
-                   class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.financial-reports.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M4 19h16"></path>
-                        <path d="M7 16V8"></path>
-                        <path d="M12 16V5"></path>
-                        <path d="M17 16v-3"></path>
-                    </svg>
-                    Laporan Keuangan
                 </a>
                 <a href="{{ route('admin.testimonials.index') }}"
                    class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-white/10 {{ request()->routeIs('admin.testimonials.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
@@ -259,11 +307,17 @@
                 </button>
                 <div class="pl-2 space-y-1 {{ request()->routeIs('admin.users.*') ? '' : 'hidden' }}" data-admin-submenu-panel="users-mobile">
                     <a href="{{ route('admin.users.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                            <path d="M8 9h8M8 13h6"></path>
+                        </svg>
                         Users List
                     </a>
                     <a href="{{ route('admin.users.detail') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="4" y="3" width="16" height="18" rx="3"></rect>
+                            <path d="M9 9h6M9 13h6M9 17h4"></path>
+                        </svg>
                         Detail User
                     </a>
                 </div>
@@ -285,11 +339,18 @@
                 </button>
                 <div class="pl-2 space-y-1 {{ (request()->routeIs('admin.products.*') && !request()->routeIs('admin.products.price')) || request()->routeIs('admin.carts.*') ? '' : 'hidden' }}" data-admin-submenu-panel="products-mobile">
                     <a href="{{ route('admin.products.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.products.index') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 7H4l8-4 8 4z"></path>
+                            <path d="M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                        </svg>
                         List Produk
                     </a>
                     <a href="{{ route('admin.carts.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.carts.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="9" cy="20" r="1.5"></circle>
+                            <circle cx="17" cy="20" r="1.5"></circle>
+                            <path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5h7.5a2 2 0 0 0 2-1.6L21 8H7.2"></path>
+                        </svg>
                         List Carts
                     </a>
                 </div>
@@ -298,10 +359,8 @@
                         data-admin-submenu="prices-mobile">
                     <span class="flex items-center gap-2">
                         <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M4 19h16"></path>
-                            <path d="M7 16V8"></path>
-                            <path d="M12 16V5"></path>
-                            <path d="M17 16v-3"></path>
+                            <path d="M12 1.5v21"></path>
+                            <path d="M16 6.5c0-2-1.8-3.5-4-3.5s-4 1.5-4 3.5 1.8 3.5 4 3.5 4 1.5 4 3.5-1.8 3.5-4 3.5-4-1.5-4-3.5"></path>
                         </svg>
                         Harga
                     </span>
@@ -312,12 +371,55 @@
                 </button>
                 <div class="pl-2 space-y-1 hidden" data-admin-submenu-panel="prices-mobile">
                     <a href="{{ route('admin.products.price') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.products.price') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 6v12"></path>
+                            <path d="M9 9l3-3 3 3"></path>
+                        </svg>
                         Update Harga
                     </a>
                     <a href="{{ route('admin.price-histories.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.price-histories.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
-                        <span class="h-1.5 w-1.5 rounded-full bg-white/60"></span>
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M7 4v16"></path>
+                            <path d="M11 8h8"></path>
+                            <path d="M11 12h8"></path>
+                            <path d="M11 16h6"></path>
+                        </svg>
                         Riwayat Harga
+                    </a>
+                </div>
+                <button type="button"
+                        class="admin-menu-link flex w-full items-center justify-between rounded-lg px-2 py-1"
+                        data-admin-submenu="reports-mobile">
+                    <span class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 19h16"></path>
+                            <path d="M7 16V8"></path>
+                            <path d="M12 16V5"></path>
+                            <path d="M17 16v-3"></path>
+                        </svg>
+                        Laporan Keuangan
+                    </span>
+                    <svg data-admin-submenu-caret viewBox="0 0 24 24" class="h-4 w-4 transition-transform {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? 'rotate-180' : '' }}"
+                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6"></path>
+                    </svg>
+                </button>
+                <div class="pl-2 space-y-1 {{ request()->routeIs('admin.financial-reports.*') || request()->routeIs('admin.expenses.*') ? '' : 'hidden' }}" data-admin-submenu-panel="reports-mobile">
+                    <a href="{{ route('admin.financial-reports.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.financial-reports.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 19V5"></path>
+                            <path d="M8 9l4-4 4 4"></path>
+                            <path d="M6 19h12"></path>
+                        </svg>
+                        Laporan Pemasukan
+                    </a>
+                    <a href="{{ route('admin.expenses.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1 text-xs {{ request()->routeIs('admin.expenses.*') ? 'bg-white/15 ring-1 ring-white/30' : '' }}">
+                        <svg viewBox="0 0 24 24" class="h-3 w-3 text-white/70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 5v14"></path>
+                            <path d="M8 15l4 4 4-4"></path>
+                            <path d="M6 5h12"></path>
+                        </svg>
+                        Laporan Pengeluaran
                     </a>
                 </div>
                 <a href="{{ route('admin.delivery-schedules.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
@@ -347,15 +449,6 @@
                         <path d="M7 15h4"></path>
                     </svg>
                     Payments
-                </a>
-                <a href="{{ route('admin.financial-reports.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
-                    <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M4 19h16"></path>
-                        <path d="M7 16V8"></path>
-                        <path d="M12 16V5"></path>
-                        <path d="M17 16v-3"></path>
-                    </svg>
-                    Laporan Keuangan
                 </a>
                 <a href="{{ route('admin.testimonials.index') }}" class="admin-menu-link flex items-center gap-2 rounded-lg px-2 py-1">
                     <svg viewBox="0 0 24 24" class="h-4 w-4 text-white/80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

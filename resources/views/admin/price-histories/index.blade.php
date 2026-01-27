@@ -34,7 +34,7 @@
             Silakan pilih produk untuk melihat grafik dan riwayat harga.
         </div>
     @else
-        <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div class="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
             <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -120,30 +120,79 @@
         const chartCanvas = document.getElementById('priceChart');
         let priceChart = null;
 
+        const formatPrice = (value) => Number(value).toLocaleString('id-ID');
+        const toNumber = (value) => {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        };
+
         function renderChart(range) {
             if (!chartCanvas) return;
 
             const dataSet = priceData[range];
+            let lastMin = null;
+            let lastMax = null;
+            const normalizedMin = dataSet.min.map((minValue) => {
+                const min = toNumber(minValue);
+                if (min !== null && min !== 0) {
+                    lastMin = min;
+                }
+                return lastMin;
+            });
+            const normalizedMax = dataSet.max.map((maxValue) => {
+                const max = toNumber(maxValue);
+                if (max !== null && max !== 0) {
+                    lastMax = max;
+                }
+                return lastMax;
+            });
+            const rangeData = normalizedMin.map((minValue, index) => {
+                const min = minValue ?? normalizedMax[index];
+                const max = normalizedMax[index] ?? minValue;
+
+                if (min === null || max === null) {
+                    return null;
+                }
+
+                const low = Math.min(min, max);
+                const high = Math.max(min, max);
+
+                return [low, high];
+            });
+
+            const paletteFill = [
+                'rgba(34, 197, 94, 0.25)',
+                'rgba(59, 130, 246, 0.25)',
+                'rgba(249, 115, 22, 0.25)',
+                'rgba(168, 85, 247, 0.25)',
+                'rgba(14, 165, 233, 0.25)',
+                'rgba(239, 68, 68, 0.25)',
+            ];
+            const paletteBorder = [
+                '#22c55e',
+                '#3b82f6',
+                '#f97316',
+                '#a855f7',
+                '#0ea5e9',
+                '#ef4444',
+            ];
+            const barFills = dataSet.labels.map((_, index) => paletteFill[index % paletteFill.length]);
+            const barBorders = dataSet.labels.map((_, index) => paletteBorder[index % paletteBorder.length]);
+
             const chartConfig = {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: dataSet.labels,
                     datasets: [
                         {
-                            label: 'Harga Min',
-                            data: dataSet.min,
-                            borderColor: '#0f3d91',
-                            backgroundColor: 'rgba(15, 61, 145, 0.15)',
-                            tension: 0.35,
-                            spanGaps: true,
-                        },
-                        {
-                            label: 'Harga Max',
-                            data: dataSet.max,
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                            tension: 0.35,
-                            spanGaps: true,
+                            label: 'Min - Max',
+                            data: rangeData,
+                            backgroundColor: barFills,
+                            borderColor: barBorders,
+                            borderWidth: 2,
+                            borderRadius: 0,
+                            borderSkipped: false,
+                            barThickness: 16,
                         },
                     ],
                 },
@@ -159,11 +208,24 @@
                                 pointStyle: 'circle',
                             },
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const index = context.dataIndex;
+                                    const min = normalizedMin[index];
+                                    const max = normalizedMax[index];
+                                    if (min === null || max === null || min === undefined || max === undefined) {
+                                        return 'Rentang: -';
+                                    }
+                                    return `Rentang: Rp ${formatPrice(min)} - Rp ${formatPrice(max)}`;
+                                },
+                            },
+                        },
                     },
                     scales: {
                         y: {
                             ticks: {
-                                callback: (value) => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                                callback: (value) => 'Rp ' + formatPrice(value),
                             },
                         },
                     },

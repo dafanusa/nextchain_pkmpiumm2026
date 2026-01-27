@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Pemasukan</title>
+    <title>Laporan Pengeluaran</title>
     <style>
         @page {
             margin: 18px;
@@ -98,42 +98,36 @@
 <body>
     <div class="header">
         <div class="header-title">
-            <p class="title">{{ $report->report_name ?? 'Laporan Pemasukan' }}</p>
+            <p class="title">Laporan Pengeluaran</p>
         </div>
         <p class="sub">UD. Ade Saputra Farm</p>
     </div>
 
     <div class="meta">
-        <div>Periode: <strong>{{ $report->date_from?->format('d M Y') ?? '-' }}</strong> - <strong>{{ $report->date_to?->format('d M Y') ?? '-' }}</strong></div>
-        <div>Total Order: <strong>{{ $report->total_orders }}</strong></div>
-        <div>Total Pendapatan: <strong>Rp {{ number_format($report->total_amount) }}</strong></div>
-        <div>Dibuat: <strong>{{ $report->created_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}</strong></div>
+        <div>Periode: <strong>{{ $dateFrom ?? '-' }}</strong> - <strong>{{ $dateTo ?? '-' }}</strong></div>
+        <div>Kelompok: <strong>{{ strtoupper($groupBy) }}</strong></div>
+        <div>Total Pengeluaran: <strong>Rp {{ number_format($summaryTotal) }}</strong></div>
+        <div>Dibuat: <strong>{{ now('Asia/Jakarta')->format('d M Y H:i') }}</strong></div>
     </div>
 
     <table>
         <thead>
             <tr>
                 <th>No</th>
-                <th>Order</th>
-                <th>Pelanggan</th>
-                <th>Status</th>
-                <th>Pembayaran</th>
-                <th class="right">Total</th>
+                <th>Tanggal</th>
+                <th>Kategori</th>
+                <th>Catatan</th>
+                <th class="right">Jumlah</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($orders as $index => $order)
-                @php
-                    $payment = $order->payments->sortByDesc('paid_at')->first()
-                        ?? $order->payments->sortByDesc('created_at')->first();
-                @endphp
+            @foreach ($expenses as $index => $expense)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $order->order_number }}</td>
-                    <td>{{ $order->user?->name ?? $order->buyer_name ?? 'Guest' }}</td>
-                    <td>{{ $order->status }}</td>
-                    <td>{{ $order->payment_status }}{{ $payment?->method ? ' · '.$payment->method : '' }}</td>
-                    <td class="right">Rp {{ number_format($order->total) }}</td>
+                    <td>{{ $expense->expense_date?->format('d M Y') }}</td>
+                    <td>{{ $expense->category }}</td>
+                    <td>{{ $expense->description ?? '-' }}</td>
+                    <td class="right">Rp {{ number_format($expense->amount) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -141,14 +135,30 @@
 
     <table class="totals">
         <tr>
-            <td>Total Pendapatan</td>
-            <td class="right grand">Rp {{ number_format($report->total_amount) }}</td>
+            <td>Total Pengeluaran</td>
+            <td class="right grand">Rp {{ number_format($summaryTotal) }}</td>
         </tr>
     </table>
 
+    <table>
+        <thead>
+            <tr>
+                <th>Periode</th>
+                <th class="right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($grouped as $row)
+                <tr>
+                    <td>{{ $row['label'] }}</td>
+                    <td class="right">Rp {{ number_format($row['total']) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
     <div class="footer">
-        Laporan pemasukan otomatis dari sistem NEXTCHAIN.
+        Laporan pengeluaran otomatis dari sistem NEXTCHAIN.
     </div>
 </body>
 </html>
-

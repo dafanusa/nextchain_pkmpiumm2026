@@ -378,9 +378,9 @@
                     <div class="absolute -bottom-10 -right-8 h-36 w-36 rounded-full bg-[var(--mint)]/20 blur-2xl"></div>
                     <div class="grid grid-cols-2 gap-4">
                         <img src="{{ asset('assets/ternakayam.jpg') }}" alt="Produksi telur"
-                             class="rounded-3xl h-56 w-full object-cover">
+                             class="rounded-3xl aspect-[4/3] w-full object-cover">
                         <img src="{{ asset('assets/ternakayam1.jpg') }}" alt="Kualitas telur"
-                             class="rounded-3xl h-56 w-full object-cover mt-8">
+                             class="rounded-3xl aspect-[4/3] w-full object-cover">
                         <div class="col-span-2 bg-gradient-to-r from-[#0f3d91] to-[#1d5bbf] rounded-3xl p-6 text-white">
                             <p class="text-xs text-white/70">Harga hari ini</p>
                             <p class="text-2xl font-semibold mt-2">
