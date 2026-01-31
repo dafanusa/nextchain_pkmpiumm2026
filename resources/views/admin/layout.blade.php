@@ -40,9 +40,95 @@
             transform: translateY(0);
             pointer-events: auto;
         }
+
+        .page-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(900px 450px at 15% 10%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%),
+                linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 180ms ease, visibility 180ms ease;
+        }
+
+        .page-loading-overlay.is-active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .page-loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transform: translateY(16px) scale(0.98);
+            opacity: 0;
+            transition: transform 320ms ease, opacity 320ms ease;
+        }
+
+        .page-loading-overlay.is-active .page-loading-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .page-loading-spinner {
+            width: 86px;
+            height: 86px;
+            border-radius: 9999px;
+            border: 5px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-right-color: rgba(255, 255, 255, 0.85);
+            box-shadow:
+                0 0 0 6px rgba(255, 255, 255, 0.08),
+                0 20px 45px rgba(10, 45, 108, 0.45);
+            animation: page-loading-spin 0.9s linear infinite;
+        }
+
+        .page-loading-text {
+            font-size: clamp(2.6rem, 6vw, 4.25rem);
+            font-weight: 800;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow:
+                0 12px 30px rgba(10, 45, 108, 0.55),
+                0 0 18px rgba(255, 255, 255, 0.18);
+            animation: page-loading-text-enter 620ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+
+        @keyframes page-loading-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes page-loading-text-enter {
+            from {
+                transform: translateY(18px) scale(0.96);
+                opacity: 0;
+                filter: blur(4px);
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
     </style>
 </head>
-<body>
+<body data-disable-loading="true">
+    <div id="pageLoadingOverlay" class="page-loading-overlay" role="status" aria-live="polite" aria-label="Loading">
+        <div class="page-loading-content">
+            <div class="page-loading-spinner" aria-hidden="true"></div>
+            <div class="page-loading-text">NEXTCHAIN</div>
+        </div>
+    </div>
     <div class="min-h-screen flex items-start overflow-x-hidden">
         <aside class="w-72 hidden lg:flex flex-col bg-[var(--brand)] text-white px-6 py-8 fixed top-0 left-0 h-screen overflow-y-auto">
             <div class="flex items-center justify-between">
@@ -473,6 +559,63 @@
         </div>
     </div>
     <script>
+        const pageLoadingOverlay = document.getElementById('pageLoadingOverlay');
+        const loadingDisabled = document.body?.dataset?.disableLoading === 'true';
+
+        if (loadingDisabled && pageLoadingOverlay) {
+            pageLoadingOverlay.classList.remove('is-active');
+        }
+
+        const showPageLoadingOverlay = () => {
+            if (loadingDisabled || !pageLoadingOverlay) {
+                return;
+            }
+            pageLoadingOverlay.classList.add('is-active');
+        };
+
+        const hidePageLoadingOverlay = () => {
+            if (loadingDisabled || !pageLoadingOverlay) {
+                return;
+            }
+            pageLoadingOverlay.classList.remove('is-active');
+        };
+
+        if (!loadingDisabled) {
+            window.addEventListener('pageshow', hidePageLoadingOverlay);
+            window.addEventListener('load', hidePageLoadingOverlay);
+
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) {
+                    return;
+                }
+
+                const link = target.closest('a[href]');
+                if (!link) {
+                    return;
+                }
+
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+                    return;
+                }
+
+                const url = new URL(link.href, window.location.origin);
+                const isSameOrigin = url.origin === window.location.origin;
+                const isSamePage = url.pathname === window.location.pathname && url.search === window.location.search;
+                const opensNewTab = link.getAttribute('target') === '_blank';
+                const isDownload = link.hasAttribute('download');
+                const hasBypass = link.hasAttribute('data-no-loading');
+                const hasModifierKey = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+
+                if (!isSameOrigin || isSamePage || opensNewTab || isDownload || hasBypass || hasModifierKey) {
+                    return;
+                }
+
+                showPageLoadingOverlay();
+            }, { capture: true });
+        }
+
         const adminMenuBtn = document.getElementById('adminMenuBtn');
 const adminMobileMenu = document.getElementById('adminMobileMenu');
 if (adminMenuBtn && adminMobileMenu) {
@@ -538,6 +681,7 @@ if (adminMenuBtn && adminMobileMenu) {
             });
         });
     </script>
+    @stack('scripts')
 </body>
 </html>
 

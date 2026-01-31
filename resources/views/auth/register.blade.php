@@ -39,6 +39,7 @@
 </head>
 
 <body>
+    @include('loading-overlay')
     <div id="top"></div>
     <main class="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-hidden">
         <div class="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl"></div>

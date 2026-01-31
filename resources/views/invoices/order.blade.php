@@ -143,6 +143,7 @@
     </style>
 </head>
 <body>
+    @include('loading-overlay')
     <div id="top"></div>
         <div class="header">
             <div class="header-title">

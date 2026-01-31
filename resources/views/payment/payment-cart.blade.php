@@ -98,6 +98,7 @@
 </head>
 
 <body>
+    @include('loading-overlay')
     <div id="top"></div>
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">

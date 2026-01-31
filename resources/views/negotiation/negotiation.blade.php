@@ -49,6 +49,7 @@
 </head>
 
 <body class="overflow-x-hidden">
+    @include('loading-overlay')
     <div id="top"></div>
     <div class="fixed inset-0 -z-10 overflow-hidden">
         <div class="absolute -top-20 -left-24 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl"></div>

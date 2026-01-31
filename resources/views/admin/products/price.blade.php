@@ -50,11 +50,29 @@
                                     @csrf
                                     @method('patch')
                                     <div class="flex items-center gap-2">
-                                        <input type="number" name="price_min" min="0" value="{{ old('price_min', $product->price_min) }}"
-                                               class="w-28 rounded-full border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-200">
+                                        <input
+                                            type="text"
+                                            inputmode="numeric"
+                                            autocomplete="off"
+                                            data-price-display
+                                            data-price-target="price_min_{{ $product->id }}"
+                                            value="{{ number_format((int) old('price_min', $product->price_min)) }}"
+                                            placeholder="cth: 2.5j / 2500000"
+                                            class="w-36 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        >
+                                        <input type="hidden" name="price_min" id="price_min_{{ $product->id }}" value="{{ old('price_min', $product->price_min) }}">
                                         <span class="text-xs text-[var(--muted)]">-</span>
-                                        <input type="number" name="price_max" min="0" value="{{ old('price_max', $product->price_max) }}"
-                                               class="w-28 rounded-full border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-200">
+                                        <input
+                                            type="text"
+                                            inputmode="numeric"
+                                            autocomplete="off"
+                                            data-price-display
+                                            data-price-target="price_max_{{ $product->id }}"
+                                            value="{{ number_format((int) old('price_max', $product->price_max)) }}"
+                                            placeholder="cth: 2.5j / 2500000"
+                                            class="w-36 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        >
+                                        <input type="hidden" name="price_max" id="price_max_{{ $product->id }}" value="{{ old('price_max', $product->price_max) }}">
                                     </div>
                                     <button type="submit"
                                             class="inline-flex px-3 py-1.5 rounded-full bg-[var(--brand)] text-white text-xs font-semibold hover:bg-[var(--brand-dark)] transition">
@@ -83,4 +101,118 @@
         {{ $products->links() }}
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const displayInputs = Array.from(document.querySelectorAll('[data-price-display]'));
+            if (displayInputs.length === 0) {
+                return;
+            }
+
+            const jutaPattern = /(jt|juta|j)\s*$/i;
+
+            const normalizeNumericPart = (value, isJuta) => {
+                const stripped = value.replace(/[^0-9.]/g, '');
+                const dotCount = (stripped.match(/\./g) ?? []).length;
+
+                if (dotCount > 1) {
+                    return stripped.replace(/\./g, '');
+                }
+
+                if (!isJuta && dotCount === 1) {
+                    const [left, right] = stripped.split('.');
+                    if ((right?.length ?? 0) === 3 && (left?.length ?? 0) >= 1) {
+                        return `${left}${right}`;
+                    }
+                }
+
+                return stripped;
+            };
+
+            const parseToNumber = (rawValue) => {
+                const normalized = rawValue
+                    .trim()
+                    .toLowerCase()
+                    .replace(/\s+/g, '')
+                    .replace(/,/g, '.');
+
+                if (normalized === '') {
+                    return null;
+                }
+
+                const isJuta = jutaPattern.test(normalized);
+                const numericCandidate = normalized.replace(jutaPattern, '');
+                const numericPart = normalizeNumericPart(numericCandidate, isJuta);
+
+                if (numericPart === '') {
+                    return null;
+                }
+
+                const parsed = Number(numericPart);
+                if (Number.isNaN(parsed)) {
+                    return null;
+                }
+
+                const value = isJuta ? parsed * 1_000_000 : parsed;
+                return Math.round(value);
+            };
+
+            const formatNumber = (value) => {
+                if (value === null) {
+                    return '';
+                }
+                return new Intl.NumberFormat('id-ID').format(value);
+            };
+
+            const syncHiddenInput = (displayInput, shouldFormatDisplay = true) => {
+                const targetId = displayInput.getAttribute('data-price-target');
+                if (!targetId) {
+                    return;
+                }
+                const hiddenInput = document.getElementById(targetId);
+                if (!hiddenInput) {
+                    return;
+                }
+
+                const parsedNumber = parseToNumber(displayInput.value);
+                if (parsedNumber === null) {
+                    hiddenInput.value = '';
+                    if (shouldFormatDisplay) {
+                        displayInput.value = '';
+                    }
+                    return;
+                }
+
+                hiddenInput.value = String(parsedNumber);
+                if (shouldFormatDisplay) {
+                    displayInput.value = formatNumber(parsedNumber);
+                }
+            };
+
+            displayInputs.forEach((input) => {
+                syncHiddenInput(input, true);
+
+                input.addEventListener('input', () => {
+                    syncHiddenInput(input, false);
+                });
+
+                input.addEventListener('blur', () => {
+                    syncHiddenInput(input, true);
+                });
+            });
+
+            const forms = new Set(displayInputs.map((input) => input.form).filter(Boolean));
+            forms.forEach((form) => {
+                form.addEventListener('submit', () => {
+                    displayInputs
+                        .filter((input) => input.form === form)
+                        .forEach((input) => {
+                            syncHiddenInput(input, true);
+                        });
+                });
+            });
+        });
+    </script>
+@endpush
 
