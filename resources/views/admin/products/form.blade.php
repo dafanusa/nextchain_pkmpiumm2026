@@ -72,6 +72,23 @@
                     </p>
                 </div>
                 <div class="sm:col-span-2">
+                    <label class="text-sm font-semibold">Galeri Produk (Multi Gambar)</label>
+                    <input type="file" name="gallery_images[]" accept=".jpg,.jpeg,.png,.webp" multiple
+                           class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+                    <p class="text-xs text-[var(--muted)] mt-2">
+                        Kamu bisa pilih beberapa gambar sekaligus untuk ditampilkan di detail produk.
+                    </p>
+                    @if ($product->exists && $product->images->isNotEmpty())
+                        <div class="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            @foreach ($product->images as $image)
+                                <img src="{{ $image->image_url }}"
+                                     alt="Galeri {{ $product->name }}"
+                                     class="h-16 w-full rounded-xl object-cover border border-slate-200">
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                <div class="sm:col-span-2">
                     <label class="text-sm font-semibold">Path Gambar (opsional)</label>
                     <input type="text" name="image" value="{{ old('image', $product->image) }}"
                            class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">

@@ -184,7 +184,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
             <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-tight inline-flex items-center gap-2 whitespace-nowrap">
                 <span>NEXTCHAIN</span>
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-9 w-9 sm:h-12 sm:w-12 object-contain">
+                <img src="{{ asset('assets/Nextchainumm.png') }}" alt="Logo Nextchain" class="h-16 w-16 sm:h-16 sm:w-16 object-contain">
             </a>
 
             <nav class="hidden xl:flex items-center gap-5 text-sm font-medium text-white/80">
@@ -1039,6 +1039,7 @@
         </svg>
     </a></body>
 </html>
+
 
 
 

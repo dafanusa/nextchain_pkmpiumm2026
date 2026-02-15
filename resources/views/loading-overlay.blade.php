@@ -159,12 +159,9 @@
 
         const closeButton = overlay.querySelector('[data-loading-close]');
         const hideDelayMs = 3000;
-        const storageKey = 'nextchain:loading-overlay';
+        const shownKey = 'nextchain:loading-overlay:shown';
         let hideTimeoutId = null;
         let hasShownOverlay = false;
-        const navigationEntry = window.performance.getEntriesByType('navigation')[0];
-        const navigationType = navigationEntry?.type ?? 'navigate';
-        const shouldShowOnInitialLoad = navigationType === 'navigate' || navigationType === 'reload';
 
         const showOverlay = () => {
             overlay.classList.add('is-active');
@@ -186,19 +183,12 @@
         };
 
         const showOverlayIfRequested = () => {
-            if (hasShownOverlay) {
-                return;
-            }
-            const shouldShowFromStorage = window.sessionStorage.getItem(storageKey) === '1';
-            const shouldShowOverlay = shouldShowFromStorage || shouldShowOnInitialLoad;
-            if (!shouldShowOverlay) {
+            if (hasShownOverlay || window.sessionStorage.getItem(shownKey) === '1') {
                 return;
             }
 
             hasShownOverlay = true;
-            if (shouldShowFromStorage) {
-                window.sessionStorage.removeItem(storageKey);
-            }
+            window.sessionStorage.setItem(shownKey, '1');
             showOverlay();
             scheduleHide();
         };
@@ -217,36 +207,6 @@
         window.addEventListener('load', () => {
             showOverlayIfRequested();
         });
-
-        document.addEventListener('click', (event) => {
-            const target = event.target;
-            if (!(target instanceof Element)) {
-                return;
-            }
-
-            const link = target.closest('a[href]');
-            if (!link) {
-                return;
-            }
-
-            const href = link.getAttribute('href');
-            if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
-                return;
-            }
-
-            const url = new URL(link.href, window.location.origin);
-            const isSameOrigin = url.origin === window.location.origin;
-            const opensNewTab = link.getAttribute('target') === '_blank';
-            const isDownload = link.hasAttribute('download');
-            const hasBypass = link.hasAttribute('data-no-loading');
-            const hasModifierKey = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-
-            if (!isSameOrigin || opensNewTab || isDownload || hasBypass || hasModifierKey) {
-                return;
-            }
-
-            window.sessionStorage.setItem(storageKey, '1');
-        }, { capture: true });
 
         hideOverlay();
         showOverlayIfRequested();

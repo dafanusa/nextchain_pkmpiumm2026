@@ -108,13 +108,23 @@ Route::get('/produk', function () {
         ->latest('id')
         ->get();
 
+    if ($products->count() === 1) {
+        return redirect()->route('produk.detail', $products->first());
+    }
+
     return view('products.product', compact('products'));
 })->name('produk');
 
 /* DETAIL */
 Route::get('/produk/{product}', function (Product $product) {
     abort_if(! $product->is_active, 404);
-    $images = [$product->image_url];
+    $product->loadMissing('images');
+    $images = collect([$product->image_url])
+        ->merge($product->images->pluck('image_url'))
+        ->filter()
+        ->unique()
+        ->values()
+        ->all();
     $today = now('Asia/Jakarta')->startOfDay();
     $histories = PriceHistory::query()
         ->where('product_id', $product->id)
@@ -161,6 +171,13 @@ Route::get('/produk/{product}', function (Product $product) {
         $weeklyMax[] = $weekData->isEmpty() ? null : (int) round($weekData->avg('price_max'));
     }
 
+    $latestPriceHistory = PriceHistory::query()
+        ->where('product_id', $product->id)
+        ->latest('updated_at')
+        ->first();
+    $priceUpdatedAt = $latestPriceHistory?->updated_at;
+    $stockUpdatedAt = $product->stock_updated_at;
+
     return view('products.detail', compact(
         'product',
         'images',
@@ -169,7 +186,9 @@ Route::get('/produk/{product}', function (Product $product) {
         'dailyMax',
         'weeklyLabels',
         'weeklyMin',
-        'weeklyMax'
+        'weeklyMax',
+        'priceUpdatedAt',
+        'stockUpdatedAt'
     ));
 })->name('produk.detail');
 

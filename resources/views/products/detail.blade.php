@@ -95,7 +95,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
             <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-tight inline-flex items-center gap-2 whitespace-nowrap">
                 <span>NEXTCHAIN</span>
-                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-9 w-9 sm:h-12 sm:w-12 object-contain">
+                <img src="{{ asset('assets/Nextchainumm.png') }}" alt="Logo Nextchain" class="h-16 w-16 sm:h-16 sm:w-16 object-contain">
             </a>
             <nav class="hidden xl:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -201,10 +201,10 @@
             Kembali ke katalog
         </a>
 
-        <div class="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+        <div class="mt-6 grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-10 items-stretch">
             <div class="flex h-full flex-col gap-4 lg:-mt-6">
                 <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-1 flex-col">
-                    <div class="relative w-full aspect-[4/5] lg:max-h-[480px] overflow-hidden rounded-2xl bg-slate-100">
+                    <div class="relative w-full aspect-[1/1] sm:aspect-[4/5] lg:max-h-[480px] overflow-hidden rounded-2xl bg-slate-100">
                         <img src="{{ $images[0] ?? $product->image_url }}"
                              id="mainImage"
                              alt="{{ $product->name }}"
@@ -212,18 +212,18 @@
                     </div>
 
                     @if (!empty($images))
-                    <div class="grid grid-cols-4 gap-3 mt-4">
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
                         @foreach ($images as $img)
                             <img src="{{ $img }}"
                                  alt="Thumbnail {{ $product->name }}"
                                  onclick="document.getElementById('mainImage').src='{{ $img }}'"
-                                 class="h-20 w-full object-cover rounded-xl cursor-pointer border border-transparent hover:border-[var(--brand)] transition">
+                                 class="h-16 sm:h-20 w-full object-cover rounded-xl cursor-pointer border border-transparent hover:border-[var(--brand)] transition">
                         @endforeach
                     </div>
                     @endif
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg mt-3">
+                <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-lg mt-3">
                     <h2 class="text-lg font-semibold">Deskripsi Produk</h2>
                     <p class="text-[var(--muted)] mt-2 leading-relaxed">
                         {{ $product->description ?? 'Deskripsi produk belum tersedia.' }}
@@ -253,13 +253,13 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg">
+                <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
                     <p class="text-xs text-[var(--muted)]">Harga real-time</p>
-                    <p class="text-3xl font-bold text-[var(--brand)] mt-2">
+                    <p class="text-2xl sm:text-3xl font-bold text-[var(--brand)] mt-2">
                         Rp {{ number_format($product->price_min) }} - Rp {{ number_format($product->price_max) }}
                         / {{ $product->unit }}
                     </p>
-                    <div class="grid grid-cols-2 gap-4 mt-4 text-sm text-[var(--muted)]">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4 mt-4 text-sm text-[var(--muted)]">
                         <div>
                             <p class="text-xs uppercase tracking-wide">MOQ</p>
                             <p class="text-base font-semibold text-[var(--ink)]">
@@ -273,9 +273,27 @@
                             </p>
                         </div>
                     </div>
+                    <div class="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-[var(--muted)]">
+                        <div class="grid grid-cols-2 gap-4 sm:gap-6 text-[11px] sm:text-sm">
+                            <div>
+                                <p class="uppercase tracking-wide text-[10px] sm:text-xs">Harga terakhir diperbarui</p>
+                                <p class="mt-1 text-sm sm:text-base font-semibold text-[var(--ink)] leading-snug">
+                                    {{ optional($priceUpdatedAt)->timezone('Asia/Jakarta')->format('d M Y') ?? '-' }}
+                                    <span class="block">{{ optional($priceUpdatedAt)->timezone('Asia/Jakarta')->format('H:i') ?? '-' }} WIB</span>
+                                </p>
+                            </div>
+                            <div>
+                                <p class="uppercase tracking-wide text-[10px] sm:text-xs">Stok terakhir diperbarui</p>
+                                <p class="mt-1 text-sm sm:text-base font-semibold text-[var(--ink)] leading-snug">
+                                    {{ optional($stockUpdatedAt)->timezone('Asia/Jakarta')->format('d M Y') ?? '-' }}
+                                    <span class="block">{{ optional($stockUpdatedAt)->timezone('Asia/Jakarta')->format('H:i') ?? '-' }} WIB</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-lg min-h-[400px] lg:min-h-[440px] flex flex-1 flex-col">
+                <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-lg min-h-[380px] sm:min-h-[360px] lg:min-h-[440px] flex flex-1 flex-col">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <p class="text-xs text-[var(--muted)]">Transparansi harga</p>
@@ -635,22 +653,6 @@
         </svg>
     </a></body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

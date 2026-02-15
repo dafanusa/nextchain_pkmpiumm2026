@@ -103,7 +103,7 @@
     <header class="sticky top-0 z-50 bg-[var(--brand)] text-white h-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tight inline-flex items-center gap-2">
-                NEXTCHAIN                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-12 w-12 object-contain">
+                NEXTCHAIN                <img src="{{ asset('assets/Nextchainumm.png') }}" alt="Logo Nextchain" class="h-16 w-16 sm:h-16 sm:w-16 object-contain">
             </a>
             <nav class="hidden md:flex items-center gap-5 text-sm font-medium text-white/80">
                 <a href="{{ route('home') }}" class="hover:text-white">Home</a>
@@ -560,6 +560,7 @@
         </svg>
     </a></body>
 </html>
+
 
 
 

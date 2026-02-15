@@ -19,6 +19,7 @@ class Product extends Model
         'price_max',
         'moq',
         'stock',
+        'stock_updated_at',
         'image',
         'description',
         'is_active',
@@ -26,6 +27,7 @@ class Product extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'stock_updated_at' => 'datetime',
     ];
 
     public function getImageUrlAttribute(): string
@@ -43,6 +45,11 @@ class Product extends Model
     public function negotiationOffers(): HasMany
     {
         return $this->hasMany(NegotiationOffer::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
     public function priceHistories(): HasMany

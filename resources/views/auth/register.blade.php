@@ -71,7 +71,7 @@
             <div class="glass rounded-[2.5rem] p-8">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                        <span class="text-lg font-semibold tracking-wide">NEXTCHAIN</span>                <img src="{{ asset('assets/logoumm.png') }}" alt="Logo UMM" class="h-8 w-8 object-contain">
+                        <span class="text-lg font-semibold tracking-wide">NEXTCHAIN</span>                <img src="{{ asset('assets/Nextchainumm.png') }}" alt="Logo Nextchain" class="h-16 w-16 sm:h-16 sm:w-16 object-contain">
                     </a>
                     <span class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Register</span>
                 </div>
@@ -138,6 +138,7 @@
         </svg>
     </a></body>
 </html>
+
 
 
 

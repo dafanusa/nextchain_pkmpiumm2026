@@ -69,9 +69,13 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'gallery_images' => ['nullable', 'array'],
+            'gallery_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
         ]);
+
+        $validated['stock_updated_at'] = now();
 
         if ($request->hasFile('image_file')) {
             $path = $request->file('image_file')->store('products', 'public');
@@ -79,6 +83,19 @@ class ProductController extends Controller
         }
 
         $product = Product::create($validated);
+
+        if ($request->hasFile('gallery_images')) {
+            $sortOrder = 0;
+            foreach ($request->file('gallery_images') as $imageFile) {
+                $path = $imageFile->store('products', 'public');
+                $product->images()->create([
+                    'image' => $path,
+                    'sort_order' => $sortOrder,
+                ]);
+                $sortOrder++;
+            }
+        }
+
         $today = now('Asia/Jakarta')->toDateString();
         PriceHistory::query()->updateOrCreate(
             [
@@ -102,6 +119,9 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $originalStock = $product->stock;
+        $originalPriceMin = $product->price_min;
+        $originalPriceMax = $product->price_max;
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'supplier' => ['required', 'string', 'max:255'],
@@ -113,6 +133,8 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'gallery_images' => ['nullable', 'array'],
+            'gallery_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
         ]);
@@ -122,19 +144,38 @@ class ProductController extends Controller
             $validated['image'] = $path;
         }
 
+        if ($validated['stock'] !== $originalStock) {
+            $validated['stock_updated_at'] = now();
+        }
+
         $product->update($validated);
-        $today = now('Asia/Jakarta')->toDateString();
-        PriceHistory::query()->updateOrCreate(
-            [
-                'product_id' => $product->id,
-                'price_date' => $today,
-            ],
-            [
-                'price_min' => $product->price_min,
-                'price_max' => $product->price_max,
-                'source' => 'admin',
-            ]
-        );
+
+        if ($request->hasFile('gallery_images')) {
+            $sortOrder = (int) $product->images()->max('sort_order') + 1;
+            foreach ($request->file('gallery_images') as $imageFile) {
+                $path = $imageFile->store('products', 'public');
+                $product->images()->create([
+                    'image' => $path,
+                    'sort_order' => $sortOrder,
+                ]);
+                $sortOrder++;
+            }
+        }
+
+        if ($originalPriceMin !== $product->price_min || $originalPriceMax !== $product->price_max) {
+            $today = now('Asia/Jakarta')->toDateString();
+            PriceHistory::query()->updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'price_date' => $today,
+                ],
+                [
+                    'price_min' => $product->price_min,
+                    'price_max' => $product->price_max,
+                    'source' => 'admin',
+                ]
+            );
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Produk diperbarui.');
     }
