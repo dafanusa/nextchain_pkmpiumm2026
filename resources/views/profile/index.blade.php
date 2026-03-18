@@ -304,6 +304,11 @@
                             $items = $order->items ?? collect();
                             $visibleItems = $items->take(2);
                             $remainingCount = $items->count() - $visibleItems->count();
+                            $proofPayment = $order->payments?->whereNotNull('proof_path')->sortByDesc('id')->first();
+                            $proofUrl = $proofPayment?->proof_path ? asset('storage/'.$proofPayment->proof_path) : null;
+                            $detailId = 'order-detail-'.$order->id;
+                            $firstProduct = $items->first()?->product;
+                            $isCartOrder = str_starts_with($order->order_number, 'NC-CART-');
                         @endphp
                         <div class="rounded-2xl border border-slate-200 bg-white px-5 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div class="space-y-2">
@@ -338,6 +343,50 @@
                                 <span class="inline-flex items-center justify-center rounded-full border px-4 py-2 text-xs font-semibold {{ $statusData['class'] }}">
                                     {{ $statusData['label'] }}
                                 </span>
+                                <button type="button" data-toggle="{{ $detailId }}"
+                                        class="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
+                                    Detail
+                                </button>
+                            </div>
+                        </div>
+                        <div id="{{ $detailId }}" class="hidden rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-[var(--muted)]">
+                            <div class="flex flex-wrap gap-3">
+                                <div class="min-w-[180px]">
+                                    <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Status Pembayaran</p>
+                                    <p class="mt-1 font-semibold text-[var(--ink)]">{{ $order->payment_status }}</p>
+                                </div>
+                                <div class="min-w-[180px]">
+                                    <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Batas Waktu</p>
+                                    <p class="mt-1 font-semibold text-[var(--ink)]">
+                                        {{ $order->payment_expires_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="min-w-[180px]">
+                                    <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Metode</p>
+                                    <p class="mt-1 font-semibold text-[var(--ink)]">{{ $proofPayment?->method ?? '-' }}</p>
+                                </div>
+                                <div class="min-w-[220px]">
+                                    <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Bukti Pembayaran</p>
+                                    @if ($proofUrl)
+                                        <a href="{{ $proofUrl }}" target="_blank"
+                                           class="mt-1 inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
+                                            Lihat Bukti
+                                        </a>
+                                    @else
+                                        <p class="mt-1 font-semibold text-[var(--ink)]">Belum diunggah</p>
+                                    @endif
+                                </div>
+                                @if ($order->payment_status !== 'paid' && $order->status !== 'canceled')
+                                    <div class="min-w-[220px]">
+                                        <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Aksi</p>
+                                        <a href="{{ $isCartOrder
+                                            ? route('checkout.cart.payment', ['order' => $order->order_number])
+                                            : ($firstProduct ? route('checkout.payment', $firstProduct) : '#') }}"
+                                           class="mt-1 inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
+                                            Upload Bukti
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endforeach
@@ -467,6 +516,17 @@
                 }
             });
         }
+
+        document.querySelectorAll('[data-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-toggle');
+                const target = document.getElementById(targetId);
+                if (!target) {
+                    return;
+                }
+                target.classList.toggle('hidden');
+            });
+        });
     </script>
     <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">
         <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

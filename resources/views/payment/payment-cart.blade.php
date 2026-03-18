@@ -202,40 +202,111 @@
 
         <div class="mt-8 grid lg:grid-cols-[1.2fr_0.8fr] gap-6 items-start">
             <div class="glass-card rounded-3xl p-6 space-y-6">
-                <div class="space-y-3">
-                    <label class="text-sm font-semibold">Pilih Metode Pembayaran</label>
-                    <select id="paymentMethod"
-                            class="pay-select w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
-                        <option value="all">Semua metode (rekomendasi)</option>
-                        <option value="qris">QRIS</option>
-                        <option value="gopay">GoPay</option>
-                        <option value="shopeepay">ShopeePay</option>
-                        <option value="bca_va">VA BCA</option>
-                        <option value="bri_va">VA BRI</option>
-                        <option value="bni_va">VA BNI</option>
-                        <option value="mandiri_va">VA Mandiri</option>
-                        <option value="permata_va">VA Permata</option>
-                        <option value="bank_transfer">Transfer Bank</option>
-                    </select>
-                    <p class="text-xs text-[var(--muted)]">
-                        Setelah memilih metode, klik Bayar Sekarang untuk membuka payment gateway Midtrans.
-                    </p>
-                </div>
+                @if (session('success'))
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @php($isLocked = $paymentExpired || $order->payment_status === 'paid')
+
+                @if ($paymentExpired || $order->status === 'canceled')
+                    <div class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        Batas waktu pembayaran sudah lewat. Pesanan dibatalkan otomatis.
+                    </div>
+                @elseif ($order->payment_status === 'paid')
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        Pembayaran sudah diverifikasi. Terima kasih!
+                    </div>
+                @elseif ($manualPayment && $manualPayment->status === 'pending')
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                        Bukti pembayaran sudah diterima. Menunggu verifikasi admin.
+                    </div>
+                @else
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-[var(--muted)]">
+                        Silakan bayar via QRIS atau Virtual Account lalu unggah bukti pembayaran.
+                    </div>
+                @endif
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div class="bg-gray-50 rounded-2xl p-4">
                         <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Status</p>
-                        <p class="text-sm font-semibold text-[var(--ink)] mt-2">Menunggu pembayaran</p>
+                        <p class="text-sm font-semibold text-[var(--ink)] mt-2">
+                            {{ $order->payment_status === 'paid' ? 'Sudah dibayar' : ($paymentExpired ? 'Kadaluarsa' : 'Menunggu pembayaran') }}
+                        </p>
                     </div>
                     <div class="bg-gray-50 rounded-2xl p-4">
                         <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Batas waktu</p>
-                        <p class="text-sm font-semibold text-[var(--ink)] mt-2">24 jam</p>
+                        <p class="text-sm font-semibold text-[var(--ink)] mt-2" id="paymentDeadline">
+                            {{ $order->payment_expires_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
+                        </p>
+                        <p class="text-xs text-[var(--muted)] mt-1" id="paymentCountdown"></p>
                     </div>
                 </div>
 
-                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-sm text-[var(--muted)]">
-                    Pembayaran diproses aman melalui Midtrans. Status akan tampil otomatis setelah transaksi selesai.
-                </div>
+                <form method="post" action="{{ route('checkout.cart.payment.proof') }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="order_number" value="{{ $order->order_number }}">
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold">Pilih Metode Pembayaran</label>
+                        <select id="paymentMethod" name="method"
+                                class="pay-select w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                @disabled($isLocked)>
+                            <option value="qris" @selected(old('method') === 'qris')>QRIS</option>
+                            <option value="bca_va" @selected(old('method') === 'bca_va')>VA BCA</option>
+                            <option value="bri_va" @selected(old('method') === 'bri_va')>VA BRI</option>
+                            <option value="bni_va" @selected(old('method') === 'bni_va')>VA BNI</option>
+                            <option value="mandiri_va" @selected(old('method') === 'mandiri_va')>VA Mandiri</option>
+                            <option value="permata_va" @selected(old('method') === 'permata_va')>VA Permata</option>
+                            <option value="bank_transfer" @selected(old('method') === 'bank_transfer')>Transfer Bank</option>
+                        </select>
+                    </div>
+
+                    <div id="methodDetail" class="pay-card text-sm text-[var(--muted)]">
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <div class="bg-white rounded-2xl p-3 border border-slate-200 text-center">
+                                <img id="qrisImage" src="{{ asset('assets/qris.png') }}" alt="QRIS" class="h-32 w-32 rounded-xl object-contain border border-slate-200 bg-white">
+                                <p class="mt-2 text-xs">Scan QRIS untuk membayar</p>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="font-semibold text-[var(--ink)]" id="methodTitle">QRIS</p>
+                                <p id="methodInfo">Scan QR di atas dengan aplikasi bank atau e-wallet.</p>
+                                <p class="text-xs">Atas nama: UD. Ade Saputra Farm</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold">Upload Bukti Pembayaran</label>
+                        <input type="file" name="payment_proof" accept="image/*,.pdf"
+                               class="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                               @disabled($isLocked)>
+                        <p class="text-xs text-[var(--muted)]">Format JPG/PNG/PDF, maksimal 5MB.</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button type="submit"
+                                class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition disabled:opacity-70 disabled:cursor-not-allowed"
+                                @disabled($isLocked)>
+                            Kirim Bukti
+                        </button>
+                        <a href="{{ route('checkout.cart') }}"
+                           class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
+                            Kembali
+                        </a>
+                    </div>
+                    <p class="text-xs text-[var(--muted)]">Setelah upload bukti, status menunggu verifikasi admin.</p>
+                </form>
             </div>
 
             <div class="glass-card rounded-3xl p-6 space-y-4 lg:sticky lg:top-28">
@@ -254,45 +325,9 @@
                     <span>Total</span>
                     <span class="text-[var(--brand)]" id="summaryTotal">Rp 0</span>
                     </div>
-                <div class="flex flex-wrap gap-3 pt-2">
-                    <button id="payNowBtn"
-                            class="px-6 py-3 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition disabled:opacity-70 disabled:cursor-not-allowed">
-                        Bayar Sekarang
-                    </button>
-                    <a href="{{ route('checkout.cart') }}"
-                       class="px-6 py-3 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
-                        Kembali
-                    </a>
-                </div>
-                <p id="payStatus" class="text-xs text-[var(--muted)]"></p>
             </div>
         </div>
     </main>
-
-    <div id="simModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-6">
-        <div class="glass-card w-full max-w-lg rounded-3xl p-6">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Simulasi Pembayaran</p>
-                    <h2 id="simTitle" class="text-2xl font-semibold mt-2">Pembayaran</h2>
-                </div>
-                <button id="simClose" class="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold">
-                    Tutup
-                </button>
-            </div>
-            <div id="simBody" class="mt-4 space-y-4 text-sm text-[var(--muted)]"></div>
-            <div class="mt-6 flex flex-wrap gap-3">
-                <button id="simConfirm"
-                        class="px-5 py-2 rounded-full bg-[var(--brand)] text-white font-semibold hover:bg-[var(--brand-dark)] transition">
-                    Konfirmasi Pembayaran
-                </button>
-                <button id="simPending"
-                        class="px-5 py-2 rounded-full border border-gray-200 font-semibold text-[var(--ink)] hover:border-[var(--brand)] transition">
-                    Simulasikan Pending
-                </button>
-            </div>
-        </div>
-    </div>
 
     <footer class="mt-16 border-t border-white/10 bg-[var(--brand)] text-white">
         <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 text-sm text-white/80">
@@ -324,7 +359,6 @@
         </div>
     </footer>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $midtransClientKey }}"></script>
     <script>
                 const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -380,20 +414,15 @@
         const summarySubtotal = document.getElementById('summarySubtotal');
         const summaryShipping = document.getElementById('summaryShipping');
         const summaryTotal = document.getElementById('summaryTotal');
-        const payNowBtn = document.getElementById('payNowBtn');
         const paymentMethod = document.getElementById('paymentMethod');
-        const payStatus = document.getElementById('payStatus');
-        const simModal = document.getElementById('simModal');
-        const simTitle = document.getElementById('simTitle');
-        const simBody = document.getElementById('simBody');
-        const simClose = document.getElementById('simClose');
-        const simConfirm = document.getElementById('simConfirm');
-        const simPending = document.getElementById('simPending');
+        const methodTitle = document.getElementById('methodTitle');
+        const methodInfo = document.getElementById('methodInfo');
+        const qrisImage = document.getElementById('qrisImage');
         const orderId = "{{ $order->order_number }}";
-        const midtransKey = "{{ $midtransClientKey }}";
-        const qrisLogoUrl = "{{ asset('assets/qris.png') }}";
         const shippingFee = {{ (int) $order->shipping_fee }};
         const initialCartCount = {{ $cartCount ?? 0 }};
+        const paymentExpiresAt = "{{ $order->payment_expires_at?->timezone('Asia/Jakarta')->format('c') }}";
+        const paymentCountdown = document.getElementById('paymentCountdown');
 
         function formatPrice(value) {
             return 'Rp ' + Number(value).toLocaleString('id-ID');
@@ -433,7 +462,6 @@
             summarySubtotal.textContent = formatPrice(subtotal);
             summaryShipping.textContent = formatPrice(shipping);
             summaryTotal.textContent = formatPrice(subtotal + shipping);
-            payNowBtn.disabled = !hasItems;
 
             const buyerHtml = `
                 <p><span class="font-semibold text-[var(--ink)]">Nama:</span>
@@ -456,102 +484,79 @@
             buyerSummary.innerHTML = buyerHtml;
         }
 
-        async function requestSnapToken() {
-            const method = paymentMethod.value;
+        const paymentDetails = {
+            qris: {
+                title: 'QRIS',
+                info: 'Scan QR di atas dengan aplikasi bank atau e-wallet.',
+                showQr: true,
+            },
+            bca_va: {
+                title: 'VA BCA',
+                info: 'Nomor VA: 1234 5678 9012',
+                showQr: false,
+            },
+            bri_va: {
+                title: 'VA BRI',
+                info: 'Nomor VA: 9876 5432 1098',
+                showQr: false,
+            },
+            bni_va: {
+                title: 'VA BNI',
+                info: 'Nomor VA: 8800 1122 3344',
+                showQr: false,
+            },
+            mandiri_va: {
+                title: 'VA Mandiri',
+                info: 'Nomor VA: 7000 8899 1100',
+                showQr: false,
+            },
+            permata_va: {
+                title: 'VA Permata',
+                info: 'Nomor VA: 8800 5544 3322',
+                showQr: false,
+            },
+            bank_transfer: {
+                title: 'Transfer Bank',
+                info: 'BRI 1234567890 a.n. UD. Ade Saputra Farm',
+                showQr: false,
+            },
+        };
 
-            const url = new URL("{{ route('checkout.cart.midtrans') }}", window.location.origin);
-            url.searchParams.set('order', orderId);
-            url.searchParams.set('method', method);
-
-            payStatus.textContent = 'Menyiapkan pembayaran...';
-            payNowBtn.disabled = true;
-            payNowBtn.classList.add('opacity-70');
-
-            const response = await fetch(url.toString(), { method: 'GET' });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Gagal membuat token pembayaran.');
+        function updatePaymentDetail() {
+            if (!paymentMethod) {
+                return;
             }
-            return data.token;
+            const detail = paymentDetails[paymentMethod.value] || paymentDetails.qris;
+            methodTitle.textContent = detail.title;
+            methodInfo.textContent = detail.info;
+            qrisImage.classList.toggle('hidden', !detail.showQr);
         }
 
-        function openSimModal(method) {
-            const methodLabel = paymentMethod.options[paymentMethod.selectedIndex].text;
-            simTitle.textContent = methodLabel;
-
-            const instructions = {
-                qris: `
-                    <div class="bg-white rounded-2xl p-4 border border-slate-200 text-center">
-                        <img src="${qrisLogoUrl}" alt="QRIS" class="mx-auto h-40 w-40 rounded-xl object-contain border border-slate-200 bg-white">
-                        <p class="mt-3 text-xs text-[var(--muted)]">Scan QRIS di atas dengan aplikasi bank atau e-wallet.</p>
-                    </div>
-                `,
-                gopay: '<p>Gunakan GoPay untuk menyelesaikan pembayaran. Simulasi: buka aplikasi dan konfirmasi.</p>',
-                shopeepay: '<p>Gunakan ShopeePay. Simulasi: buka aplikasi dan konfirmasi.</p>',
-                bca_va: '<p>Virtual Account BCA: <strong>1234 5678 9012</strong></p>',
-                bri_va: '<p>Virtual Account BRI: <strong>9876 5432 1098</strong></p>',
-                bni_va: '<p>Virtual Account BNI: <strong>8800 1122 3344</strong></p>',
-                mandiri_va: '<p>Virtual Account Mandiri: <strong>7000 8899 1100</strong></p>',
-                permata_va: '<p>Virtual Account Permata: <strong>8800 5544 3322</strong></p>',
-                bank_transfer: '<p>Transfer Bank: <strong>BRI 1234567890 a.n. UD. Ade Saputra Farm</strong></p>',
-                all: '<p>Pilih metode di dropdown, lalu klik Bayar Sekarang.</p>',
-            };
-
-            simBody.innerHTML = instructions[method] || instructions.all;
-            simModal.classList.remove('hidden');
-            simModal.classList.add('flex');
-        }
-
-        function closeSimModal() {
-            simModal.classList.add('hidden');
-            simModal.classList.remove('flex');
-        }
-
-        simClose.addEventListener('click', closeSimModal);
-
-        simConfirm.addEventListener('click', () => {
-            const method = paymentMethod.value;
-            window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}&method=${encodeURIComponent(method)}`;
-        });
-
-        simPending.addEventListener('click', () => {
-            payStatus.textContent = 'Pembayaran pending. Silakan selesaikan pembayaran.';
-            closeSimModal();
-        });
-
-        payNowBtn.addEventListener('click', async () => {
-            try {
-                if (!midtransKey) {
-                    openSimModal(paymentMethod.value);
-                    return;
-                }
-                const token = await requestSnapToken();
-                payStatus.textContent = '';
-                window.snap.pay(token, {
-                    onSuccess: () => {
-                        const method = paymentMethod.value;
-                        window.location.href = "{{ route('checkout.cart.success') }}" + `?orderId=${encodeURIComponent(orderId)}&method=${encodeURIComponent(method)}`;
-                    },
-                    onPending: () => {
-                        payStatus.textContent = 'Pembayaran pending. Silakan selesaikan pembayaran.';
-                    },
-                    onError: () => {
-                        payStatus.textContent = 'Pembayaran gagal. Coba lagi.';
-                    },
-                    onClose: () => {
-                        payStatus.textContent = 'Popup pembayaran ditutup.';
-                    }
-                });
-            } catch (error) {
-                payStatus.textContent = '';
-                openSimModal(paymentMethod.value);
-            } finally {
-                payNowBtn.disabled = false;
-                payNowBtn.classList.remove('opacity-70');
+        function updateCountdown() {
+            if (!paymentExpiresAt || !paymentCountdown) {
+                return;
             }
-        });
+            const expiresAt = new Date(paymentExpiresAt);
+            const diff = expiresAt.getTime() - Date.now();
+            if (Number.isNaN(diff) || diff <= 0) {
+                paymentCountdown.textContent = 'Waktu pembayaran habis.';
+                return;
+            }
+            const totalSeconds = Math.floor(diff / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            paymentCountdown.textContent = `Sisa waktu ${hours}j ${minutes}m ${seconds}d`;
+        }
+
+        if (paymentMethod) {
+            paymentMethod.addEventListener('change', updatePaymentDetail);
+            updatePaymentDetail();
+        }
 
         renderSummary();
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
         updateCartBadge(initialCartCount);
     </script>
     <a href="#top" class="lg:hidden fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0f3d91] text-white shadow-lg shadow-blue-900/30 hover:bg-[#0a2d6c] transition" aria-label="Kembali ke atas">

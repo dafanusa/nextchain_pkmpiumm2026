@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DateFilterRequest;
+use App\Jobs\SendInvoiceJob;
 use App\Models\Payment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,30 @@ class PaymentController extends Controller
         ]);
 
         $payment->update($validated);
+
+        if ($payment->status === 'paid' && ! $payment->paid_at) {
+            $payment->update(['paid_at' => now()]);
+        }
+
+        $order = $payment->order;
+        if ($order) {
+            $statusMap = [
+                'pending' => 'unpaid',
+                'paid' => 'paid',
+                'failed' => 'failed',
+                'refunded' => 'refunded',
+            ];
+
+            $order->update([
+                'payment_status' => $statusMap[$payment->status],
+            ]);
+
+            if ($payment->status === 'paid') {
+                $order->deductStockIfNeeded();
+                $order->ensureInvoiceData();
+                SendInvoiceJob::dispatch($order->id);
+            }
+        }
 
         return redirect()->route('admin.payments.index')->with('success', 'Pembayaran diperbarui.');
     }

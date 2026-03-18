@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CartCheckoutRequest;
+use App\Http\Requests\StoreManualPaymentProofRequest;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\DeliverySchedule;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Payment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CartCheckoutController extends Controller
@@ -85,6 +88,7 @@ class CartCheckoutController extends Controller
             'order_number' => $orderNumber,
             'status' => 'pending',
             'payment_status' => 'unpaid',
+            'payment_expires_at' => now('Asia/Jakarta')->addHour(),
             'subtotal' => $subtotal,
             'shipping_fee' => $shipping,
             'total' => $total,
@@ -124,15 +128,28 @@ class CartCheckoutController extends Controller
         $order = Order::query()
             ->where('order_number', $orderNumber)
             ->where('user_id', $request->user()->id)
-            ->with(['items.product', 'deliverySchedule'])
+            ->with(['items.product', 'deliverySchedule', 'payments'])
             ->firstOrFail();
 
+        if (! $order->payment_expires_at && $order->payment_status === 'unpaid') {
+            $order->update(['payment_expires_at' => now('Asia/Jakarta')->addHour()]);
+            $order->refresh();
+        }
+
+        $paymentExpired = $this->expireOrderIfNeeded($order);
+        $order->refresh();
+
+        $manualPayment = $order->payments
+            ->where('provider', 'manual')
+            ->sortByDesc('id')
+            ->first();
         $orderItems = $order->items->map(fn (OrderItem $item) => $this->mapOrderItem($item))->values();
-        $midtransClientKey = config('services.midtrans.client_key');
 
         return view('payment.payment-cart', [
             'order' => $order,
             'orderItems' => $orderItems,
+            'manualPayment' => $manualPayment,
+            'paymentExpired' => $paymentExpired,
             'buyer' => [
                 'name' => $order->buyer_name,
                 'phone' => $order->buyer_phone,
@@ -144,8 +161,61 @@ class CartCheckoutController extends Controller
                 'shipping_status' => $order->shipping_status ?? 'processing',
                 'note' => $order->note,
             ],
-            'midtransClientKey' => $midtransClientKey,
         ]);
+    }
+
+    public function storeManualPaymentProof(StoreManualPaymentProofRequest $request): RedirectResponse
+    {
+        $orderNumber = $request->input('order_number');
+        $order = Order::query()
+            ->where('order_number', $orderNumber)
+            ->where('user_id', $request->user()->id)
+            ->with('payments')
+            ->firstOrFail();
+
+        if ($order->payment_status === 'paid') {
+            return redirect()
+                ->route('checkout.cart.payment', ['order' => $order->order_number])
+                ->with('success', 'Pembayaran sudah diverifikasi.');
+        }
+
+        if ($this->expireOrderIfNeeded($order)) {
+            return redirect()
+                ->route('checkout.cart.payment', ['order' => $order->order_number])
+                ->withErrors(['payment_proof' => 'Batas waktu pembayaran sudah lewat. Pesanan dibatalkan.']);
+        }
+
+        $proofFile = $request->file('payment_proof');
+        $proofPath = $proofFile->store('payments', 'public');
+
+        $existingPayment = $order->payments
+            ->where('provider', 'manual')
+            ->where('status', 'pending')
+            ->sortByDesc('id')
+            ->first();
+
+        if ($existingPayment) {
+            if ($existingPayment->proof_path && Storage::disk('public')->exists($existingPayment->proof_path)) {
+                Storage::disk('public')->delete($existingPayment->proof_path);
+            }
+
+            $existingPayment->update([
+                'method' => $request->input('method'),
+                'proof_path' => $proofPath,
+            ]);
+        } else {
+            Payment::query()->create([
+                'order_id' => $order->id,
+                'provider' => 'manual',
+                'method' => $request->input('method'),
+                'status' => 'pending',
+                'proof_path' => $proofPath,
+            ]);
+        }
+
+        return redirect()
+            ->route('checkout.cart.payment', ['order' => $order->order_number])
+            ->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
     }
 
     public function midtransToken(Request $request): JsonResponse
@@ -227,6 +297,32 @@ class CartCheckoutController extends Controller
         }
 
         return response()->json(['token' => $data['token']]);
+    }
+
+    private function expireOrderIfNeeded(Order $order): bool
+    {
+        if ($order->payment_status !== 'unpaid' || $order->status === 'canceled') {
+            return false;
+        }
+
+        if (! $order->payment_expires_at) {
+            return false;
+        }
+
+        if (now('Asia/Jakarta')->lte($order->payment_expires_at)) {
+            return false;
+        }
+
+        $order->update([
+            'status' => 'canceled',
+            'payment_status' => 'failed',
+        ]);
+
+        $order->payments()
+            ->where('status', 'pending')
+            ->update(['status' => 'failed']);
+
+        return true;
     }
 
     private function mapCartItem(CartItem $item): array

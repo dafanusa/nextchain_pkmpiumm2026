@@ -35,6 +35,7 @@
                         <th class="text-left px-4 py-3">Order</th>
                         <th class="text-left px-4 py-3">Metode</th>
                         <th class="text-left px-4 py-3">Status</th>
+                        <th class="text-left px-4 py-3">Bukti</th>
                         <th class="text-left px-4 py-3">Waktu</th>
                         <th class="text-right px-4 py-3">Aksi</th>
                     </tr>
@@ -46,6 +47,16 @@
                             <td class="px-4 py-3 text-[var(--muted)]">{{ $payment->method ?? '-' }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex px-2 py-1 rounded-full text-xs bg-slate-100 text-[var(--ink)]">{{ $payment->status }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-[var(--muted)]">
+                                @if ($payment->proof_path)
+                                    <a href="{{ asset('storage/'.$payment->proof_path) }}" target="_blank"
+                                       class="inline-flex px-2 py-1 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                                        Lihat
+                                    </a>
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td class="px-4 py-3 text-[var(--muted)]">
                                 {{ $payment->paid_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? $payment->created_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? '-' }}
@@ -70,7 +81,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada pembayaran.</td>
+                            <td colspan="6" class="px-4 py-8 text-center text-[var(--muted)]">Belum ada pembayaran.</td>
                         </tr>
                     @endforelse
                 </tbody>

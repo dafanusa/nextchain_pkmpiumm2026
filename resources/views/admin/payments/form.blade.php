@@ -18,6 +18,19 @@
             Order: <span class="font-semibold text-[var(--ink)]">{{ $payment->order?->order_number ?? '-' }}</span>
         </div>
 
+        @if ($payment->proof_path)
+            <div class="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs uppercase tracking-wide text-[var(--muted)]">Bukti Pembayaran</p>
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <a href="{{ asset('storage/'.$payment->proof_path) }}" target="_blank"
+                       class="inline-flex px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold hover:border-[var(--brand)] transition">
+                        Buka File
+                    </a>
+                    <span class="text-xs text-[var(--muted)]">{{ $payment->proof_path }}</span>
+                </div>
+            </div>
+        @endif
+
         <form method="post" action="{{ route('admin.payments.update', $payment) }}" class="space-y-4">
             @csrf
             @method('put')

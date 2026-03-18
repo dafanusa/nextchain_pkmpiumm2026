@@ -18,11 +18,11 @@ use App\Http\Controllers\Web\CartCheckoutController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\InvoiceController;
 use App\Http\Controllers\Web\NegotiationController as WebNegotiationController;
+use App\Http\Controllers\Web\ProductCheckoutPaymentController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\TestimonialWebController;
 use App\Models\DeliverySchedule;
 use App\Models\NegotiationOffer;
-use App\Models\Payment;
 use App\Models\PriceHistory;
 use App\Models\Product;
 use Illuminate\Support\Carbon;
@@ -291,11 +291,13 @@ Route::get('/checkout/{product}/payment', function (Product $product) use ($isSc
     $shipping = 25000;
     $total = $subtotal + $shipping;
     $orderId = 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT);
-    $midtransClientKey = config('services.midtrans.client_key');
     $shippingMethod = (string) request('shipping_method', '');
     $deliverySchedule = null;
     $shippingDate = request('shipping_date', '');
     $shippingTime = request('shipping_time', '');
+    $paymentExpired = false;
+    $manualPayment = null;
+    $order = null;
 
     if ($shippingMethod !== '') {
         $validated = request()->validate([
@@ -349,6 +351,7 @@ Route::get('/checkout/{product}/payment', function (Product $product) use ($isSc
                 'user_id' => Auth::id(),
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
+                'payment_expires_at' => now('Asia/Jakarta')->addHour(),
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shipping,
                 'total' => $total,
@@ -374,10 +377,51 @@ Route::get('/checkout/{product}/payment', function (Product $product) use ($isSc
             ]);
         }
         $buyer['shipping_status'] = $order->shipping_status ?? 'processing';
+
+        if (! $order->payment_expires_at && $order->payment_status === 'unpaid') {
+            $order->update(['payment_expires_at' => now('Asia/Jakarta')->addHour()]);
+            $order->refresh();
+        }
+
+        if ($order->payment_status === 'unpaid' && $order->payment_expires_at) {
+            $paymentExpired = now('Asia/Jakarta')->gt($order->payment_expires_at);
+            if ($paymentExpired) {
+                $order->update([
+                    'status' => 'canceled',
+                    'payment_status' => 'failed',
+                ]);
+
+                $order->payments()
+                    ->where('status', 'pending')
+                    ->update(['status' => 'failed']);
+            }
+        }
+
+        $order->load('payments');
+        $manualPayment = $order->payments
+            ->where('provider', 'manual')
+            ->sortByDesc('id')
+            ->first();
     }
 
-    return view('payment.payment', compact('product', 'qty', 'unitPrice', 'subtotal', 'shipping', 'total', 'orderId', 'midtransClientKey', 'buyer'));
+    return view('payment.payment', compact(
+        'product',
+        'qty',
+        'unitPrice',
+        'subtotal',
+        'shipping',
+        'total',
+        'orderId',
+        'buyer',
+        'order',
+        'manualPayment',
+        'paymentExpired'
+    ));
 })->middleware('auth')->name('checkout.payment');
+
+Route::post('/checkout/{product}/payment-proof', [ProductCheckoutPaymentController::class, 'storeManualPaymentProof'])
+    ->middleware('auth')
+    ->name('checkout.payment.proof');
 
 Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
     abort_if(! $product->is_active, 404);
@@ -449,7 +493,6 @@ Route::get('/checkout/{product}/midtrans-token', function (Product $product) {
 Route::get('/checkout/{product}/success', function (Product $product) {
     abort_if(! $product->is_active, 404);
     $orderId = request('orderId', 'NC-'.date('ymd').'-'.str_pad((string) $product->id, 3, '0', STR_PAD_LEFT));
-    $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
         ->where('user_id', Auth::id())
@@ -457,19 +500,9 @@ Route::get('/checkout/{product}/success', function (Product $product) {
         ->first();
 
     if ($order && $order->payment_status !== 'paid') {
-        $order->deductStockIfNeeded();
-        $order->ensureInvoiceData();
-        $order->update(['payment_status' => 'paid']);
-        if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {
-            Payment::query()->create([
-                'order_id' => $order->id,
-                'provider' => 'midtrans',
-                'method' => $method !== 'all' ? $method : null,
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
-        }
-        \App\Jobs\SendInvoiceJob::dispatch($order->id);
+        return redirect()
+            ->route('checkout.payment', $product)
+            ->withErrors(['payment_proof' => 'Menunggu verifikasi admin.']);
     }
 
     return view('success.success', [
@@ -494,13 +527,15 @@ Route::post('/checkout-cart/payment', [CartCheckoutController::class, 'storePaym
 Route::get('/checkout-cart/payment', [CartCheckoutController::class, 'payment'])
     ->middleware('auth')
     ->name('checkout.cart.payment');
+Route::post('/checkout-cart/payment-proof', [CartCheckoutController::class, 'storeManualPaymentProof'])
+    ->middleware('auth')
+    ->name('checkout.cart.payment.proof');
 Route::get('/checkout-cart/midtrans-token', [CartCheckoutController::class, 'midtransToken'])
     ->middleware('auth')
     ->name('checkout.cart.midtrans');
 
 Route::get('/checkout-cart/success', function () {
     $orderId = request('orderId', 'NC-CART-'.date('ymd').'-'.substr(uniqid(), -5));
-    $method = request('method');
     $order = \App\Models\Order::query()
         ->where('order_number', $orderId)
         ->where('user_id', Auth::id())
@@ -508,19 +543,9 @@ Route::get('/checkout-cart/success', function () {
         ->first();
 
     if ($order && $order->payment_status !== 'paid') {
-        $order->deductStockIfNeeded();
-        $order->ensureInvoiceData();
-        $order->update(['payment_status' => 'paid']);
-        if (! Payment::query()->where('order_id', $order->id)->where('status', 'paid')->exists()) {
-            Payment::query()->create([
-                'order_id' => $order->id,
-                'provider' => 'midtrans',
-                'method' => $method !== 'all' ? $method : null,
-                'status' => 'paid',
-                'paid_at' => now(),
-            ]);
-        }
-        \App\Jobs\SendInvoiceJob::dispatch($order->id);
+        return redirect()
+            ->route('checkout.cart.payment', ['order' => $order->order_number])
+            ->withErrors(['payment_proof' => 'Menunggu verifikasi admin.']);
     }
 
     return view('success.success-cart', [

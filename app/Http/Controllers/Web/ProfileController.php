@@ -46,7 +46,7 @@ class ProfileController extends Controller
 
         $orders = Order::query()
             ->where('user_id', $user->id)
-            ->with(['items.product'])
+            ->with(['items.product', 'payments'])
             ->latest()
             ->get();
 

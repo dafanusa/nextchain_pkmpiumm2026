@@ -18,6 +18,7 @@ class Order extends Model
         'order_number',
         'status',
         'payment_status',
+        'payment_expires_at',
         'subtotal',
         'shipping_fee',
         'total',
@@ -37,6 +38,7 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'payment_expires_at' => 'datetime',
         'shipping_date' => 'date',
         'stock_deducted_at' => 'datetime',
     ];
