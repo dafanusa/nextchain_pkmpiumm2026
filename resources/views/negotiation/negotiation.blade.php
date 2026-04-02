@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Negosiasi - {{ $product->name }}</title>
+    <title>Negosiasi - CV. ADESAputra Farm</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -172,7 +172,7 @@
             <section class="order-1 lg:order-none lg:col-span-4 glass-card rounded-3xl p-6">
                 <h1 class="text-2xl font-bold">Negosiasi Harga</h1>
                 <p class="text-[var(--muted)] mt-2">
-                    {{ $product->name }} - {{ $product->supplier }}
+                CV. ADESAputra Farm
                 </p>
                 @if ($acceptedOffer)
                     <div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
@@ -682,7 +682,7 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur CV. ADESAputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">

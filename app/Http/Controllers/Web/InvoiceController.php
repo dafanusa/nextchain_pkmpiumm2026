@@ -74,7 +74,7 @@ class InvoiceController extends Controller
         return view('invoices.order', [
             'order' => $order,
             'publicUrl' => route('invoice.short', $order->invoice_short_code),
-            'businessName' => 'UD. Ade Saputra Farm',
+            'businessName' => 'CV. ADESAputra Farm',
         ]);
     }
 

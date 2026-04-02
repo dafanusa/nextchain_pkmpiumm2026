@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NEXTCHAIN | UD. Ade Saputra Farm</title>
+    <title>NEXTCHAIN | CV. ADESAputra Farm</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -298,7 +298,7 @@
                 <div class="relative px-6 py-10 sm:px-10 lg:px-16 lg:py-16">
                     <div class="max-w-3xl space-y-6">
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/90">
-                            UD. Ade Saputra Farm
+                            CV. ADESAputra Farm
                         </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl">
                             Telur segar, Harga jujur, dan Negosiasi mudah.
@@ -346,7 +346,7 @@
                         <span class="h-2.5 w-2.5 rounded-full bg-[var(--brand)]"></span>
                     Profil UMKM
                     </span>
-                    <h2 class="text-4xl sm:text-5xl font-bold">UD. Ade Saputra Farm</h2>
+                    <h2 class="text-4xl sm:text-5xl font-bold">CV. ADESAputra Farm</h2>
                     <p class="text-[var(--muted)] text-lg sm:text-xl">
                         UMKM peternakan telur yang fokus pada kualitas produksi dan keterbukaan harga.
                         NEXTCHAIN membantu pembeli berinteraksi langsung dengan peternak tanpa perantara.
@@ -432,7 +432,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 reveal">
                 <h2 class="text-3xl sm:text-4xl font-bold mt-3">Gallery</h2>
                 <p class="text-[var(--muted)] mt-2 text-lg">
-                    Aktivitas harian dan kualitas telur UD. Ade Saputra Farm.
+                    Aktivitas harian dan kualitas telur CV. ADESAputra Farm.
                 </p>
 
                 <div class="mt-8">
@@ -497,7 +497,7 @@
             <div class="bg-gradient-to-br from-[#0f3d91] to-[#1d5bbf] rounded-3xl p-8 text-white">
                 <h3 class="text-xl font-semibold">Profil Usaha</h3>
                 <p class="text-white/80 mt-3">
-                    UD. Ade Saputra Farm adalah UMKM peternakan telur yang berfokus pada kualitas produksi,
+                    CV. ADESAputra Farm adalah UMKM peternakan telur yang berfokus pada kualitas produksi,
                     ketepatan distribusi, serta keterbukaan data harga untuk konsumen akhir.
                 </p>
                 <a href="{{ route('produk') }}"
@@ -516,7 +516,7 @@
                             <div class="flex items-center justify-between flex-wrap gap-3">
                                 <div>
                                     <p class="text-xs uppercase tracking-[0.35em] text-[var(--muted)]">Testimoni</p>
-                                    <h2 class="text-3xl sm:text-4xl font-bold mt-2">Suara pembeli tentang UD. Ade Saputra Farm</h2>
+                                    <h2 class="text-3xl sm:text-4xl font-bold mt-2">Suara pembeli tentang CV. ADESAputra Farm</h2>
                                 </div>
                                 @php
                                     $testimonialRatings = collect($testimonials ?? [])->pluck('rating')->filter()->map(fn ($value) => (int) $value);
@@ -631,7 +631,7 @@
                 <div class="rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/70 bg-white">
                     <div class="aspect-[16/7] w-full">
                         <iframe
-                            title="Google Maps UD. Ade Saputra Farm"
+                            title="Google Maps CV. ADESAputra Farm"
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4878.781846080625!2d112.7805477!3d-7.849893400000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd62d0050889509%3A0xaa5fd49b6d349a35!2sUD.ADESAputra%20farm!5e1!3m2!1sid!2sid!4v1769071772478!5m2!1sid!2sid"
                             class="h-full w-full"
                             style="border:0;"
@@ -666,7 +666,7 @@
                         <div>
                             <p class="text-sm text-[var(--muted)]">WhatsApp</p>
                             <a href="https://wa.me/6281230384757" class="font-semibold text-[var(--brand)]">
-                                0812-3038-4757                                                                                                                                                       
+                                0812-3038-4757
                             </a>
                         </div>
                     </div>
@@ -725,7 +725,7 @@
                             <p class="text-xs uppercase tracking-[0.35em] text-white/70">DEVELOPER NEXTCHAIN</p>
                             <h2 class="text-3xl sm:text-4xl font-bold">Tim Pengembang NEXTCHAIN</h2>
                             <p class="text-sm text-white/80 max-w-md leading-relaxed">
-                                Mahasiswa Universitas Muhammadiyah Malang menghadirkan NEXTCHAIN untuk UD. Ade Saputra Farm :
+                                Mahasiswa Universitas Muhammadiyah Malang menghadirkan NEXTCHAIN untuk CV. ADESAputra Farm :
                                 platform digital generasi baru yang menyatukan katalog produk, negosiasi harga, dan alur transaksi
                                 terintegrasi agar pemesanan lebih cepat, transparan, dan memangkas rantai distribusi antara peternak
                                 dengan konsumen.
@@ -821,7 +821,7 @@
             <div class="space-y-3">
                 <p class="text-lg font-semibold text-white">NEXTCHAIN</p>
                 <p>
-                    UMKM peternakan telur UD. Ade Saputra Farm dengan negosiasi terbuka dan distribusi jelas.
+                    UMKM peternakan telur CV. ADESAputra Farm dengan negosiasi terbuka dan distribusi jelas.
                 </p>
             </div>
             <div class="space-y-3">
